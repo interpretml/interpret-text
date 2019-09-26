@@ -102,3 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+#datasets
+datasets.1.17.2019/
+datasets.1.17.2019.zip
