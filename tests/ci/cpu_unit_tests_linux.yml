@@ -21,18 +21,18 @@ steps:
 
 - script: 
    # setup your environment and run pytest
-     conda create -n interpret_env python=3.7
-     conda activate interpret_env
-     git clone git@github.com:microsoft/interpret-community-text.git
-     cd interpret-community-text/python
-     pip install -e .
-     pip install pytest
-     pip install lightgbm
-     pip install interpret-community
-     pip install xgboost
-     pip install tensorflow
-     conda install pytorch torchvision cpuonly -c pytorch
-     cd ../tests
+     conda create -n interpret_env python=3.7 && \
+     conda activate interpret_env && \
+     git clone git@github.com:microsoft/interpret-community-text.git && \
+     cd interpret-community-text/python && \
+     pip install -e . && \
+     pip install pytest && \
+     pip install lightgbm && \
+     pip install interpret-community && \
+     pip install xgboost && \
+     pip install tensorflow && \
+     conda install pytorch torchvision cpuonly -c pytorch && \
+     cd ../tests && \
      pytest test_text_explainer.py
   displayName: 'run pytest'
 
