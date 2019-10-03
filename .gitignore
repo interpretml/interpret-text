@@ -106,3 +106,6 @@ venv.bak/
 #datasets
 datasets.1.17.2019/
 datasets.1.17.2019.zip
+
+#vscode
+.vscode/
