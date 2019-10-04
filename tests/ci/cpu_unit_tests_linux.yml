@@ -19,31 +19,8 @@ steps:
     architecture: 'x64'
   displayName: 'Use Python 3.7'
 
-- bash: echo "##vso[task.prependpath]$CONDA/bin"
-  displayName: Add Conda to PATH
-
-- bash: 
-   # setup your environment and run pytest
-     conda create --yes --name interpret_env
-  displayName: 'Step 0'
-
-- bash:
-     conda env list
-  displayName: 'Step env list'
-
-- bash:
-     conda activate
-  displayName: 'Step conda activate'
-
-- bash:
-     source activate interpret_env && \
-     cd python
-  displayName: 'Step source activate'
-
-
-
-- bash:
-     conda activate interpret_env && \
+- script:
+     cd python && \
      pip install -e . && \
      pip install pytest && \
      pip install lightgbm && \
@@ -51,7 +28,6 @@ steps:
   displayName: 'Step 2'
   
 - script:
-     conda activate interpret_env && \
      pip install xgboost && \
      pip install tensorflow && \
      conda install -y pytorch torchvision cpuonly -c pytorch && \
@@ -59,8 +35,6 @@ steps:
   displayName: 'Step 3'
   
 - script:
-     conda env list && \
-     conda activate interpret_env && \
      pytest test_text_explainer.py
   displayName: 'run pytest'
 
