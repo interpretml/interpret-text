@@ -28,11 +28,19 @@ steps:
   displayName: 'Step 0'
 
 - bash:
-     conda env list && \
-     conda activate && \
+     conda env list
+  displayName: 'Step env list'
+
+- bash:
+     conda activate
+  displayName: 'Step conda activate'
+
+- bash:
      source activate interpret_env && \
      cd python
-  displayName: 'Step 1'
+  displayName: 'Step source activate'
+
+
 
 - bash:
      conda activate interpret_env && \
