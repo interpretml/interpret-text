@@ -4,9 +4,7 @@
 
 trigger: none
 
-pr:
-- staging 
-- master
+pr: none
   
 pool:
  vmImage: 'ubuntu-16.04'
@@ -41,7 +39,6 @@ steps:
 - script:
      pip install xgboost && \
      pip install tensorflow && \
-     conda install -y pytorch torchvision cpuonly -c pytorch && \
      cd ../tests
   displayName: 'Step 6'
   
