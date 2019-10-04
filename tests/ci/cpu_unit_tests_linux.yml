@@ -45,8 +45,12 @@ steps:
   displayName: 'Step 7'
 
 - script:
-     pip install azureml-sdk[explain,contrib]
+     pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
   displayName: 'Step 8'
+
+- script:
+     pip install azureml-sdk[explain,contrib]
+  displayName: 'Step 9'
 
 - script:
      pytest tests/unit/test_text_explainer.py
