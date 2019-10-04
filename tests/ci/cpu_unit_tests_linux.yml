@@ -45,7 +45,7 @@ steps:
   displayName: 'Step 7'
   
 - script:
-     pytest tests/test_text_explainer.py
+     pytest tests/unit/test_text_explainer.py
   displayName: 'run pytest'
 
 - task: PublishTestResults@2
