@@ -23,18 +23,27 @@ steps:
 #  displayName: 'Install pip and tools'
 
 - script:
-     pip install -e ./python && \
-     pip install pytest && \
-     pip install lightgbm && \
-     pip install interpret-community
+     pip install -e ./python
   displayName: 'Step 2'
+
+- script:
+     pip install pytest
+  displayName: 'Step 3'
+
+- script:
+     pip install lightgbm
+  displayName: 'Step 4'
+
+- script:
+     pip install interpret-community
+  displayName: 'Step 5'
   
 - script:
      pip install xgboost && \
      pip install tensorflow && \
      conda install -y pytorch torchvision cpuonly -c pytorch && \
      cd ../tests
-  displayName: 'Step 3'
+  displayName: 'Step 6'
   
 - script:
      pytest test_text_explainer.py
