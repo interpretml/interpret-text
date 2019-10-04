@@ -22,7 +22,7 @@ steps:
 - script: 
    # setup your environment and run pytest
      conda create -y -n interpret_env python=3.7 && \
-     conda activate interpret_env && \
+     source activate interpret_env && \
      git clone git@github.com:microsoft/interpret-community-text.git && \
      cd interpret-community-text/python
   displayName: 'Step 1'
