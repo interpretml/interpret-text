@@ -32,10 +32,11 @@ steps:
 - script: 
    # setup your environment and run pytest
      conda env list && \
-     conda create -y -n interpret_env python=3.7
+     conda create -y -n interpret_env
   displayName: 'Step 0'
 
 - script:
+     conda activate && \
      source activate interpret_env && \
      cd python
   displayName: 'Step 1'
