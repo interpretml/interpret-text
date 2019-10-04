@@ -43,13 +43,9 @@ steps:
 - script:
      pip install tensorflow
   displayName: 'Step 7'
-
-- script:
-     cd ../tests
-  displayName: 'Step 8'
   
 - script:
-     pytest test_text_explainer.py
+     pytest tests/test_text_explainer.py
   displayName: 'run pytest'
 
 - task: PublishTestResults@2
