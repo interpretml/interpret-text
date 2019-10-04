@@ -42,8 +42,11 @@ steps:
 
 - script:
      pip install tensorflow
+  displayName: 'Step 7'
+
+- script:
      cd ../tests
-  displayName: 'Step 6'
+  displayName: 'Step 8'
   
 - script:
      pytest test_text_explainer.py
