@@ -19,6 +19,11 @@ steps:
     architecture: 'x64'
   displayName: 'Use Python 3.7'
 
+- bash: |
+    echo "##vso[task.prependpath]/data/anaconda/bin"
+  displayName: Add Conda to PATH
+
+
 - script: 
    # setup your environment and run pytest
      conda create -y -n interpret_env python=3.7
