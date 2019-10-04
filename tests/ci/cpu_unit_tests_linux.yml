@@ -19,20 +19,19 @@ steps:
     architecture: 'x64'
   displayName: 'Use Python 3.7'
 
-- bash: |
-    echo "##vso[task.prependpath]/data/anaconda/bin"
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
   displayName: Add Conda to PATH
 
 
-- script: 
+- bash: 
    # setup your environment and run pytest
      conda init bash
   displayName: 'Step 00'
 
-- script: 
+- bash: 
    # setup your environment and run pytest
      conda env list && \
-     conda create -y -n interpret_env
+     conda create -yes -n interpret_env
   displayName: 'Step 0'
 
 - script:
