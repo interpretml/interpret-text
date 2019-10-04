@@ -37,8 +37,11 @@ steps:
   displayName: 'Step 5'
   
 - script:
-     pip install xgboost && \
-     pip install tensorflow && \
+     pip install xgboost
+  displayName: 'Step 6'
+
+- script:
+     pip install tensorflow
      cd ../tests
   displayName: 'Step 6'
   
