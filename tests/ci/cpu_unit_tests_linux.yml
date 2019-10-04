@@ -21,12 +21,16 @@ steps:
 
 - script: 
    # setup your environment and run pytest
-     conda create -y -n interpret_env python=3.7 && \
+     conda create -y -n interpret_env python=3.7
+  displayName: 'Step 0'
+
+- script:
      conda activate interpret_env && \
      cd python
   displayName: 'Step 1'
 
 - script:
+     conda activate interpret_env && \
      pip install -e . && \
      pip install pytest && \
      pip install lightgbm && \
@@ -34,6 +38,7 @@ steps:
   displayName: 'Step 2'
   
 - script:
+     conda activate interpret_env && \
      pip install xgboost && \
      pip install tensorflow && \
      conda install -y pytorch torchvision cpuonly -c pytorch && \
@@ -41,6 +46,7 @@ steps:
   displayName: 'Step 3'
   
 - script:
+     conda activate interpret_env && \
      pytest test_text_explainer.py
   displayName: 'run pytest'
 
