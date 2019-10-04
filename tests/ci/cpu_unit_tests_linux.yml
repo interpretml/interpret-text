@@ -43,7 +43,11 @@ steps:
 - script:
      pip install tensorflow
   displayName: 'Step 7'
-  
+
+- script:
+     pip install azureml-sdk[explain,contrib]
+  displayName: 'Step 8'
+
 - script:
      pytest tests/unit/test_text_explainer.py
   displayName: 'run pytest'
