@@ -46,6 +46,7 @@ steps:
   displayName: 'Step 3'
   
 - script:
+     conda env list && \
      conda activate interpret_env && \
      pytest test_text_explainer.py
   displayName: 'run pytest'
