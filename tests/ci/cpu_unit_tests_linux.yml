@@ -23,8 +23,7 @@ steps:
 #  displayName: 'Install pip and tools'
 
 - script:
-     cd python && \
-     pip install -e . && \
+     pip install -e ./python && \
      pip install pytest && \
      pip install lightgbm && \
      pip install interpret-community
