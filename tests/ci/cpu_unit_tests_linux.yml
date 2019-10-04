@@ -19,6 +19,9 @@ steps:
     architecture: 'x64'
   displayName: 'Use Python 3.7'
 
+- script: python -m pip install --upgrade pip setuptools wheel
+  displayName: 'Install pip and tools'
+
 - script:
      cd python && \
      pip install -e . && \
