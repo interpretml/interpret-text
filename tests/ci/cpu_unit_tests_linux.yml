@@ -53,12 +53,12 @@ steps:
   displayName: 'Step 9'
 
 - script:
-     pytest tests/unit/test_text_explainer.py
+     python -m pytest tests/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
   displayName: 'run pytest'
 
 - task: PublishTestResults@2
   inputs:
-    testResultsFiles: '**/test-*.xml'
+    testResultsFiles: '**/*.xml'
     failTaskOnFailedTests: true
   condition: succeededOrFailed()
   displayName: 'Publish Test Results'
