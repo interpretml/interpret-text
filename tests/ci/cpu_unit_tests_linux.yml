@@ -26,7 +26,7 @@ steps:
 
 - script: 
    # setup your environment and run pytest
-     conda init bash
+     conda init bash && \
      conda create -y -n interpret_env python=3.7
   displayName: 'Step 0'
 
