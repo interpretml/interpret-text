@@ -4,9 +4,7 @@
 
 trigger: none
 
-pr:
-- staging 
-- master
+pr: none
   
 pool:
  vmImage: 'ubuntu-16.04'
@@ -17,28 +15,50 @@ steps:
   inputs:
     versionSpec: '3.6'
     architecture: 'x64'
-  displayName: 'Use Python 3.7'
+  displayName: 'Use Python 3.6'
 
-- script: 
-  # setup your environment and run pytest
-  conda create -n interpret_env python=3.7
-  conda activate interpret_env
-  git clone git@github.com:microsoft/interpret-community-text.git
-  cd interpret-community-text/python
-  pip install -e .
-  pip install pytest
-  pip install lightgbm
-  pip install interpret-community
-  pip install xgboost
-  pip install tensorflow
-  conda install pytorch torchvision cpuonly -c pytorch
-  cd ../tests
-  pytest test_text_explainer.py
+#- script: python -m pip install --upgrade pip setuptools wheel
+#  displayName: 'Install pip and tools'
+
+- script:
+     pip install -e ./python
+  displayName: 'Step 2'
+
+- script:
+     pip install pytest
+  displayName: 'Step 3'
+
+- script:
+     pip install lightgbm
+  displayName: 'Step 4'
+
+- script:
+     pip install interpret-community
+  displayName: 'Step 5'
+  
+- script:
+     pip install xgboost
+  displayName: 'Step 6'
+
+- script:
+     pip install tensorflow
+  displayName: 'Step 7'
+
+- script:
+     pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+  displayName: 'Step 8'
+
+- script:
+     pip install azureml-sdk[explain,contrib]
+  displayName: 'Step 9'
+
+- script:
+     python -m pytest tests/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
   displayName: 'run pytest'
 
 - task: PublishTestResults@2
-  displayName: 'Publish Test Results **/test-*.xml'
   inputs:
-    testResultsFiles: '**/test-*.xml'
+    testResultsFiles: '**/*.xml'
     failTaskOnFailedTests: true
   condition: succeededOrFailed()
+  displayName: 'Publish Test Results'
