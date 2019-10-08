@@ -9,18 +9,7 @@ Contributions are welcomed! Here's a few things to know:
 
 ## Steps to Contributing
 
-**TL;DR for contributing: We use the staging branch to land all new features and fixes. To make a contribution, please create a branch from staging, make a modification in the code and create a PR to staging.** 
-
-Here are the basic steps to get started with your first contribution. Please reach out with any questions.
-1. Use [open issues](https://github.com/microsoft/interpret-community-text/issues) to discuss the proposed changes. Create an issue describing changes if necessary to collect feedback. Also, please use provided labels to tag issues so everyone can easily sort issues of interest.
-2. [Fork the repo](https://help.github.com/articles/fork-a-repo/) so you can make and test local changes.
-3. Create a new branch **from staging branch** for the issue (please do not create a branch from master). We suggest prefixing the branch with your username and then a descriptive title: (e.g. gramhagen/update_contributing_docs)
-4. Create a test that replicates the issue.
-5. Make code changes.
-6. Ensure unit tests pass and code style / formatting is consistent (see [wiki](https://github.com/yourRepo/wiki/Coding-Guidelines#python-and-docstrings-style) for more details).
-7. Create a pull request against **staging** branch.
-
-Once the features included in a [milestone](https://github.com/microsoft/interpret-community-text/milestones) are completed, we will merge staging into master. See the wiki for more detail about our [merge strategy](https://github.com/yourRepo/wiki/Strategy-to-merge-the-code-to-master-branch).
+*Prs are made against Master and releases are made from Master.
 
 ## Coding Guidelines
 
