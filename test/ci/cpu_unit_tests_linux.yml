@@ -53,7 +53,7 @@ steps:
   displayName: 'Step 9'
 
 - script:
-     python -m pytest tests/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+     python -m pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
   displayName: 'run pytest'
 
 - task: PublishTestResults@2
