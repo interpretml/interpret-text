@@ -7,13 +7,14 @@
 import numpy as np
 import re
 
-from azureml.explain.model.common.blackbox_explainer import BlackBoxExplainer
-from azureml.explain.model.common.explanation_utils import _convert_to_list
-from azureml.contrib.explain.model.explanation.explanation import _create_local_explanation
+from interpret_community.common.blackbox_explainer import BlackBoxExplainer
+from interpret_community.common.explanation_utils import _convert_to_list
+from .explanation.explanation import _create_local_explanation
 from .common.text_explainer_utils import _find_golden_doc
-from azureml.explain.model.common.constants import Attributes, ExplainParams, ExplainType
+from interpret_community.common.constants import Attributes, ExplainParams, ExplainType
 
 import warnings
+
 
 with warnings.catch_warnings():
     warnings.filterwarnings('ignore', 'Starting from version 2.2.1', UserWarning)
