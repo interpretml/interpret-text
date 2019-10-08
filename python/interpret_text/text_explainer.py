@@ -43,18 +43,12 @@ class TextExplainer(BlackBoxExplainer):
         from sklearn.feature_extraction.text import CountVectorizer
         rowArr = [row]
         vectorizer = CountVectorizer(lowercase=False, min_df=0.0, binary=True)
-        vectorizer.fit(rowArr)
 
         # convert input data to numeric data via term frequency
-        numeric_vals = vectorizer.transform(rowArr)
+        numeric_vals = vectorizer.fit_transform(rowArr)
         zeros = np.zeros(numeric_vals.shape)
         ones = np.ones(numeric_vals.shape)
-        vocab = vectorizer.vocabulary_
-        inverse_vocab = {value: key for key, value in vocab.items()}
-        features = []
-        for i in range(len(inverse_vocab)):
-            features.append(inverse_vocab[i])
-        features = np.array(features)
+        features = np.array(vectorizer.get_feature_names())
 
         # convert from numeric back to text (inverse) and then predict it
         def from_numeric_predict(data):
