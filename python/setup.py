@@ -48,6 +48,7 @@ DEPENDENCIES = [
     'scipy',
     'scikit-learn',
     'interpret',
+    'interpret-community',
     'shap>=0.20.0, <=0.29.3'
 ]
 
