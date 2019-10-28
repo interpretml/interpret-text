@@ -15,76 +15,95 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     :type model: bert, xlnet or pytorch NN model
     """
 
-    def __init__(self, x, Phi, scale=0.5, rate=0.1, regularization=None, words=None):
+    def __init__(self, input_words, input_embeddings, model, Phi=None, scale=0.5, rate=0.1, regularization=None, words=None):
         """ Initialize an interpreter class.
-        Args:
-            x (torch.FloatTensor): Of shape ``[length, dimension]``.
-                The $x$ we studied. i.e. The input word embeddings.
-            Phi (function):
-                The $Phi$ we studied. A function whose input is x (the first
-                parameter) and returns a hidden state (of type
-                ``torch.FloatTensor``, of any shape)
-            scale (float):
-                The maximum size of sigma. A hyper-parameter in
-                reparameterization trick. The recommended value is
-                10 * Std[word_embedding_weight], where word_embedding_weight
-                is the word embedding weight in the model interpreted. Larger
-                scale will give more salient result, Default: 0.5.
-            rate (float):
-                A hyper-parameter that balance the MLE Loss and Maximum
-                Entropy Loss. Larger rate will result in larger information
-                loss. Default: 0.1.
-            regularization (Torch.FloatTensor or np.ndarray):
-                The regularization term, should be of the same shape as
-                (or broadcastable to) the output of Phi. If None is given,
-                method will use the output to regularize itself.
-                Default: None.
-            words (List[Str]):
-                The input sentence, used for visualizing. If None is given,
-                method will not show the words.
+        :param input_words: The input sentence, used for visualizing.
+        :type input_words: Array[String]
+        :param input_embeddings: The input word embeddings. A FloatTensor of shape ``[length, dimension]``.
+        "type input_embeddings: torch.FloatTensor
+        :param model: A pytorch model
+        :type model: torch.nn
+        :param scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
+        :type scale: float
+        :param rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in larger information loss. Default: 0.1.
+        :type rate: float
+        :param regularization: The regularization of the hidden state. Default: None
+        :type regularization: np.ndarray
         """
         super(MSRAExplainer, self).__init__()
-        self.s = x.size(0)
-        self.d = x.size(1)
+        self.model = model
+        self.s = input_embeddings.size(0)
+        self.d = input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.s, 1), requires_grad=True)
+
 
         self.scale = scale
         self.rate = rate
-        self.x = x
-        self.Phi = Phi
+        self.x = input_embeddings
+
+        #TODO
+        self.Phi = self.Phi
 
         self.regular = regularization
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(x), requires_grad=False)
-        self.words = words
+        self.words = input_words
         if self.words is not None:
             assert self.s == len(
                 words
-            ), "the length of x should be of the same with the lengh of words"
+            ), "the length of input_embeddings should be the same as the lengh of input_words"
 
-    def explain_local(self, evaluation_examples):
+    def explain_local(self, dataset, evaluation_examples, device):
         """Explain the model by using msra's interpretor
 
         :param evaluation_examples: A matrix of feature vector examples (# examples x # features) on which
             to explain the model's output.
         :type evaluation_examples: DatasetWrapper
+        :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
+        :type sampled_x: List[torch.Tensor]
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
-        pass
+        if not self.Phi:
+            self.Phi = self._generate_Phi(self.modle, 3)
+        regularization = _calculate_regularization(dataset, self.Phi)
+        interpreter = Interpreter(x=self.x, Phi=self.Phi, regularization=regularization, words=self.input_words).to(device)
+        interpreter.optimize(iteration=5000, lr=0.01, show_progress=True)
+        local_importance_values = interpreter.get_sigma()
+        return _create_local_explanation(local_importance_values=np.array(local_importance_values))
+
+    def _generate_Phi(self, model, layer):
+        """Generate the Phi/hidden state that needs to be interpreted
+
+        :param evaluation_examples: A matrix of feature vector examples (# examples x # features) on which to explain the model's output.
+        :type evaluation_examples: DatasetWrapper
+        :return: A model explanation object. It is guaranteed to be a LocalExplanation
+        """
+        assert (
+            1 <= layer <= 12
+        ), "model only have 12 layers, while you want to access layer %d" % (layer)
+
+        def Phi(x):
+            x = x.unsqueeze(0)
+            attention_mask = torch.ones(x.shape[:2]).to(x.device)
+            extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
+            extended_attention_mask = extended_attention_mask.to(dtype=torch.float)
+            extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
+            # extract the 3rd layer
+            model_list = model.encoder.layer[:layer]
+            hidden_states = x
+            for layer_module in model_list:
+                hidden_states = layer_module(hidden_states, extended_attention_mask)
+            return hidden_states[0]
+
+        return Phi
 
     def _calculate_regularization(self, sampled_x, Phi, reduced_axes=None, device=None):
         """ Calculate the variance that is used for Interpreter
-        Args:
-            sampled_x (list of torch.FloatTensor):
-                A list of sampled input embeddings $x$, each $x$ is of shape
-                ``[length, dimension]``. All the $x$s can have different length,
-                but should have the same dimension. Sampled number should be
-                higher to get a good estimation.
-            reduced_axes (list of ints, Optional):
-                The axes that is variable in Phi (e.g., the sentence length axis).
-                We will reduce these axes by mean along them.
-        Returns:
-            torch.FloatTensor: The regularization term calculated
+        :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
+        :type sampled_x: List[torch.Tensor]
+        :param reduced_axes: The axes that is variable in Phi (e.g., the sentence length axis). We will reduce these axes by mean along them.
+        :type reduced_axes: List[int]
+        :return: torch.FloatTensor: The regularization term calculated
         """
         sample_num = len(sampled_x)
         sample_s = []
@@ -151,3 +170,32 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
+
+
+
+device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
+
+# Suppose our input is x, and the sentence is simply "1 2 3 4 5"
+x_simple = torch.randn(5, 256) / 100
+x_simple = x_simple.to(device)
+words = ["1", "2", "3", "4", "5"]
+
+# Suppose our hidden state s = Phi(x), where
+# Phi = 10 * word[0] + 20 * word[1] + 5 * word[2] - 20 * word[3] - 10 * word[4]
+def Phi_simple(x):
+    W = torch.tensor([10.0, 20.0, 5.0, -20.0, -10.0]).to(device)
+    return W @ x
+
+
+# Suppose this is our dataset used for training our models
+dataset = [torch.randn(5, 256) / 100 for _ in range(100)]
+
+interpreter_simple = MSRAExplainer(
+    model = Phi_simple,
+    input_embeddings=x_simple,
+    Phi=Phi_simple,
+    scale=10 * 0.1,
+    input_words=words
+)
+
+print(interpreter_simple)
