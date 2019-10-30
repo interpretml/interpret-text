@@ -8,7 +8,7 @@ class PureStructuredModelMixin(ChainedIdentity):
     :type model: A grey box model.
     """
 
-    def __init__(self, model, **kwargs):
+    def __init__(self, model=None, **kwargs):
         """Initialize the PureStructuredModelExplainer.
 
         :param model: The white box model to explain.
