@@ -19,10 +19,10 @@ jobs:
 
   - task: UsePythonVersion@0
     inputs:
-      versionSpec: '3.6.8'
+      versionSpec: '3.6'
       architecture: 'x64'
       addToPath: true
-    displayName: 'Use Python 3.6.8'
+    displayName: 'Use Python 3.6'
     
   - bash: |
       echo "##vso[task.prependpath]/data/anaconda/bin"
