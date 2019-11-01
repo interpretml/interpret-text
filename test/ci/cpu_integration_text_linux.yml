@@ -1,0 +1,57 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+#
+
+trigger: none
+
+pr: none
+  
+pool:
+ vmImage: 'ubuntu-16.04'
+
+steps:
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.6'
+    architecture: 'x64'
+  displayName: 'Use Python 3.6'
+
+#- script: python -m pip install --upgrade pip setuptools wheel
+#  displayName: 'Install pip and tools'
+
+- script:
+     pip install -e ./python
+  displayName: 'Install package dependencies'
+
+- bash: |
+    pip install -r requirements.txt
+  displayName: Install additional pip packages
+
+- script:
+     pip install interpret-community
+  displayName: 'Install interpret-community'
+
+- script:
+     pip install git+https://github.com/microsoft/nlp.git
+  displayName: 'Install NLP Best practices utils'
+
+
+- script:
+     pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
+  displayName: 'Step 8'
+
+- script:
+     pip install azureml-sdk[explain,contrib]
+  displayName: 'Step 9'
+
+- script:
+     python -m pytest test/integration --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+  displayName: 'run pytest'
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/*.xml'
+    failTaskOnFailedTests: true
+  condition: succeededOrFailed()
+  displayName: 'Publish Test Results'
