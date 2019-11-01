@@ -70,6 +70,14 @@ steps:
   displayName: 'Install azureml sdk'
 
 - script:
+     pip install dask
+  displayName: 'Install dask'
+
+- script:
+     pip install tqdm
+  displayName: 'Install tqdm'
+
+- script:
      python -m pytest test/integration --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
   displayName: 'run pytest'
 
