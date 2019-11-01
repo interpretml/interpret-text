@@ -24,9 +24,33 @@ steps:
      pip install -e ./python
   displayName: 'Install package dependencies'
 
-- bash: |
+- bash:
     pip install -r requirements.txt
   displayName: Install additional pip packages
+
+- script:
+     pip install nltk
+  displayName: 'install nltk'
+
+- script:
+     pip install pytorch-pretrained-bert
+  displayName: 'install pytorch-pretrained-bert'
+
+- script:
+     pip install cached-property
+  displayName: 'install cached-property'
+
+- script:
+     pip install nteract-scrapbook
+  displayName: 'install scrapbook'
+
+- script:
+     pip install papermill
+  displayName: 'install papermill'
+
+- script:
+     pip install pytest-shutil
+  displayName: 'install pytest-shutil'
 
 - script:
      pip install interpret-community
@@ -39,11 +63,11 @@ steps:
 
 - script:
      pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-  displayName: 'Step 8'
+  displayName: 'Install pytorch'
 
 - script:
      pip install azureml-sdk[explain,contrib]
-  displayName: 'Step 9'
+  displayName: 'Install azureml sdk'
 
 - script:
      python -m pytest test/integration --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
