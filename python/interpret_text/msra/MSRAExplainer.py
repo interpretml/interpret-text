@@ -6,7 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_community.common.base_explainer import LocalExplainer
+from interpret_text.explanation.explanation import _create_local_explanation
 
+device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
 
 class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     """The MSRAExplainer for returning explanations for deep neural network models.
@@ -15,7 +17,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     :type model: bert, xlnet or pytorch NN model
     """
 
-    def __init__(self, input_words, input_embeddings, Phi=None, scale=0.5, rate=0.1, regularization=None):
+    def __init__(self, x, scale=0.5, rate=0.1, Phi=None, regularization=None, words=None):
         """ Initialize an interpreter class.
         :param input_words: The input sentence, used for visualizing.
         :type input_words: Array[String]
@@ -30,27 +32,24 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param regularization: The regularization of the hidden state. Default: None
         :type regularization: np.ndarray
         """
-        super().__init__()
-        self.s = input_embeddings.size(0)
-        self.d = input_embeddings.size(1)
+        super(MSRAExplainer, self).__init__()
+        self.s = x.size(0)
+        self.d = x.size(1)
         self.ratio = nn.Parameter(torch.randn(self.s, 1), requires_grad=True)
-        self.local_importance_values = None
 
         self.scale = scale
         self.rate = rate
-        self.x = input_embeddings
-
-        #TODO
+        self.x = x
         self.Phi = Phi
 
         self.regular = regularization
-        # if self.regular is not None:
-        #     self.regular = nn.Parameter(torch.tensor(self.regular).to(x), requires_grad=False)
-        self.words = input_words
+        if self.regular is not None:
+            self.regular = nn.Parameter(torch.tensor(self.regular).to(x), requires_grad=False)
+        self.words = words
         if self.words is not None:
             assert self.s == len(
                 words
-            ), "the length of input_embeddings should be the same as the lengh of input_words"
+            ), "the length of x should be of the same with the lengh of words"
 
     def explain_local(self,model, evaluation_examples, device, dataset=None):
         """Explain the model by using msra's interpretor
@@ -64,11 +63,11 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """
         self.Phi = self._generate_Phi(model, layer=3)
         if self.regular is None:
-            self.regular = _calculate_regularization(dataset, self.Phi)
+            self.regular = self._calculate_regularization(dataset, self.Phi)
         self.optimize(iteration=5000, lr=0.01, show_progress=True)
-        local_importance_values = interpreter.get_sigma()
+        local_importance_values = self.get_sigma()
         self.local_importance_values = local_importance_values
-        return _create_local_explanation(local_importance_values=np.array(local_importance_values))
+        return _create_local_explanation(local_importance_values=np.array(local_importance_values), method="neural network", model_task="classification")
 
     def _generate_Phi(self, model, layer):
         """Generate the Phi/hidden state that needs to be interpreted
@@ -169,74 +168,3 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
-
-
-
-# device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
-
-# # Suppose our input is x, and the sentence is simply "1 2 3 4 5"
-# x_simple = torch.randn(5, 256) / 100
-# x_simple = x_simple.to(device)
-# words = ["1", "2", "3", "4", "5"]
-
-# # Suppose our hidden state s = Phi(x), where
-# # Phi = 10 * word[0] + 20 * word[1] + 5 * word[2] - 20 * word[3] - 10 * word[4]
-# def Phi_simple(x):
-#     W = torch.tensor([10.0, 20.0, 5.0, -20.0, -10.0]).to(device)
-#     return W @ x
-
-
-# # Suppose this is our dataset used for training our models
-# dataset = [torch.randn(5, 256) / 100 for _ in range(100)]
-
-# interpreter_simple = MSRAExplainer(
-#     model = Phi_simple,
-#     input_embeddings=x_simple,
-#     Phi=Phi_simple,
-#     scale=10 * 0.1,
-#     input_words=words
-# )
-
-# print(interpreter_simple)
-
-
-device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
-
-from pytorch_pretrained_bert import BertModel, BertTokenizer
-from urllib import request
-import json
-
-# suppose the sentence is as following
-text = "rare bird has more than enough charm to make it memorable."
-
-# get the tokenized words.
-tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-words = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
-
-print(words)
-
-# load BERT base model
-model = BertModel.from_pretrained("bert-base-uncased").to(device)
-for param in model.parameters():
-    param.requires_grad = False
-model.eval()
-
-# get the x (here we get x by hacking the code in the pytorch_pretrained_bert package)
-tokenized_ids = tokenizer.convert_tokens_to_ids(words)
-segment_ids = [0 for _ in range(len(words))]
-token_tensor = torch.tensor([tokenized_ids], device=device)
-segment_tensor = torch.tensor([segment_ids], device=device)
-x_bert = model.embeddings(token_tensor, segment_tensor)[0]
-
-data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
-regularization_bert = json.loads(data)
-
-interpreter_simple = MSRAExplainer(
-    input_embeddings=x_bert,
-    input_words=words,
-    regularization= regularization_bert
-)
-
-interpreter_simple.explain_local(model=model,evaluation_examples=text,device=device)
-
-print(interpreter_simple.local_importance_values)
