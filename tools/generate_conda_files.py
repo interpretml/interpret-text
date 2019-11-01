@@ -97,7 +97,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # set name for environment and output yaml file
-    conda_env = "nlp_cpu"
+    conda_env = "interpret_cpu"
     if args.gpu:
         conda_env = "nlp_gpu"
 
