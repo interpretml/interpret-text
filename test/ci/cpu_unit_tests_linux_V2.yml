@@ -32,7 +32,7 @@ jobs:
   # Conda creation can take around 10min
   - bash: |
       python tools/generate_conda_files.py
-      conda create -n interpret_cpu -f interpret_cpu.yaml
+      conda create -n interpret_cpu -f nlp_cpu.yaml
     displayName: 'Creating Conda Environment with dependencies'
 
   - bash: |
