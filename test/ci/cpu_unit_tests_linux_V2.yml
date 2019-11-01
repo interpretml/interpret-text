@@ -1,0 +1,55 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+# Pull request against these branches will trigger this build
+pr: none
+
+#Any commit to this branch will trigger the build.
+trigger: none
+
+
+jobs:
+- job: cpu_unit_tests_linux
+  timeoutInMinutes: 20 # how long to run the job before automatically cancelling
+  pool:
+    vmImage: 'ubuntu-16.04' # hosted machine 
+    # name: nameofagentpool
+
+steps:
+
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.6.8'
+    architecture: 'x64'
+    addToPath: true
+  displayName: 'Use Python 3.6.8'
+  
+- bash: |
+    echo "##vso[task.prependpath]/data/anaconda/bin"
+    conda env list
+  displayName: Add Conda to PATH
+# Uncomment if needed
+# Conda creation can take around 10min
+- bash: |
+    python tools/generate_conda_file.py
+    conda env create -n interpret_cpu -f interpret_cpu.yaml
+  displayName: 'Creating Conda Environment with dependencies'
+
+- bash: |
+    source activate interpret_cpu
+    pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+  displayName: 'Run Unit tests'
+# Uncomment if needed
+- bash: |
+    echo Remove Conda Environment
+    conda remove -n interpret_cpu --all -q --force -y
+    echo Done Cleanup
+  displayName: 'Cleanup Task'
+  condition: always()
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/*.xml'
+    failTaskOnFailedTests: true
+  condition: succeededOrFailed()
+  displayName: 'Publish Test Results'
