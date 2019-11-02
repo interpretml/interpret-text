@@ -54,11 +54,11 @@ jobs:
       conda env create -n interpret_cpu --file=interpret_cpu.yaml
     displayName: 'Creating Conda Environment with dependencies'
 
-  - bash: |
-      cd /usr/share/miniconda/bin
-      source activate interpret_cpu
-      pip install -e .\python
-    displayName: 'Install setup.py files'
+  # - bash: |
+  #     cd /usr/share/miniconda/bin
+  #     source activate interpret_cpu
+  #     pip install -e .\python
+  #   displayName: 'Install setup.py files'
 
   - bash: |
       cd /usr/share/miniconda/bin
