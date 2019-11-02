@@ -59,8 +59,8 @@ jobs:
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
-      cd /home/vsts/work/1/s
-      pip install -e .\python
+      cd /home/vsts/work/1/s/python
+      pip install -e .
     displayName: 'Install setup.py files'
 
   - bash: |
