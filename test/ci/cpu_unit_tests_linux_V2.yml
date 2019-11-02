@@ -33,7 +33,7 @@ jobs:
     displayName: Create Anaconda environment
 
   - bash: |
-      cd /usr/share/miniconda
+      cd /usr/share/miniconda/bin
       source activate myEnvironment
     displayName: Install Anaconda packages
 
