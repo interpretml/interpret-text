@@ -29,43 +29,39 @@ jobs:
       conda env list
     displayName: Add Conda to PATH
 
-  - bash: conda create --yes --quiet --name myEnvironment
-    displayName: Create Anaconda environment
+  # - bash: conda create --yes --quiet --name myEnvironment
+  #   displayName: Create Anaconda environment
 
-  - bash: |
-      cd /usr/share/miniconda/bin
-      source activate myEnvironment
-    displayName: Install Anaconda packages
+  # - bash: |
+  #     cd /usr/share/miniconda/bin
+  #     source activate myEnvironment
+  #   displayName: Install Anaconda packages
 
-  - bash: |
-      source activate myEnvironment
-    displayName: Install Anaconda packages
+  # - bash: |
+  #     source activate myEnvironment
+  #   displayName: Install Anaconda packages
 
-  - task: CondaEnvironment@0
-    inputs:
-      environmentName: 'testing'
-      packageSpecs: 
-      updateConda: false
+  # - task: CondaEnvironment@0
+  #   inputs:
+  #     environmentName: 'testing'
+  #     packageSpecs: 
+  #     updateConda: false
 
   # Uncomment if needed
   # Conda creation can take around 10min
   - bash: |
       python tools/generate_conda_files.py
       conda env create -n interpret_cpu --file=interpret_cpu.yaml
-      source activate interpret_cpu
     displayName: 'Creating Conda Environment with dependencies'
 
   - bash: |
-      conda env list
-      source activate interpret_cpu
-    displayName: 'Activate conda env'
-
-  - bash: |
+      cd /usr/share/miniconda/bin
       source activate interpret_cpu
       pip install -e .\python
     displayName: 'Install setup.py files'
 
   - bash: |
+      cd /usr/share/miniconda/bin
       source activate interpret_cpu
       pytest test/unit/test_text_explainer.py -m --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run Unit tests'
