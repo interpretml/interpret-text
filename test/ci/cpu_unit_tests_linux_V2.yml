@@ -35,6 +35,12 @@ jobs:
       conda env create -n interpret_cpu --file=interpret_cpu.yaml
     displayName: 'Creating Conda Environment with dependencies'
 
+  - task: CondaEnvironment@0
+    inputs:
+      environmentName: 'interpret_cpu'
+      packageSpecs: 
+      updateConda: false
+
   - bash: |
       conda env list
       source activate interpret_cpu
