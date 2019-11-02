@@ -37,7 +37,11 @@ jobs:
 
   - bash: |
       source activate interpret_cpu
-      pip install -e .\python\
+    displayName: 'Activate conda env'
+
+  - bash: |
+      source activate interpret_cpu
+      pip install -e .\python
     displayName: 'Install setup.py files'
 
   - bash: |
