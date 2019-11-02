@@ -36,6 +36,7 @@ jobs:
     displayName: 'Creating Conda Environment with dependencies'
 
   - bash: |
+      conda env list
       source activate interpret_cpu
     displayName: 'Activate conda env'
 
