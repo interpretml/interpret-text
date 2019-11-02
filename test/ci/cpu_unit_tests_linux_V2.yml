@@ -23,11 +23,26 @@ jobs:
       architecture: 'x64'
       addToPath: true
     displayName: 'Use Python 3.6'
-    
+
   - bash: |
       echo "##vso[task.prependpath]/data/anaconda/bin"
       conda env list
     displayName: Add Conda to PATH
+
+  - bash: |
+      python tools/generate_conda_files.py
+    displayName: 'Creating Conda Environment with dependencies'
+
+  - script: conda env create --name myEnvironment --quiet --file interpret_cpu.yaml
+    displayName: Create Anaconda environment
+
+- bash: |
+    conda env list
+    source activate myEnvironment
+    conda install --yes --quiet --name myEnvironment scipy
+  displayName: Install Anaconda packages
+
+
   # Uncomment if needed
   # Conda creation can take around 10min
   - bash: |
