@@ -63,7 +63,7 @@ jobs:
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
-      pytest test/unit/test_text_explainer.py -m --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+      pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run Unit tests'
   # Uncomment if needed
   - bash: |
