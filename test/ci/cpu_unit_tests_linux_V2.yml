@@ -38,6 +38,10 @@ jobs:
   - bash: |
       source activate interpret_cpu
       pip install -e .\python\
+    displayName: 'Install setup.py files'
+
+  - bash: |
+      source activate interpret_cpu
       pytest test/unit/test_text_explainer.py -m --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run Unit tests'
   # Uncomment if needed
