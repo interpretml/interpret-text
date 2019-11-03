@@ -7,6 +7,7 @@ pr: none
 #Any commit to this branch will trigger the build.
 trigger: none
 
+
 jobs:
 - job: cpu_unit_tests_linux
   timeoutInMinutes: 20 # how long to run the job before automatically cancelling
@@ -15,16 +16,37 @@ jobs:
     # name: nameofagentpool
 
   steps:
+
   - task: UsePythonVersion@0
     inputs:
       versionSpec: '3.6'
       architecture: 'x64'
       addToPath: true
     displayName: 'Use Python 3.6'
-
+    
   - bash: |
       echo "##vso[task.prependpath]/data/anaconda/bin"
+      conda env list
+      ls
+      pwd
     displayName: Add Conda to PATH
+  # - bash: conda create --yes --quiet --name myEnvironment
+  #   displayName: Create Anaconda environment
+
+  # - bash: |
+  #     cd /usr/share/miniconda/bin
+  #     source activate myEnvironment
+  #   displayName: Install Anaconda packages
+
+  # - bash: |
+  #     source activate myEnvironment
+  #   displayName: Install Anaconda packages
+
+  # - task: CondaEnvironment@0
+  #   inputs:
+  #     environmentName: 'testing'
+  #     packageSpecs: 
+  #     updateConda: false
 
   # Uncomment if needed
   # Conda creation can take around 10min
@@ -32,28 +54,25 @@ jobs:
       python tools/generate_conda_files.py
       conda env create -n interpret_cpu --file=interpret_cpu.yaml
     displayName: 'Creating Conda Environment with dependencies'
-
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s/python
       pip install -e .
-    displayName: 'Install necessary packages'
-
+    displayName: 'Install setup.py files'
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
-      cd /home/vsts/work/1/s/python
+      cd /home/vsts/work/1/s
       pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run tests'
-
+    displayName: 'Run Unit tests'
+  # Uncomment if needed
   - bash: |
       echo Remove Conda Environment
       conda remove -n interpret_cpu --all -q --force -y
       echo Done Cleanup
     displayName: 'Cleanup Task'
     condition: always()
-
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/*.xml'
