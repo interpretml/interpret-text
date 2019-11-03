@@ -38,8 +38,14 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s/python
       pip install -e .
+    displayName: 'Install necessary packages'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s/python
       pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Install necessary packages and Run tests'
+    displayName: 'Run tests'
 
   - bash: |
       echo Remove Conda Environment
