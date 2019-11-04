@@ -8,8 +8,6 @@ from interpret_text.common.structured_model_mixin import PureStructuredModelMixi
 from interpret_community.common.base_explainer import LocalExplainer
 from interpret_text.explanation.explanation import _create_local_explanation
 
-device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
-
 class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     """The MSRAExplainer for returning explanations for deep neural network models.
 
@@ -17,8 +15,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     :type model: bert, xlnet or pytorch NN model
     """
 
-    def __init__(self, x, scale=0.5, rate=0.1, Phi=None, regularization=None, words=None):
-        """ Initialize an interpreter class.
+    def __init__(self, input_embeddings, scale=0.5, rate=0.1, Phi=None, regularization=None, words=None):
+        """ Initialize an interpreter class.F
         :param input_words: The input sentence, used for visualizing.
         :type input_words: Array[String]
         :param input_embeddings: The input word embeddings. A FloatTensor of shape ``[length, dimension]``.
@@ -33,21 +31,21 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type regularization: np.ndarray
         """
         super(MSRAExplainer, self).__init__()
-        self.s = x.size(0)
-        self.d = x.size(1)
-        self.ratio = nn.Parameter(torch.randn(self.s, 1), requires_grad=True)
-
+        self.input_size = input_embeddings.size(0)
+        self.input_dimension = input_embeddings.size(1)
+        self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
         self.scale = scale
         self.rate = rate
-        self.x = x
+        self.input_embeddings = input_embeddings
         self.Phi = Phi
-
         self.regular = regularization
-        if self.regular is not None:
-            self.regular = nn.Parameter(torch.tensor(self.regular).to(x), requires_grad=False)
         self.words = words
+
+        if self.regular is not None:
+            self.regular = nn.Parameter(torch.tensor(self.regular).to(input_embeddings), requires_grad=False)
+        
         if self.words is not None:
-            assert self.s == len(
+            assert self.input_size == len(
                 words
             ), "the length of x should be of the same with the lengh of words"
 
@@ -126,8 +124,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             torch.FloatTensor: a scalar, the target loss.
         """
         ratios = torch.sigmoid(self.ratio)  # S * 1
-        x = self.x + 0.0  # S * D
-        x_tilde = x + ratios * torch.randn(self.s, self.d).to(x.device) * self.scale  # S * D
+        x = self.input_embeddings + 0.0  # S * D
+        x_tilde = x + ratios * torch.randn(self.input_size, self.input_dimension).to(x.device) * self.scale  # S * D
         s = self.Phi(x)  # D or S * D
         s_tilde = self.Phi(x_tilde)
         loss = (s_tilde - s) ** 2
