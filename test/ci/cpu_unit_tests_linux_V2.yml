@@ -31,8 +31,7 @@ jobs:
       pwd
     displayName: Add Conda to PATH
 
-  # Uncomment if needed
-  # Conda creation can take around 10min
+  # Conda environment creation
   - bash: |
       python tools/generate_conda_files.py
       conda env create -n interpret_cpu --file=interpret_cpu.yaml
@@ -42,14 +41,15 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s/python
       pip install -e .
-      pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Install setup.py files'
-  # - bash: |
-  #     cd /usr/share/miniconda/bin
-  #     source activate interpret_cpu
-  #     cd /home/vsts/work/1/s
-  #     pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-  #   displayName: 'Run Unit tests'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run Unit tests'
+
   # Uncomment if needed
   - bash: |
       echo Remove Conda Environment
@@ -57,6 +57,7 @@ jobs:
       echo Done Cleanup
     displayName: 'Cleanup Task'
     condition: always()
+
   - task: PublishTestResults@2
     inputs:
       testResultsFiles: '**/*.xml'
