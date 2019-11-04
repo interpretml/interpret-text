@@ -1,64 +1,66 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-#
 
+# Pull request against these branches will trigger this build
+pr: none
+
+#Any commit to this branch will trigger the build.
 trigger: none
 
-pr: none
-  
-pool:
- vmImage: 'ubuntu-16.04'
 
-steps:
+jobs:
+- job: cpu_unit_tests_linux
+  timeoutInMinutes: 20 # how long to run the job before automatically cancelling
+  pool:
+    vmImage: 'ubuntu-16.04' # hosted machine 
+    # name: nameofagentpool
 
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.6'
-    architecture: 'x64'
-  displayName: 'Use Python 3.6'
+  steps:
 
-#- script: python -m pip install --upgrade pip setuptools wheel
-#  displayName: 'Install pip and tools'
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.6'
+      architecture: 'x64'
+      addToPath: true
+    displayName: 'Use Python 3.6'
+    
+  - bash: |
+      echo "##vso[task.prependpath]/data/anaconda/bin"
+      conda env list
+      ls
+      pwd
+    displayName: Add Conda to PATH
 
-- script:
-     pip install -e ./python
-  displayName: 'Step 2'
+  # Conda environment creation
+  - bash: |
+      python tools/generate_conda_files.py
+      conda env create -n interpret_cpu --file=interpret_cpu.yaml
+    displayName: 'Creating Conda Environment with dependencies'
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s/python
+      pip install -e .
+    displayName: 'Install setup.py files'
 
-- script:
-     pip install pytest
-  displayName: 'Step 3'
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run Unit tests'
 
-- script:
-     pip install lightgbm
-  displayName: 'Step 4'
+  # Uncomment if needed
+  - bash: |
+      echo Remove Conda Environment
+      conda remove -n interpret_cpu --all -q --force -y
+      echo Done Cleanup
+    displayName: 'Cleanup Task'
+    condition: always()
 
-- script:
-     pip install interpret-community
-  displayName: 'Step 5'
-  
-- script:
-     pip install xgboost
-  displayName: 'Step 6'
-
-- script:
-     pip install tensorflow
-  displayName: 'Step 7'
-
-- script:
-     pip install torch==1.2.0+cpu torchvision==0.4.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
-  displayName: 'Step 8'
-
-- script:
-     pip install azureml-sdk[explain,contrib]
-  displayName: 'Step 9'
-
-- script:
-     python -m pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-  displayName: 'run pytest'
-
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: '**/*.xml'
-    failTaskOnFailedTests: true
-  condition: succeededOrFailed()
-  displayName: 'Publish Test Results'
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/*.xml'
+      failTaskOnFailedTests: true
+    condition: succeededOrFailed()
+    displayName: 'Publish Test Results'
