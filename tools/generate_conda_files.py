@@ -46,7 +46,7 @@ CONDA_BASE = {
 CONDA_GPU = {
     "numba": "numba>=0.38.1",
     "pytorch": "pytorch>=1.0.0",
-    "tensorflow": "tensorflow-gpu==1.12.0",
+    "tensorflow": "tensorflow-gpu==1.14.0",
     "cudatoolkit": "cudatoolkit==9.2",
 }
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # set name for environment and output yaml file
     conda_env = "interpret_cpu"
     if args.gpu:
-        conda_env = "nlp_gpu"
+        conda_env = "interpret_gpu"
 
     # overwrite environment name with user input
     if args.name is not None:
