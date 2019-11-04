@@ -30,23 +30,6 @@ jobs:
       ls
       pwd
     displayName: Add Conda to PATH
-  # - bash: conda create --yes --quiet --name myEnvironment
-  #   displayName: Create Anaconda environment
-
-  # - bash: |
-  #     cd /usr/share/miniconda/bin
-  #     source activate myEnvironment
-  #   displayName: Install Anaconda packages
-
-  # - bash: |
-  #     source activate myEnvironment
-  #   displayName: Install Anaconda packages
-
-  # - task: CondaEnvironment@0
-  #   inputs:
-  #     environmentName: 'testing'
-  #     packageSpecs: 
-  #     updateConda: false
 
   # Uncomment if needed
   # Conda creation can take around 10min
@@ -59,13 +42,14 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s/python
       pip install -e .
-    displayName: 'Install setup.py files'
-  - bash: |
-      cd /usr/share/miniconda/bin
-      source activate interpret_cpu
-      cd /home/vsts/work/1/s
       pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run Unit tests'
+    displayName: 'Install setup.py files'
+  # - bash: |
+  #     cd /usr/share/miniconda/bin
+  #     source activate interpret_cpu
+  #     cd /home/vsts/work/1/s
+  #     pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+  #   displayName: 'Run Unit tests'
   # Uncomment if needed
   - bash: |
       echo Remove Conda Environment
