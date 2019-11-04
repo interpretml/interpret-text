@@ -26,9 +26,6 @@ jobs:
     
   - bash: |
       echo "##vso[task.prependpath]/data/anaconda/bin"
-      conda env list
-      ls
-      pwd
     displayName: Add Conda to PATH
 
   # Conda environment creation
