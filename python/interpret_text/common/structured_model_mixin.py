@@ -11,8 +11,8 @@ class PureStructuredModelMixin(ChainedIdentity):
     def __init__(self, model=None, **kwargs):
         """Initialize the PureStructuredModelExplainer.
 
-        :param model: The white box model to explain.
-        :type model: A white box model.
+        :param model: The grey box model to explain.
+        :type model: A grey box model.
         """
         super(PureStructuredModelMixin, self).__init__(**kwargs)
         self._logger.debug('Initializing PureStructuredModelMixin')
