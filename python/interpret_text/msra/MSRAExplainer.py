@@ -10,25 +10,22 @@ from interpret_text.explanation.explanation import _create_local_explanation
 
 class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     """The MSRAExplainer for returning explanations for deep neural network models.
-
-    :param model: The tree model to explain.
-    :type model: bert, xlnet or pytorch NN model
     """
 
-    def __init__(self, input_embeddings, scale=0.5, rate=0.1, Phi=None, regularization=None, words=None):
-        """ Initialize an interpreter class.F
+    def __init__(self, input_embeddings, input_words=None, scale=0.5, rate=0.1, Phi=None, regularization=None):
+        """ Initialize the MSRAExplainer
         :param input_words: The input sentence, used for visualizing.
         :type input_words: Array[String]
         :param input_embeddings: The input word embeddings. A FloatTensor of shape ``[length, dimension]``.
         "type input_embeddings: torch.FloatTensor
-        :param model: A pytorch model
-        :type model: torch.nn
         :param scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
         :type scale: float
         :param rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in larger information loss. Default: 0.1.
         :type rate: float
         :param regularization: The regularization of the hidden state. Default: None
         :type regularization: np.ndarray
+        :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
+        :type Phi: function
         """
         super(MSRAExplainer, self).__init__()
         self.input_size = input_embeddings.size(0)
@@ -39,7 +36,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.input_embeddings = input_embeddings
         self.Phi = Phi
         self.regular = regularization
-        self.words = words
+        self.words = input_words
 
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(input_embeddings), requires_grad=False)
@@ -49,14 +46,16 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
                 words
             ), "the length of x should be of the same with the lengh of words"
 
-    def explain_local(self,model, evaluation_examples, device, dataset=None):
+    def explain_local(self, model, evaluation_examples, device, dataset=None):
         """Explain the model by using msra's interpretor
 
+        :param model: a pytorch model
+        :type: torch.nn
         :param evaluation_examples: A matrix of feature vector examples (# examples x # features) on which
             to explain the model's output.
         :type evaluation_examples: DatasetWrapper
-        :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
-        :type sampled_x: List[torch.Tensor]
+        :param device: A pytorch device
+        :type device: torch.device
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
         self.Phi = self._generate_Phi(model, layer=3)
@@ -69,14 +68,15 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
 
     def _generate_Phi(self, model, layer):
         """Generate the Phi/hidden state that needs to be interpreted
-
-        :param evaluation_examples: A matrix of feature vector examples (# examples x # features) on which to explain the model's output.
-        :type evaluation_examples: DatasetWrapper
+        :param model: a pytorch model
+        :type: torch.nn
+        :param layer: the layer to generate Phi for
+        :type layer: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
         assert (
             1 <= layer <= 12
-        ), "model only have 12 layers, while you want to access layer %d" % (layer)
+        ), "model only has 12 layers, while you want to access layer %d" % (layer)
 
         def Phi(x):
             x = x.unsqueeze(0)
@@ -99,6 +99,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type sampled_x: List[torch.Tensor]
         :param reduced_axes: The axes that is variable in Phi (e.g., the sentence length axis). We will reduce these axes by mean along them.
         :type reduced_axes: List[int]
+        :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
+        :type Phi: function
         :return: torch.FloatTensor: The regularization term calculated
         """
         sample_num = len(sampled_x)
