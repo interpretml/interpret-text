@@ -1,6 +1,5 @@
 import torch
-from torch import nn
-from torch import optim
+from torch import nn, optim
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,13 +8,13 @@ from interpret_community.common.base_explainer import LocalExplainer
 from interpret_text.explanation.explanation import _create_local_explanation
 
 class MSRAExplainer(PureStructuredModelMixin, nn.Module):
-    """The MSRAExplainer for returning explanations for deep neural network models.
+    """The MSRAExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, input_embeddings, input_words=None, scale=0.5, rate=0.1, Phi=None, regularization=None):
+    def __init__(self, input_embeddings, input_words=None, regularization=None):
         """ Initialize the MSRAExplainer
         :param input_words: The input sentence, used for visualizing.
-        :type input_words: Array[String]
+        :type input_words: list[String]
         :param input_embeddings: The input word embeddings. A FloatTensor of shape ``[length, dimension]``.
         "type input_embeddings: torch.FloatTensor
         :param scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
@@ -31,23 +30,32 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.input_size = input_embeddings.size(0)
         self.input_dimension = input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
-        self.scale = scale
-        self.rate = rate
         self.input_embeddings = input_embeddings
-        self.Phi = Phi
         self.regular = regularization
         self.words = input_words
+        
+        #Constant paramters for now, will modify based on the model later
+        #Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
+        self.scale=0.5
+        #Rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in larger information loss. Default: 0.1.
+        self.rate=0.1
+        #Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
+        self.Phi=None
+
 
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(input_embeddings), requires_grad=False)
         
         if self.words is not None:
             assert self.input_size == len(
-                words
+                self.words
             ), "the length of x should be of the same with the lengh of words"
 
+        assert self.scale >= 0, "the value for scale cannot be less than zero"
+        assert 1 >= self.rate >= 0, "the value for rate has to be between 0 and 1"
+
     def explain_local(self, model, evaluation_examples, device, dataset=None):
-        """Explain the model by using msra's interpretor
+        """Explain the model by using MSRA's interpretor
 
         :param model: a pytorch model
         :type: torch.nn
@@ -58,9 +66,11 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type device: torch.device
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
+        #arbitrarily looking at the 3rd layer for now, will change this later
         self.Phi = self._generate_Phi(model, layer=3)
         if self.regular is None:
             self.regular = self._calculate_regularization(dataset, self.Phi)
+        #values below are arbitarily set for now
         self.optimize(iteration=5000, lr=0.01, show_progress=True)
         local_importance_values = self.get_sigma()
         self.local_importance_values = local_importance_values
@@ -68,12 +78,14 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
 
     def _generate_Phi(self, model, layer):
         """Generate the Phi/hidden state that needs to be interpreted
+        /Generates a function that returns the new hidden state given a new perturbed input is passed
         :param model: a pytorch model
         :type: torch.nn
         :param layer: the layer to generate Phi for
         :type layer: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
+        #Assuming below that model has only 12 layers, will change this later
         assert (
             1 <= layer <= 12
         ), "model only has 12 layers, while you want to access layer %d" % (layer)
@@ -94,11 +106,11 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         return Phi
 
     def _calculate_regularization(self, sampled_x, Phi, reduced_axes=None, device=None):
-        """ Calculate the variance that is used for Interpreter
+        """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
         :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
-        :type sampled_x: List[torch.Tensor]
+        :type sampled_x: list[torch.Tensor]
         :param reduced_axes: The axes that is variable in Phi (e.g., the sentence length axis). We will reduce these axes by mean along them.
-        :type reduced_axes: List[int]
+        :type reduced_axes: list[int]
         :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
         :type Phi: function
         :return: torch.FloatTensor: The regularization term calculated

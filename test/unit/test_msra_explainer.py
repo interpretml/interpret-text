@@ -18,8 +18,6 @@ from pytorch_pretrained_bert import BertModel, BertTokenizer
 
 from interpret_text.msra.MSRAExplainer import MSRAExplainer
 
-#@pytest.mark.owner(email=owner_email_tools_and_ux)
-#@pytest.mark.usefixtures("clean_dir")
 class TestMSRAExplainer(object):
     def test_working(self):
         assert True
