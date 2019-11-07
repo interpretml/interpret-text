@@ -50,7 +50,13 @@ jobs:
       pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run Unit tests'
 
-<<<<<<< HEAD
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/unit/test_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run MSR Asia tests'
+
   # Uncomment if needed
   - bash: |
       echo Remove Conda Environment
@@ -65,30 +71,3 @@ jobs:
       failTaskOnFailedTests: true
     condition: succeededOrFailed()
     displayName: 'Publish Test Results'
-=======
-- script:
-     python -m pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-  displayName: 'run text explainer test'
-
-- script:
-<<<<<<< HEAD
-=======
-     python -m pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-  displayName: 'run text explainer test'
-
-- script:
->>>>>>> 926ce12a8a9917b68b8d2261cb7eb3d86d1234df
-     python -m pytest test/unit/test_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-  displayName: 'run MSR Asia test'
-
-- task: PublishTestResults@2
-  inputs:
-    testResultsFiles: '**/*.xml'
-    failTaskOnFailedTests: true
-  condition: succeededOrFailed()
-<<<<<<< HEAD
-  displayName: 'Publish Test Results'
->>>>>>> refactored API to require less user input and added MSRA tests to the pipeline
-=======
-  displayName: 'Publish Test Results'
->>>>>>> 926ce12a8a9917b68b8d2261cb7eb3d86d1234df
