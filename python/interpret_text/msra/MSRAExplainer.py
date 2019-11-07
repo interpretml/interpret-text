@@ -140,7 +140,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             except:
                 n += 1
                 if n > 10:
-                    raise requests.ConnectionError("Too many failed HTTP Requests")
+                    raise Exception("Too many failed HTTP Requests")
                 print("Request Failed, trying again...")
         regularization_bert = json.loads(data)
         return regularization_bert
