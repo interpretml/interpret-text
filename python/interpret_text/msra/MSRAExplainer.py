@@ -2,37 +2,41 @@ import torch
 from torch import nn, optim
 from tqdm import tqdm
 import numpy as np
+import json
+import requests
 import matplotlib.pyplot as plt
-from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
+from pytorch_pretrained_bert import BertModel, BertTokenizer
+from urllib import request
+
 from interpret_community.common.base_explainer import LocalExplainer
+from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
+
 
 class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     """The MSRAExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, input_embeddings, input_words=None, regularization=None):
+    def __init__(self, device, model_name="", input_text=None):
         """ Initialize the MSRAExplainer
-        :param input_words: The input sentence, used for visualizing.
-        :type input_words: list[String]
-        :param input_embeddings: The input word embeddings. A FloatTensor of shape ``[length, dimension]``.
-        "type input_embeddings: torch.FloatTensor
-        :param scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
-        :type scale: float
-        :param rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in larger information loss. Default: 0.1.
-        :type rate: float
-        :param regularization: The regularization of the hidden state. Default: None
-        :type regularization: np.ndarray
-        :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
-        :type Phi: function
+        :param model_name: The name of the input model
+        :type model_name: str
+        :param input_text: The text to generate embeddings for
+        "type input_text: str
+        :param device: A pytorch device
+        :type device: torch.device
         """
         super(MSRAExplainer, self).__init__()
-        self.input_size = input_embeddings.size(0)
-        self.input_dimension = input_embeddings.size(1)
+        self.device = device
+
+        if model_name == "BERT":
+            assert input_text != None, "input text is required to generate embeddings for BERT"
+            self.input_embeddings = self.getEmbeddingsBERT(input_text)
+            self.regular = self.getRegularizationBERT()
+
+        self.input_size = self.input_embeddings.size(0)
+        self.input_dimension = self.input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
-        self.input_embeddings = input_embeddings
-        self.regular = regularization
-        self.words = input_words
         
         #Constant paramters for now, will modify based on the model later
         #Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
@@ -44,7 +48,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
 
 
         if self.regular is not None:
-            self.regular = nn.Parameter(torch.tensor(self.regular).to(input_embeddings), requires_grad=False)
+            self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
         
         if self.words is not None:
             assert self.input_size == len(
@@ -54,21 +58,19 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         assert self.scale >= 0, "the value for scale cannot be less than zero"
         assert 1 >= self.rate >= 0, "the value for rate has to be between 0 and 1"
 
-    def explain_local(self, model, evaluation_examples, device, dataset=None):
+    def explain_local(self, model, dataset=None):
         """Explain the model by using MSRA's interpretor
 
         :param model: a pytorch model
         :type: torch.nn
-        :param evaluation_examples: A matrix of feature vector examples (# examples x # features) on which
-            to explain the model's output.
-        :type evaluation_examples: DatasetWrapper
-        :param device: A pytorch device
-        :type device: torch.device
+        :param dataset: dataset used while training the model
+        :type dataset: numpy ndarray
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
         #arbitrarily looking at the 3rd layer for now, will change this later
         self.Phi = self._generate_Phi(model, layer=3)
         if self.regular is None:
+            assert dataset != None, "Dataset is required if explainer not initialized with regularization parameter"
             self.regular = self._calculate_regularization(dataset, self.Phi)
         #values below are arbitarily set for now
         self.optimize(iteration=5000, lr=0.01, show_progress=True)
@@ -104,8 +106,46 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             return hidden_states[0]
 
         return Phi
+    
+    def getEmbeddingsBERT(self, text):
+        # suppose the sentence is as following
+        text = "rare bird has more than enough charm to make it memorable."
 
-    def _calculate_regularization(self, sampled_x, Phi, reduced_axes=None, device=None):
+        # get the tokenized words.
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        words = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
+
+        self.words = words
+
+        # load BERT base model
+        model = BertModel.from_pretrained("bert-base-uncased").to(self.device)
+        for param in model.parameters():
+            param.requires_grad = False
+        model.eval()
+
+        # get the x (here we get x by hacking the code in the pytorch_pretrained_bert package)
+        tokenized_ids = tokenizer.convert_tokens_to_ids(words)
+        segment_ids = [0 for _ in range(len(words))]
+        token_tensor = torch.tensor([tokenized_ids], device=self.device)
+        segment_tensor = torch.tensor([segment_ids], device=self.device)
+        x_bert = model.embeddings(token_tensor, segment_tensor)[0]
+        return x_bert
+
+    def getRegularizationBERT(self):
+        no_tries = 0
+        while True:
+            try:
+                data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
+                break
+            except:
+                n += 1
+                if n > 10:
+                    raise requests.ConnectionError("Too many failed HTTP Requests")
+                print("Request Failed, trying again...")
+        regularization_bert = json.loads(data)
+        return regularization_bert
+
+    def _calculate_regularization(self, sampled_x, Phi, reduced_axes=None):
         """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
         :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
         :type sampled_x: list[torch.Tensor]
@@ -119,8 +159,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         sample_s = []
         for n in range(sample_num):
             x = sampled_x[n]
-            if device is not None:
-                x = x.to(device)
+            if self.device is not None:
+                x = x.to(self.device)
             s = Phi(x)
             if reduced_axes is not None:
                 for axis in reduced_axes:
