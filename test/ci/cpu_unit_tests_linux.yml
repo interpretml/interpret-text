@@ -57,7 +57,7 @@ steps:
   displayName: 'run text explainer test'
 
 - script:
-     python -m pytest test/unit/test_text_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+     python -m pytest test/unit/test_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
   displayName: 'run MSR Asia test'
 
 - task: PublishTestResults@2
