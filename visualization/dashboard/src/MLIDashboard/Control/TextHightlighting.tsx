@@ -27,10 +27,10 @@ export class TextHighlighting extends React.Component<ITextHighlighting>{
                 let word = token.replace(/[^a-zA-Z0-9]+/g,"")
                 if (word in dict[documentIndex]){
                     if (dict[documentIndex][word][documentIndex] > 0){
-                        return <span className="makeitred" title={token}>{token+" "}</span>
+                        return <span className="highlighted" title={token}>{token+" "}</span>
                     }
                     else if (dict[documentIndex][word][documentIndex] < 0){
-                        return <span className="makeitblue" title={token}>{token+" "}</span>
+                        return <span className="boldunderline" title={token}>{token+" "}</span>
                     }
                     else{
                         return <span>{token+" "}</span>
