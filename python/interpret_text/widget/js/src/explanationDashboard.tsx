@@ -24,8 +24,8 @@ export class  ExplanationModel extends DOMWidgetModel {
         return {
             _model_name : 'ExplanationModel',
             _view_name : 'ExplanationView',
-            _model_module : 'interpret-ml-widget',
-            _view_module : 'interpret-ml-widget',
+            _model_module : 'interpret-text-widget',
+            _view_module : 'interpret-text-widget',
             _model_module_version : '0.1.0',
             _view_module_version : '0.1.1',
             value: {},
