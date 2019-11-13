@@ -2,11 +2,12 @@ import os
 
 azure = False
 
+#Do NGCD
 if azure:
     from azureml.core import Workspace
     ws = Workspace.create(name='myworkspace',
-                subscription_id='5f08d643-1910-4a38-a7c7-84a39d4f42e0',
-                resource_group='interprettext',
+                subscription_id='15ae9cb6-95c1-483d-a0e3-b1a1a3b06324',
+                resource_group='nlpinterpret',
                 create_resource_group=False,
                 location='eastus2'
                 )
@@ -25,4 +26,4 @@ if azure:
     print(run.get_portal_url())
     run.wait_for_completion()
 else:
-    os.system('python scripts/msra_run.py')
+    os.system('python python/interpret_text/performance/scripts/msra_run.py')

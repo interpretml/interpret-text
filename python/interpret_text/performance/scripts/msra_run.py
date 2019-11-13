@@ -9,6 +9,7 @@ from pytorch_pretrained_bert import BertModel, BertTokenizer
 
 from interpret_text.msra.MSRAExplainer import MSRAExplainer
 
+logging.basicConfig(filename='benchmark.log')
 test_logger = logging.getLogger(__name__)
 test_logger.setLevel(logging.INFO)
 
@@ -34,8 +35,11 @@ end = time.time()
 test_logger.info('elapsed time: ' + str(end - start))
 peak_memory = get_peak_memory()
 test_logger.info('peak memory usage: ' + str(peak_memory))
+#log accuracy of scenario model (bert or logistic regression)
 
 if azure_run:
     # log execution time and peak memory usage to the Azure Run
     run.log('execution time', end - start)
     run.log('peak memory usage', peak_memory)
+
+# a = [i**2 for i in range(1,1000000)]

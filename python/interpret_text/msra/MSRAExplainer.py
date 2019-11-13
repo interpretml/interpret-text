@@ -68,7 +68,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
         #arbitrarily looking at the 3rd layer for now, will change this later
-        self.Phi = self._generate_Phi(model, layer=3)
+        self.Phi = self._generate_Phi(model, layer=12)
         if self.regular is None:
             assert dataset != None, "Dataset is required if explainer not initialized with regularization parameter"
             self.regular = self._calculate_regularization(dataset, self.Phi)
