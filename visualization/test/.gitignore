@@ -5,3 +5,6 @@
 
 #datasets
 /_mock_data
+
+#prod
+index.js
