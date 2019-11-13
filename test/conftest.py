@@ -13,7 +13,8 @@ def notebooks():
 
     # Path for the notebooks
     paths = {
-        "tc_mnli_bert": os.path.join(folder_notebooks, "text_classification", "text_classification_mnli_bert.ipynb")
+        "tc_mnli_bert": os.path.join(folder_notebooks, "text_classification", "text_classification_mnli_bert.ipynb"),
+        "text_classification_mnli_bow_lr": os.path.join(folder_notebooks, "text_classification", "text_classification_mnli_bow_lr.ipynb")
     }
     return paths
 
