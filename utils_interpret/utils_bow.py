@@ -70,6 +70,7 @@ def plot_global_imp(top_words, top_importances, label_name):
     plt.show()
 
 def get_local_importances(classifier, labelencoder, label_name, document, spacytokenizer, countvectorizer):
+    #TODO : Vectorize list comprehensions to speed up word importance finding process
     label_coefs = classifier.coef_[labelencoder.transform([label_name]),:]
     parsed_sentence = []
     for i in spacytokenizer.parse(document):
