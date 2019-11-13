@@ -4,17 +4,16 @@
 # This file contains helper functions needed to run the bag of words baseline notebook
 
 import spacy
-from spacy.lang.en import English
+import html
 import string
-from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import matplotlib.pyplot as plt
-import html
+from spacy.lang.en import English
+from sklearn.preprocessing import LabelEncoder
 from IPython.core.display import display, HTML
 
 # spacy tokenizer class
 # if keep_idx is true, allows inverse mapping back to text from tokens, for future text highlighting.
-
 class SpacyTokenizer:
     def __init__(self, parser):
         self.parser = parser
@@ -46,9 +45,9 @@ def encode_labels(ylabels):
     # convert from pandas dataframe to ndarray
     ylabels = np.asarray(ylabels[:]).reshape(-1,1)
     ylabels = labelencoder.fit_transform(ylabels)
-    return [labelencoder,ylabels]
+    return [labelencoder, ylabels]
 
-def get_important_words(classifier,label_name,countvectorizer,labelencoder,clf_type='coef'):
+def get_important_words(classifier, label_name, countvectorizer, labelencoder, clf_type='coef'):
     if clf_type is'coef':
         label_coefs_all =  classifier.coef_
         label_coefs = label_coefs_all[labelencoder.transform([label_name]),:]
@@ -56,31 +55,33 @@ def get_important_words(classifier,label_name,countvectorizer,labelencoder,clf_t
         top_ids = sorting_ids[0:20] # view top 20 features per label
         top_words = [countvectorizer.get_feature_names()[i] for i in top_ids]
         top_importances = [label_coefs[0,i] for i in top_ids]
-        return [top_words,top_importances]
+        return [top_words, top_importances]
     else:
-        print("not yet supported")
+        raise Exception('This feature is not yet supported.')
+        # TODO : Add support for sklearn classifiers that use feature importances instead
         return
 
-def plot_global_imp(top_words,top_importances,label_name):
+def plot_global_imp(top_words, top_importances, label_name):
     plt.figure(figsize = (14,7))
     plt.title("most important words for class label: " + str(label_name), fontsize = 18 )
-    plt.bar(range(len(top_importances)), top_importances,
-        color="r", align="center")
+    plt.bar(range(len(top_importances)), top_importances, 
+            color="r", align="center")
     plt.xticks(range(len(top_importances)), top_words, rotation=60, fontsize = 18)
     plt.show()
 
-def get_local_importances(classifier,labelencoder,label_name,document,spacytokenizer,countvectorizer):
+def get_local_importances(classifier, labelencoder, label_name, document, spacytokenizer, countvectorizer):
     label_coefs = classifier.coef_[labelencoder.transform([label_name]),:]
     parsed_sentence = []
     for i in spacytokenizer.parse(document):
         parsed_sentence += [str(i)]
     doc_tokens = spacytokenizer.tokenize(document, keep_idx = True)
     word_ids = [None if word is 'empty_token' else countvectorizer.vocabulary_.get(word) for word in doc_tokens]
-    word_importances = [0 if idx==None else label_coefs[0,idx] for idx in word_ids]
-    return [parsed_sentence,word_importances]
+    word_importances = [0 if idx == None else label_coefs[0,idx] for idx in word_ids]
+    return [parsed_sentence, word_importances]
 
-def plot_local_imp(parsed_sentence,word_importances, max_alpha=0.5):
+def plot_local_imp(parsed_sentence, word_importances, max_alpha = 0.5):
     # Prevent special characters like & and < to cause the browser to display something other than what you intended.
+    
     def html_escape(text):
         return html.escape(text)
 
