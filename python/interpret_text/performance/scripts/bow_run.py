@@ -22,13 +22,13 @@ logging.basicConfig(filename='benchmark.log')
 test_logger = logging.getLogger(__name__)
 test_logger.setLevel(logging.INFO)
 
-
 azure_run = False
 
 if azure_run:
     run = Run.get_context()
 start = time.time()
 
+###################################################################################################################################################
 
 #Run model
 DATA_FOLDER = './temp'
@@ -60,7 +60,6 @@ tuned_parameters = [{'solver': ['saga'],'multi_class': ['multinomial'], 'C': [10
 model =  LogisticRegression()
 classifier_CV = GridSearchCV(model, tuned_parameters, cv=3, scoring='accuracy')
 classifier_CV.fit(X_train,y_train)
-
 
 # obtain best classifier and hyper params
 classifier = classifier_CV.best_estimator_
@@ -96,9 +95,11 @@ parsed_sentence, word_importances = get_local_importances(classifier, labelencod
 #Visualize local feature importances as a heatmap over words in the document
 # plot_local_imp(parsed_sentence, word_importances)
 
+###################################################################################################################################################
 
 # Get elapsed execution time
 end = time.time()
+test_logger.info('accuracy: '+ str(mean_accuracy*100) + "%"))
 test_logger.info('elapsed time: ' + str(end - start))
 peak_memory = get_peak_memory()
 test_logger.info('peak memory usage: ' + str(peak_memory))

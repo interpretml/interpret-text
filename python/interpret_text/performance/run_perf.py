@@ -26,5 +26,5 @@ if azure:
     print(run.get_portal_url())
     run.wait_for_completion()
 else:
-    # os.system('python python/interpret_text/performance/scripts/msra_run.py')
+    os.system('python python/interpret_text/performance/scripts/msra_run.py')
     os.system('python python/interpret_text/performance/scripts/bow_run.py')

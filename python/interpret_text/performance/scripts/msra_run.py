@@ -41,5 +41,3 @@ if azure_run:
     # log execution time and peak memory usage to the Azure Run
     run.log('execution time', end - start)
     run.log('peak memory usage', peak_memory)
-
-# a = [i**2 for i in range(1,1000000)]
