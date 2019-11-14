@@ -110,5 +110,5 @@ datasets.1.17.2019.zip
 #vscode
 .vscode/
 
-#shell scripts
-.sh/
+#node_modules
+visualization/node_modules
