@@ -4,9 +4,11 @@ from tqdm import tqdm
 import numpy as np
 import json
 import requests
+import html
 import matplotlib.pyplot as plt
-from pytorch_pretrained_bert import BertModel, BertTokenizer
 from urllib import request
+from pytorch_pretrained_bert import BertModel, BertTokenizer
+from IPython.core.display import display, HTML
 
 from interpret_community.common.base_explainer import LocalExplainer
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
@@ -17,27 +19,13 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     """The MSRAExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, device, model_name="", input_text=None):
+    def __init__(self, device):
         """ Initialize the MSRAExplainer
-        :param model_name: The name of the input model
-        :type model_name: str
-        :param input_text: The text to generate embeddings for
-        "type input_text: str
         :param device: A pytorch device
         :type device: torch.device
         """
         super(MSRAExplainer, self).__init__()
         self.device = device
-
-        if model_name == "BERT":
-            assert input_text != None, "input text is required to generate embeddings for BERT"
-            self.input_embeddings = self.getEmbeddingsBERT(input_text)
-            self.regular = self.getRegularizationBERT()
-
-        self.input_size = self.input_embeddings.size(0)
-        self.input_dimension = self.input_embeddings.size(1)
-        self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
-        
         #Constant paramters for now, will modify based on the model later
         #Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
         self.scale=0.5
@@ -45,40 +33,183 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.rate=0.1
         #Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
         self.Phi=None
-
-
-        if self.regular is not None:
-            self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
-        
-        if self.words is not None:
-            assert self.input_size == len(
-                self.words
-            ), "the length of x should be of the same with the lengh of words"
+        self.regular=None
 
         assert self.scale >= 0, "the value for scale cannot be less than zero"
         assert 1 >= self.rate >= 0, "the value for rate has to be between 0 and 1"
 
-    def explain_local(self, model, dataset=None):
+    def explain_local(self, model, embedded_input, regularization, dataset=None):
         """Explain the model by using MSRA's interpretor
 
         :param model: a pytorch model
         :type: torch.nn
+        :param embedded_input: The preprocessed text
+        "type embedded_input: numpy ndarray
+        :param regularizfation: The regularization term
+        "type regularizfation: numpy ndarray
         :param dataset: dataset used while training the model
         :type dataset: numpy ndarray
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         """
-        #arbitrarily looking at the 3rd layer for now, will change this later
-        self.Phi = self._generate_Phi(model, layer=3)
-        if self.regular is None:
+        
+        self.input_embeddings = embedded_input
+        self.input_size = self.input_embeddings.size(0)
+        self.input_dimension = self.input_embeddings.size(1)
+        self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
+        self.regular = regularization
+        assert type(self.input_embeddings) != type(None), "input embeddings is required to generate explanation"
+
+        if self.regular is not None:
+            self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
+        else:
             assert dataset != None, "Dataset is required if explainer not initialized with regularization parameter"
+            self.Phi = self._generate_Phi(model)
             self.regular = self._calculate_regularization(dataset, self.Phi)
+
         #values below are arbitarily set for now
         self.optimize(iteration=5000, lr=0.01, show_progress=True)
         local_importance_values = self.get_sigma()
         self.local_importance_values = local_importance_values
         return _create_local_explanation(local_importance_values=np.array(local_importance_values), method="neural network", model_task="classification")
 
-    def _generate_Phi(self, model, layer):
+    def getRegularizationBERT(self, model, explain_layer=3):
+        """
+        :param model: A pytorch model
+        :type model: torch.nn
+        :param explain_layer: layer to explain
+        :type explain_layer: int
+        :return: the regularization value for BERT model
+        """
+        no_tries = 0
+        while True:
+            try:
+                data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
+                break
+            except:
+                n += 1
+                if n > 10:
+                    raise Exception("Too many failed HTTP Requests")
+                print("Request Failed, trying again...")
+        regularization_bert = json.loads(data)
+        self.Phi = self.generate_Phi(model, layer=explain_layer)
+        return regularization_bert
+
+    def calculate_regularization(self, sampled_x, model, device, explain_layer=3, reduced_axes=None):
+        """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
+        :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
+        :type sampled_x: list[torch.Tensor]
+        :param reduced_axes: The axes that is variable in Phi (e.g., the sentence length axis). We will reduce these axes by mean along them.
+        :type reduced_axes: list[int]
+        :param model: A pytorch model
+        :type model: torch.model
+        :param explain_layer: They layer that needs to be explained. Defaults to the last layer
+        :type explain_layer: int
+        :param device: A pytorch device
+        :type device: torch.device
+        :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
+        :type Phi: function
+        :return: torch.FloatTensor: The regularization term calculated
+        """
+        sample_num = len(sampled_x)
+        sample_s = []
+        self.Phi = self.generate_Phi(model, layer=explain_layer)
+        for n in range(sample_num):
+            print("Step: ", n, "of 79")
+            x = sampled_x[n]
+            if device is not None:
+                x = x.to(device)
+            s = self.Phi(x)
+            if reduced_axes is not None:
+                for axis in reduced_axes:
+                    assert axis < len(s.shape)
+                    s = s.mean(dim=axis, keepdim=True)
+            sample_s.append(s.tolist())
+        sample_s = np.array(sample_s)
+        return np.std(sample_s, axis=0)
+
+    def forward(self):
+        """ Calculate loss:
+            $L(sigma) = (||Phi(embed + epsilon) - Phi(embed)||_2^2)
+            // (regularization^2) - rate * log(sigma)$
+        :return: torch.FloatTensor: a scalar, the target loss.
+        """
+        ratios = torch.sigmoid(self.ratio)  # S * 1
+        x = self.input_embeddings + 0.0  # S * D
+        x_tilde = x + ratios * torch.randn(self.input_size, self.input_dimension).to(x.device) * self.scale  # S * D
+        s = self.Phi(x)  # D or S * D
+        s_tilde = self.Phi(x_tilde)
+        loss = (s_tilde - s) ** 2
+        if self.regular is not None:
+            loss = torch.mean(loss / self.regular ** 2)
+        else:   
+            loss = torch.mean(loss) / torch.mean(s ** 2)
+
+        return loss - torch.mean(torch.log(ratios)) * self.rate
+
+    def optimize(self, iteration=5000, lr=0.01, show_progress=False):
+        """ Optimize the loss function
+        :param iteration: Total optimizing iteration
+        :type iteration: int
+        :param lr: Learning rate
+        :type lr: float
+        :param show_progress: Whether to show the learn progress
+        :type show_progress: bool
+        :return: torch.FloatTensor: The regularization term calculated
+        """
+        minLoss = None
+        state_dict = None
+        optimizer = optim.Adam(self.parameters(), lr=lr)
+        self.train()
+        func = (lambda x: x) if not show_progress else tqdm
+        for _ in func(range(iteration)):
+            optimizer.zero_grad()
+            loss = self()
+            loss.backward()
+            optimizer.step()
+            if minLoss is None or minLoss > loss:
+                state_dict = {k: self.state_dict()[k] + 0.0 for k in self.state_dict().keys()}
+                minLoss = loss
+        self.eval()
+        self.load_state_dict(state_dict)
+
+    def get_sigma(self):
+        """ Calculate and return the sigma
+        return: np.ndarray: Sigma values of shape ``[seqLen]``, the ``sigma``.
+        """
+        ratios = torch.sigmoid(self.ratio)  # S * 1
+        return ratios.detach().cpu().numpy()[:, 0] * self.scale
+
+    def visualize(self, text, max_alpha = 0.5):
+        """ Currently a placeholder visualize function until python widget is in a working state
+        :param text: sample text
+        :type text: str
+        :param max_alpha: max alpha value 
+        :type max_alpha: float
+        """
+        def html_escape(text):
+            return html.escape(text)
+
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        parsed_sentence = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
+
+        max_alpha = 0.5
+        highlighted_text = []
+        for i,word in enumerate(parsed_sentence):
+            #since this is a placeholder function, ignore the magic numbers below
+            weight = .5-(self.local_importance_values[i]*2)
+            if weight > 0:
+                highlighted_text.append('<span style="background-color:rgba(135,206,250,' + str(abs(weight) / max_alpha) +
+                                        ');">' + html_escape(word) + '</span>')
+            elif weight < 0:
+                highlighted_text.append('<span style="background-color:rgba(250,0,0,' + str(abs(weight) / max_alpha) +
+                                        ');">' + html_escape(word) + '</span>')
+            else:
+                highlighted_text.append(word)
+        highlighted_text = highlighted_text[1:-2]
+        highlighted_text = ' '.join(highlighted_text)
+        display(HTML(highlighted_text))
+
+    def generate_Phi(self, model, layer):
         """Generate the Phi/hidden state that needs to be interpreted
         /Generates a function that returns the new hidden state given a new perturbed input is passed
         :param model: a pytorch model
@@ -104,119 +235,4 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             for layer_module in model_list:
                 hidden_states = layer_module(hidden_states, extended_attention_mask)
             return hidden_states[0]
-
         return Phi
-    
-    def getEmbeddingsBERT(self, text):
-        # suppose the sentence is as following
-        text = "rare bird has more than enough charm to make it memorable."
-
-        # get the tokenized words.
-        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        words = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
-
-        self.words = words
-
-        # load BERT base model
-        model = BertModel.from_pretrained("bert-base-uncased").to(self.device)
-        for param in model.parameters():
-            param.requires_grad = False
-        model.eval()
-
-        # get the x (here we get x by hacking the code in the pytorch_pretrained_bert package)
-        tokenized_ids = tokenizer.convert_tokens_to_ids(words)
-        segment_ids = [0 for _ in range(len(words))]
-        token_tensor = torch.tensor([tokenized_ids], device=self.device)
-        segment_tensor = torch.tensor([segment_ids], device=self.device)
-        x_bert = model.embeddings(token_tensor, segment_tensor)[0]
-        return x_bert
-
-    def getRegularizationBERT(self):
-        no_tries = 0
-        while True:
-            try:
-                data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
-                break
-            except:
-                n += 1
-                if n > 10:
-                    raise Exception("Too many failed HTTP Requests")
-                print("Request Failed, trying again...")
-        regularization_bert = json.loads(data)
-        return regularization_bert
-
-    def _calculate_regularization(self, sampled_x, Phi, reduced_axes=None):
-        """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
-        :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``. All the $x$s can have different length, but should have the same dimension. Sampled number should be higher to get a good estimation.
-        :type sampled_x: list[torch.Tensor]
-        :param reduced_axes: The axes that is variable in Phi (e.g., the sentence length axis). We will reduce these axes by mean along them.
-        :type reduced_axes: list[int]
-        :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
-        :type Phi: function
-        :return: torch.FloatTensor: The regularization term calculated
-        """
-        sample_num = len(sampled_x)
-        sample_s = []
-        for n in range(sample_num):
-            x = sampled_x[n]
-            if self.device is not None:
-                x = x.to(self.device)
-            s = Phi(x)
-            if reduced_axes is not None:
-                for axis in reduced_axes:
-                    assert axis < len(s.shape)
-                    s = s.mean(dim=axis, keepdim=True)
-            sample_s.append(s.tolist())
-        sample_s = np.array(sample_s)
-        return np.std(sample_s, axis=0)
-
-    def forward(self):
-        """ Calculate loss:
-            $L(sigma) = (||Phi(embed + epsilon) - Phi(embed)||_2^2)
-            // (regularization^2) - rate * log(sigma)$
-        Returns:
-            torch.FloatTensor: a scalar, the target loss.
-        """
-        ratios = torch.sigmoid(self.ratio)  # S * 1
-        x = self.input_embeddings + 0.0  # S * D
-        x_tilde = x + ratios * torch.randn(self.input_size, self.input_dimension).to(x.device) * self.scale  # S * D
-        s = self.Phi(x)  # D or S * D
-        s_tilde = self.Phi(x_tilde)
-        loss = (s_tilde - s) ** 2
-        if self.regular is not None:
-            loss = torch.mean(loss / self.regular ** 2)
-        else:   
-            loss = torch.mean(loss) / torch.mean(s ** 2)
-
-        return loss - torch.mean(torch.log(ratios)) * self.rate
-
-    def optimize(self, iteration=5000, lr=0.01, show_progress=False):
-        """ Optimize the loss function
-        Args:
-            iteration (int): Total optimizing iteration
-            lr (float): Learning rate
-            show_progress (bool): Whether to show the learn progress
-        """
-        minLoss = None
-        state_dict = None
-        optimizer = optim.Adam(self.parameters(), lr=lr)
-        self.train()
-        func = (lambda x: x) if not show_progress else tqdm
-        for _ in func(range(iteration)):
-            optimizer.zero_grad()
-            loss = self()
-            loss.backward()
-            optimizer.step()
-            if minLoss is None or minLoss > loss:
-                state_dict = {k: self.state_dict()[k] + 0.0 for k in self.state_dict().keys()}
-                minLoss = loss
-        self.eval()
-        self.load_state_dict(state_dict)
-
-    def get_sigma(self):
-        """ Calculate and return the sigma
-        Returns:
-            np.ndarray: of shape ``[seqLen]``, the ``sigma``.
-        """
-        ratios = torch.sigmoid(self.ratio)  # S * 1
-        return ratios.detach().cpu().numpy()[:, 0] * self.scale
