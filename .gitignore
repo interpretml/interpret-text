@@ -110,5 +110,5 @@ datasets.1.17.2019.zip
 #vscode
 .vscode/
 
-#vis node_modules
-visualization/node_modules/
+#node_modules
+visualization/node_modules
