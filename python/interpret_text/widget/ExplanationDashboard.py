@@ -15,10 +15,12 @@ class ExplanationDashboard(object):
         """Initialize the Explanation Dashboard for a single sentence."""
         self._widget_instance = ExplanationWidget()
         self._model = model
-        self._text = text
-        self._prediction = prediction
-        self._classNames = classNames
-        self._local_explanation = explanation
-
+        self._widget_instance.value = {
+            'text':text,
+            'prediction':prediction,
+            'classNames':classNames,
+            'localExplanation':explanation
+        }
+        display(self._widget_instance)
     def _show(self):
         display(self._widget_instance)

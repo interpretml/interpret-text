@@ -1,5 +1,5 @@
 import { DOMWidgetModel, DOMWidgetView } from '@jupyter-widgets/base';
-import { ExplanationDashboard } from 'mlchartlib';
+import { ExplanationDashboard } from '../../../../../visualization/dashboard/rel/ExplanationDashboard'
 import * as _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -28,15 +28,11 @@ export class  ExplanationModel extends DOMWidgetModel {
             _view_module : 'interpret-text-widget',
             _model_module_version : '0.1.0',
             _view_module_version : '0.1.1',
-            value: {},
-            request: {},
-            response: {}
+            value: {}
         }
     }
 };
 
-interface IPromiseResolvers {
-}
 
 // Custom View. Renders the widget model.
 export class ExplanationView extends DOMWidgetView {
@@ -45,7 +41,16 @@ export class ExplanationView extends DOMWidgetView {
         this.el.style.cssText = "width: 100%";
         let root_element = document.createElement("div");
         root_element.style.cssText = "width: 100%;";
-        ReactDOM.render(<ExplanationDashboard/>, root_element);
+        const data = this.model.get('value');
+        ReactDOM.render(<ExplanationDashboard
+            modelInformation={{modelClass: 'blackbox'} as any}
+            dataSummary={{
+                text:data.text,
+                classNames:data.classNames,
+                localExplanations: data.localExplanations,
+                prediction: data.prediction
+                }}
+        />, root_element);
         this.el.appendChild(root_element)
     }
     

@@ -10,7 +10,7 @@ import shutil
 _major = '0.1'
 _minor = '0.0'
 
-shutil.copyfile('../LICENSE', 'LICENSE.txt')
+#shutil.copyfile('../LICENSE', 'LICENSE.txt')
 
 if os.path.exists('../major.version'):
     with open('../major.version', 'rt') as bf:
@@ -74,7 +74,7 @@ setup(
 
     version=SELFVERSION,
 
-    description='Microsoft Interpret Extensions SDK for Python',
+    description='Microsoft Interpret Text Extensions SDK for Python',
     long_description="Blah", #README,
     long_description_content_type='text/markdown',
     author='Microsoft Corp',
@@ -88,5 +88,21 @@ setup(
 
     install_requires=DEPENDENCIES,
 
-    extras_require=EXTRAS
+    extras_require=EXTRAS,
+    include_package_data=True,
+    data_files=[
+        ('share/jupyter/nbextensions/interpret-text-widget', [
+            'interpret_text/widget/static/extension.js',
+            'interpret_text/widget/static/extension.js.map',
+            'interpret_text/widget/static/index.js',
+            'interpret_text/widget/static/index.js.map'
+        ]),
+        ("etc/jupyter/nbconfig/notebook.d", [
+            "jupyter-config/nbconfig/notebook.d/interpret-text-widget.json"
+        ]),
+        ('share/jupyter/lab/extensions', [
+            'interpret_text/widget/js/'
+            'interpret_text_widget/labextension/interpret-text-widget-0.1.7.tgz'
+        ])],
+    zip_safe=False,
 )

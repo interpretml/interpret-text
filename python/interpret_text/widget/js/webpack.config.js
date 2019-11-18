@@ -85,7 +85,7 @@ module.exports = [
             filename: 'index.js',
             path: path.resolve(__dirname, 'dist'),
             libraryTarget: 'amd',
-            publicPath: 'https://unpkg.com/interpret-ml-widget@' + version + '/dist/'
+            publicPath: 'https://unpkg.com/interpret-text-widget@' + version + '/dist/'
         },
         devtool: 'source-map',
         module: {
