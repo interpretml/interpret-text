@@ -11,15 +11,15 @@ from IPython.display import display
 class ExplanationDashboard(object):
     """The dashboard class, wraps the dashboard component."""
 
-    def __init__(self, explanation, model=None, text=None, prediction=None, classNames=None,):
+    def __init__(self, explanation, text=None, prediction=None, classNames=None,):
         """Initialize the Explanation Dashboard for a single sentence."""
         self._widget_instance = ExplanationWidget()
-        self._model = model
+        #self._model = model
         self._widget_instance.value = {
             'text':text,
             'prediction':prediction,
             'classNames':classNames,
-            'localExplanation':explanation
+            'localExplanations':explanation
         }
         display(self._widget_instance)
     def _show(self):

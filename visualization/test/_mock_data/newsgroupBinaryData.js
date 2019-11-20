@@ -8,8 +8,8 @@
 //     text: ['From: johnchad@triton.unm.edu (jchadwic)\nSubject: Another request for Darwin Fish\nOrganization: University of New Mexico, Albuquerque\nLines: 11\nNNTP-Posting-Host: triton.unm.edu\n\nHello Gang,\n\nThere have been some notes recently asking where to obtain the DARWIN fish.\nThis is the same question I have and I have not seen an answer on the\nnet. If anyone has a contact please post on the net or email me.\n\nThanks,\n\njohn chadwick\njohnchad@triton.unm.edu\nor\n', 'this is fake made by fake becca']
 // }
 export const newsgroupBinaryData = {
-    text: ["Here", "is", "a", "fake", "sentence"],
-    localExplanations: [0,0,0,0.6,-0.3],
+    text: ["I", "went", "to", "the", "park"],
+    localExplanations: [0, 0.5, 0, 0, -0.6],
     classNames: ["spam", "not spam"],
     prediction: [1,0]
    }

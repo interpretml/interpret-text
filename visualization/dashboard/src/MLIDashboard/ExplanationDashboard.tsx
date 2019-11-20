@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { IExplanationDashboardProps } from './Interfaces/IExplanationDashboardProps'
 import { TextHighlighting } from './Control/TextHightlighting'
+import { localization } from '../Localization/localization'
 
 export interface IDashboardContext {
 }
@@ -8,14 +9,11 @@ export interface IDashboardContext {
 export interface IDashboardState {
 }
 
-export class ExplanationDashboard extends React.Component<IExplanationDashboardProps, IDashboardState> {
+export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   public render () {
     return ( // look at how they do dataExploration
       <>
-        <h1>Interpretability Dashboard</h1>
-        {/* <div className="explainerDashboard">
-                        Placeholder for the text explanation dashboard
-        </div> */}
+        <h1>{localization.interpretibilityDashboard}</h1>
         <TextHighlighting
           text = {this.props.dataSummary.text}
           localExplanations = {this.props.dataSummary.localExplanations}
