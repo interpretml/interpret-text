@@ -11,7 +11,7 @@ export interface IDashboardState {
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   public render () {
-    return ( // look at how they do dataExploration
+    return (
       <>
         <h1>{localization.interpretibilityDashboard}</h1>
         <TextHighlighting

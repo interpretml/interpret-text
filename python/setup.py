@@ -10,8 +10,6 @@ import shutil
 _major = '0.1'
 _minor = '0.0'
 
-#shutil.copyfile('../LICENSE', 'LICENSE.txt')
-
 if os.path.exists('../major.version'):
     with open('../major.version', 'rt') as bf:
         _major = str(bf.read()).strip()
@@ -64,18 +62,13 @@ EXTRAS = {
     ]
 }
 
-# with open('README.md', 'r', encoding='utf-8') as f:
-#     README = f.read()
-# with open('HISTORY.rst', 'r', encoding='utf-8') as f:
-#     HISTORY = f.read()
-
 setup(
     name='interpret-text',
 
     version=SELFVERSION,
 
-    description='Microsoft Interpret Text Extensions SDK for Python',
-    long_description="Blah", #README,
+    description='Microsoft Interpret Text SDK for Python',
+    long_description="", #README,
     long_description_content_type='text/markdown',
     author='Microsoft Corp',
     author_email='ilmat@microsoft.com',

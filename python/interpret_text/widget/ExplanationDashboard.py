@@ -16,10 +16,10 @@ class ExplanationDashboard(object):
         self._widget_instance = ExplanationWidget()
         #self._model = model
         self._widget_instance.value = {
-            'text':text,
-            'prediction':prediction,
-            'classNames':classNames,
-            'localExplanations':explanation
+            'text': text,
+            'prediction': prediction,
+            'classNames': classNames,
+            'localExplanations': explanation
         }
         display(self._widget_instance)
     def _show(self):

@@ -38,15 +38,15 @@ export class  ExplanationModel extends DOMWidgetModel {
 export class ExplanationView extends DOMWidgetView {
     el: any;
     public render() {
-        this.el.style.cssText = "width: 100%";
-        let root_element = document.createElement("div");
-        root_element.style.cssText = "width: 100%;";
+        this.el.style.cssText = 'width: 100%';
+        let root_element = document.createElement('div');
+        root_element.style.cssText = 'width: 100%;';
         const data = this.model.get('value');
         ReactDOM.render(<ExplanationDashboard
-            modelInformation={{modelClass: 'blackbox'} as any}
-            dataSummary={{
-                text:data.text,
-                classNames:data.classNames,
+            modelInformation = {{modelClass: 'blackbox'} as any}
+            dataSummary = {{
+                text: data.text,
+                classNames: data.classNames,
                 localExplanations: data.localExplanations,
                 prediction: data.prediction
                 }}
