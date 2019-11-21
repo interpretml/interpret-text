@@ -14,7 +14,6 @@ class ExplanationDashboard(object):
     def __init__(self, explanation, text=None, prediction=None, classNames=None,):
         """Initialize the Explanation Dashboard for a single sentence."""
         self._widget_instance = ExplanationWidget()
-        #self._model = model
         self._widget_instance.value = {
             'text': text,
             'prediction': prediction,

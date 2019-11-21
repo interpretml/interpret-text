@@ -4,8 +4,7 @@ export interface IExplanationDashboardProps {
     }
 
 export interface IModelInformation {
-    modelClass: 'blackbox';
-    method: 'classifier' | 'regressor';
+    modelClass: 'msra'| 'bow' | 'rmp';
 }
 
 export interface IDatasetSummary {

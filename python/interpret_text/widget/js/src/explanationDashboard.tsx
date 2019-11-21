@@ -43,7 +43,7 @@ export class ExplanationView extends DOMWidgetView {
         root_element.style.cssText = 'width: 100%;';
         const data = this.model.get('value');
         ReactDOM.render(<ExplanationDashboard
-            modelInformation = {{modelClass: 'blackbox'} as any}
+            modelInformation = {{modelClass: 'msra'} as any}
             dataSummary = {{
                 text: data.text,
                 classNames: data.classNames,

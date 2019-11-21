@@ -16,7 +16,7 @@ import {newsgroupBinaryData} from './_mock_data/newsgroupBinaryData';
               <div style={{ width: '80vw', backgroundColor: 'white', margin:'50px auto'}}>
                   <div style={{ width: '100%'}}>
                       <ExplanationDashboard
-                        modelInformation = {{modelInformation: 'blackbox', method: 'classifier'}}
+                        modelInformation = {{modelInformation: 'msra'}}
                         dataSummary = {{text: data.text, localExplanations: data.localExplanations, classNames: data.classNames, prediction:data.prediction}}
                       />
                   </div>
