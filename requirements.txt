@@ -1,0 +1,9 @@
+sklearn
+spacy
+flake8
+pytest
+ipywidgets
+tqdm
+interpret-community
+scipy
+pandas

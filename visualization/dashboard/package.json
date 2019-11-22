@@ -11,7 +11,8 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "build-css": "node-sass-chokidar src/MLIDashboard -o rel/ && node-sass-chokidar src/ChartTools -o rel/ && node-sass-chokidar src/MLIDashboard -o rel/MLIDashboard/ && node-sass-chokidar src/ChartTools -o rel/ChartTools && node-sass-chokidar src/FairnessDashboard -o rel/ && node-sass-chokidar src/FairnessDashboard -o rel/FairnessDashboard"
+    "build-css": "node-sass-chokidar src/MLIDashboard -o rel/ && node-sass-chokidar src/ChartTools -o rel/ && node-sass-chokidar src/MLIDashboard -o rel/MLIDashboard/ && node-sass-chokidar src/ChartTools -o rel/ChartTools && node-sass-chokidar src/FairnessDashboard -o rel/ && node-sass-chokidar src/FairnessDashboard -o rel/FairnessDashboard",
+    "lint": "eslint **/*{.ts,.tsx}"
   },
   "peerDependencies": {
     "react": "^16.10.2",
@@ -24,6 +25,15 @@
     "@types/plotly.js": "1.44.0",
     "@types/react": "16.8.10",
     "@types/uuid": "3.4.4",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.16.0",
+    "eslint-plugin-standard": "^4.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.8.0",
     "node-sass-chokidar": "1.3.4",
@@ -32,8 +42,8 @@
     "typescript": "^3.5.2"
   },
   "dependencies": {
-    "typescript": "^3.6.4",
     "react": "^16.10.2",
-    "react-dom": "^16.10.2"
+    "react-dom": "^16.10.2",
+    "typescript": "^3.6.4"
   }
 }

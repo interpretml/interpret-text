@@ -2,3 +2,12 @@
 
 # dependencies
 /node_modules
+
+#datasets
+/_mock_data
+
+#prod
+index.js
+
+#shell script
+.sh
