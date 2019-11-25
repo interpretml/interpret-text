@@ -44,9 +44,9 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param model: a pytorch model
         :type: torch.nn
         :param embedded_input: The preprocessed text
-        "type embedded_input: numpy ndarray
-        :param regularizfation: The regularization term
-        "type regularizfation: numpy ndarray
+        :type embedded_input: numpy ndarray
+        :param regularization: The regularization term
+        :type regularization: numpy ndarray
         :param dataset: dataset used while training the model
         :type dataset: numpy ndarray
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
@@ -79,6 +79,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param explain_layer: layer to explain
         :type explain_layer: int
         :return: the regularization value for BERT model
+        "rtype: List[floats]
         """
         no_tries = 0
         while True:
@@ -102,7 +103,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type reduced_axes: list[int]
         :param model: A pytorch model
         :type model: torch.model
-        :param explain_layer: They layer that needs to be explained. Defaults to the last layer
+        :param explain_layer: The layer that needs to be explained. Defaults to the last layer
         :type explain_layer: int
         :param device: A pytorch device
         :type device: torch.device
@@ -114,7 +115,6 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         sample_s = []
         self.Phi = self.generate_Phi(model, layer=explain_layer)
         for n in range(sample_num):
-            print("Step: ", n, "of 79")
             x = sampled_x[n]
             if device is not None:
                 x = x.to(device)
@@ -186,20 +186,29 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param max_alpha: max alpha value 
         :type max_alpha: float
         """
+
+        CLS_TOKEN = ["[CLS]"]
+        SEP_TOKEN = ["[SEP]"]
+
         def html_escape(text):
             return html.escape(text)
 
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        parsed_sentence = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
+        parsed_sentence = CLS_TOKEN + tokenizer.tokenize(text) + SEP_TOKEN
+
+        self.plot_global_imp(parsed_sentence[1:-2], [.4-i for i in self.local_importance_values[1:-2]], "positive" )
 
         max_alpha = 0.5
         highlighted_text = []
         for i,word in enumerate(parsed_sentence):
             #since this is a placeholder function, ignore the magic numbers below
-            weight = .5-(self.local_importance_values[i]*2)
+            weight = .55-(self.local_importance_values[i]*2)
+
+            #if make it blue if weight positive
             if weight > 0:
                 highlighted_text.append('<span style="background-color:rgba(135,206,250,' + str(abs(weight) / max_alpha) +
                                         ');">' + html_escape(word) + '</span>')
+            #red if it's negative
             elif weight < 0:
                 highlighted_text.append('<span style="background-color:rgba(250,0,0,' + str(abs(weight) / max_alpha) +
                                         ');">' + html_escape(word) + '</span>')
@@ -236,3 +245,11 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
                 hidden_states = layer_module(hidden_states, extended_attention_mask)
             return hidden_states[0]
         return Phi
+
+    def plot_global_imp(self, top_words, top_importances, label_name):
+        plt.figure(figsize = (8,4))
+        plt.title("most important words for class label: " + str(label_name), fontsize = 18 )
+        plt.bar(range(len(top_importances)), top_importances, 
+                color="b", align="center")
+        plt.xticks(range(len(top_importances)), top_words, rotation=60, fontsize = 18)
+        plt.show()
