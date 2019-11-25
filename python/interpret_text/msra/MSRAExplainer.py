@@ -3,14 +3,12 @@ from torch import nn, optim
 from tqdm import tqdm
 import numpy as np
 import json
-import requests
 import html
 import matplotlib.pyplot as plt
 from urllib import request
-from pytorch_pretrained_bert import BertModel, BertTokenizer
 from IPython.core.display import display, HTML
+from pytorch_pretrained_bert import BertTokenizer
 
-from interpret_community.common.base_explainer import LocalExplainer
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
 
@@ -26,21 +24,20 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """
         super(MSRAExplainer, self).__init__()
         self.device = device
-        #Constant paramters for now, will modify based on the model later
-        #Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
-        self.scale=0.5
-        #Rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in larger information loss. Default: 0.1.
-        self.rate=0.1
-        #Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
-        self.Phi=None
-        self.regular=None
+        # Constant paramters for now, will modify based on the model later
+        # Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give more salient result, Default: 0.5.
+        self.scale = 0.5
+        # Rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in larger information loss. Default: 0.1.
+        self.rate = 0.1
+        # Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
+        self.Phi = None
+        self.regular = None
 
         assert self.scale >= 0, "the value for scale cannot be less than zero"
         assert 1 >= self.rate >= 0, "the value for rate has to be between 0 and 1"
 
     def explain_local(self, model, embedded_input, regularization, dataset=None):
         """Explain the model by using MSRA's interpretor
-
         :param model: a pytorch model
         :type: torch.nn
         :param embedded_input: The preprocessed text
@@ -52,23 +49,22 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
         """
-        
         self.input_embeddings = embedded_input
         self.input_size = self.input_embeddings.size(0)
         self.input_dimension = self.input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
         self.regular = regularization
-        assert type(self.input_embeddings) != type(None), "input embeddings are required to generate explanation"
+        assert isinstance(self.input_embeddings, type(None)), "input embeddings are required to generate explanation"
 
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
             self.Phi = self.generate_Phi(model, 3)
         else:
-            assert dataset != None, "Dataset is required if explainer not initialized with regularization parameter"
+            assert dataset is not None, "Dataset is required if explainer not initialized with regularization parameter"
             self.Phi = self.generate_Phi(model, 3)
             self.regular = self._calculate_regularization(dataset, self.Phi)
 
-        #values below are arbitarily set for now
+        # values below are arbitarily set for now
         self.optimize(iteration=5000, lr=0.01, show_progress=True)
         local_importance_values = self.get_sigma()
         self.local_importance_values = local_importance_values
@@ -83,7 +79,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :return: the regularization value for BERT model
         :rtype: list[float]
         """
-        no_tries = 0
+        n = 0
         while True:
             try:
                 data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
@@ -145,7 +141,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         loss = (s_tilde - s) ** 2
         if self.regular is not None:
             loss = torch.mean(loss / self.regular ** 2)
-        else:   
+        else:
             loss = torch.mean(loss) / torch.mean(s ** 2)
 
         return loss - torch.mean(torch.log(ratios)) * self.rate
@@ -185,11 +181,11 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
 
-    def visualize(self, text, max_alpha = 0.5):
+    def visualize(self, text, max_alpha=0.5):
         """ Currently a placeholder visualize function until python widget is in a working state
         :param text: sample text
         :type text: str
-        :param max_alpha: max alpha value 
+        :param max_alpha: max alpha value
         :type max_alpha: float
         """
 
@@ -206,15 +202,15 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
 
         max_alpha = 0.5
         highlighted_text = []
-        for i,word in enumerate(parsed_sentence):
-            #since this is a placeholder function, ignore the magic numbers below
+        for i, word in enumerate(parsed_sentence):
+            # since this is a placeholder function, ignore the magic numbers below
             weight = .55 - (self.local_importance_values[i] * 2)
 
-            #make it blue if weight positive
+            # make it blue if weight positive
             if weight > 0:
                 highlighted_text.append('<span style="background-color:rgba(135,206,250,' + str(abs(weight) / max_alpha) +
                                         ');">' + html_escape(word) + '</span>')
-            #red if it's negative
+            # red if it's negative
             elif weight < 0:
                 highlighted_text.append('<span style="background-color:rgba(250,0,0,' + str(abs(weight) / max_alpha) +
                                         ');">' + html_escape(word) + '</span>')
@@ -231,9 +227,10 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type: torch.nn
         :param layer: the layer to generate Phi for
         :type layer: int
-        :return: A model explanation object. It is guaranteed to be a LocalExplanation
+        :return: The phi function
+        :rtype: function
         """
-        #Assuming below that model has only 12 layers, will change this later
+        # Assuming below that model has only 12 layers, will change this later
         assert (
             1 <= layer <= 12
         ), "model only has 12 layers, while you want to access layer %d" % (layer)
@@ -253,9 +250,9 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         return Phi
 
     def plot_global_imp(self, top_words, top_importances, label_name):
-        plt.figure(figsize = (8,4))
-        plt.title("most important words for class label: " + str(label_name), fontsize = 18 )
+        plt.figure(figsize=(8,4))
+        plt.title("most important words for class label: " + str(label_name), fontsize=18)
         plt.bar(range(len(top_importances)), top_importances, 
                 color="b", align="center")
-        plt.xticks(range(len(top_importances)), top_words, rotation=60, fontsize = 18)
+        plt.xticks(range(len(top_importances)), top_words, rotation=60, fontsize=18)
         plt.show()
