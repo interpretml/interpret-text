@@ -50,6 +50,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param dataset: dataset used while training the model
         :type dataset: numpy ndarray
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
+        :rtype: DynamicLocalExplanation
         """
         
         self.input_embeddings = embedded_input
@@ -57,13 +58,14 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.input_dimension = self.input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
         self.regular = regularization
-        assert type(self.input_embeddings) != type(None), "input embeddings is required to generate explanation"
+        assert type(self.input_embeddings) != type(None), "input embeddings are required to generate explanation"
 
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
+            self.Phi = self.generate_Phi(model, 3)
         else:
             assert dataset != None, "Dataset is required if explainer not initialized with regularization parameter"
-            self.Phi = self._generate_Phi(model)
+            self.Phi = self.generate_Phi(model, 3)
             self.regular = self._calculate_regularization(dataset, self.Phi)
 
         #values below are arbitarily set for now
@@ -79,7 +81,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param explain_layer: layer to explain
         :type explain_layer: int
         :return: the regularization value for BERT model
-        "rtype: List[floats]
+        :rtype: list[float]
         """
         no_tries = 0
         while True:
@@ -109,7 +111,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type device: torch.device
         :param Phi: A function whose input is x (element in the first parameter) and returns a hidden state (of type ``torch.FloatTensor``, of any shape
         :type Phi: function
-        :return: torch.FloatTensor: The regularization term calculated
+        :return: The regularization term calculated
+        :rtype: torch.FloatTensor
         """
         sample_num = len(sampled_x)
         sample_s = []
@@ -131,7 +134,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """ Calculate loss:
             $L(sigma) = (||Phi(embed + epsilon) - Phi(embed)||_2^2)
             // (regularization^2) - rate * log(sigma)$
-        :return: torch.FloatTensor: a scalar, the target loss.
+        :return: a scalar, the target loss.
+        :rtype: torch.FloatTensor
         """
         ratios = torch.sigmoid(self.ratio)  # S * 1
         x = self.input_embeddings + 0.0  # S * D
@@ -154,7 +158,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :type lr: float
         :param show_progress: Whether to show the learn progress
         :type show_progress: bool
-        :return: torch.FloatTensor: The regularization term calculated
+        :return: The regularization term calculated
+        :rtype: torch.FloatTensor
         """
         minLoss = None
         state_dict = None
@@ -164,7 +169,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         for _ in func(range(iteration)):
             optimizer.zero_grad()
             loss = self()
-            loss.backward()
+            loss.backward(retain_graph=True)
             optimizer.step()
             if minLoss is None or minLoss > loss:
                 state_dict = {k: self.state_dict()[k] + 0.0 for k in self.state_dict().keys()}
@@ -174,7 +179,8 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
 
     def get_sigma(self):
         """ Calculate and return the sigma
-        return: np.ndarray: Sigma values of shape ``[seqLen]``, the ``sigma``.
+        :return: Sigma values of shape ``[seqLen]``, the ``sigma``.
+        :rtype: np.ndarray
         """
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
@@ -196,15 +202,15 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         parsed_sentence = CLS_TOKEN + tokenizer.tokenize(text) + SEP_TOKEN
 
-        self.plot_global_imp(parsed_sentence[1:-2], [.4-i for i in self.local_importance_values[1:-2]], "positive" )
+        self.plot_global_imp(parsed_sentence[1:-2], [.4 - i for i in self.local_importance_values[1:-2]], "positive" )
 
         max_alpha = 0.5
         highlighted_text = []
         for i,word in enumerate(parsed_sentence):
             #since this is a placeholder function, ignore the magic numbers below
-            weight = .55-(self.local_importance_values[i]*2)
+            weight = .55 - (self.local_importance_values[i] * 2)
 
-            #if make it blue if weight positive
+            #make it blue if weight positive
             if weight > 0:
                 highlighted_text.append('<span style="background-color:rgba(135,206,250,' + str(abs(weight) / max_alpha) +
                                         ');">' + html_escape(word) + '</span>')
