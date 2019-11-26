@@ -49,12 +49,13 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
         """
+        assert self.input_embeddings is not None, "input embeddings are required to generate explanation"
+        
         self.input_embeddings = embedded_input
         self.input_size = self.input_embeddings.size(0)
         self.input_dimension = self.input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
         self.regular = regularization
-        assert not isinstance(self.input_embeddings, type(None)), "input embeddings are required to generate explanation"
 
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
