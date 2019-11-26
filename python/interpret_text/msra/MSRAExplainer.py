@@ -54,7 +54,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.input_dimension = self.input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
         self.regular = regularization
-        assert isinstance(self.input_embeddings, type(None)), "input embeddings are required to generate explanation"
+        assert not isinstance(self.input_embeddings, type(None)), "input embeddings are required to generate explanation"
 
         if self.regular is not None:
             self.regular = nn.Parameter(torch.tensor(self.regular).to(self.input_embeddings), requires_grad=False)
@@ -79,14 +79,14 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :return: the regularization value for BERT model
         :rtype: list[float]
         """
-        n = 0
+        no_tries = 0
         while True:
             try:
                 data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
                 break
             except:
-                n += 1
-                if n > 10:
+                no_tries += 1
+                if no_tries > 10:
                     raise Exception("Too many failed HTTP Requests")
                 print("Request Failed, trying again...")
         regularization_bert = json.loads(data)
