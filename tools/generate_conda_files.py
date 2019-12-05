@@ -59,7 +59,8 @@ PIP_BASE = {
     "tqdm": "tqdm==4.31.1",
     "scikit-learn": "scikit-learn>=0.19.0,<=0.20.3",
     "nltk": "nltk>=3.4",
-    "interpret-community": "interpret-community>=0.1.0.2"
+    "interpret-community": "interpret-community>=0.1.0.2",
+    "pre-commit": "pre-commit>=1.20.0",
 }
 PIP_GPU = {}
 
@@ -93,7 +94,9 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--name", help="specify name of conda environment")
-    parser.add_argument("--gpu", action="store_true", help="include packages for GPU support")
+    parser.add_argument(
+        "--gpu", action="store_true", help="include packages for GPU support"
+    )
     args = parser.parse_args()
 
     # set name for environment and output yaml file
