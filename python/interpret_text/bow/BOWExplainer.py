@@ -2,7 +2,7 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score, precision_recall_fscore_support
 from IPython.core.display import display, HTML
-from bow_utils_temp import BOWEncoder, BOWEncoder, plot_local_imp, get_important_words, plot_global_imp
+from interpret_text.common.utils_bow import BOWEncoder, BOWEncoder, plot_local_imp, get_important_words, plot_global_imp
 
 class BOWExplainer():
     def __init__(self):
