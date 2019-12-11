@@ -1,3 +1,4 @@
 {
-    "interpretabilityDashboard": "Interpretability Dashboard"
+    "interpretibilityDashboard": "Interpretability Dashboard",
+    "topKwords": "Top K Important Words"
 }

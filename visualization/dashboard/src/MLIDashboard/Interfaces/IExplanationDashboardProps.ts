@@ -1,6 +1,8 @@
 export interface IExplanationDashboardProps {
     modelInformation: IModelInformation;
     dataSummary: IDatasetSummary;
+    config: IFeatureSelectionProps;
+    onChange:(config:IFeatureSelectionProps)=>void;
     }
 
 export interface IModelInformation {
@@ -12,4 +14,9 @@ export interface IDatasetSummary {
     classNames: string[];
     localExplanations: number[];
     prediction: number[];
+    topK: number;
+}
+
+export interface IFeatureSelectionProps {
+    topK: number;
 }
