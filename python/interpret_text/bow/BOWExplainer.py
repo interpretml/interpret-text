@@ -3,7 +3,8 @@ from sklearn.linear_model import LogisticRegression
 from interpret_text.common.utils_bow import plot_local_imp, plot_global_imp
 from interpret_text.common.utils_bow import get_important_words, BOWEncoder
 
-
+# BOW explainer class that allows extensibility to other encoders
+# Uses logistic regression and 1-gram model by default
 class BOWExplainer():
     def __init__(self):
         self.parsed_sentence = None
