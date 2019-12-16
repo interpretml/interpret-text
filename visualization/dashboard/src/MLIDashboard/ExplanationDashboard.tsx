@@ -22,26 +22,22 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
       <>
         <h1>{localization.interpretibilityDashboard}</h1>
         <div className = "explainerDashboard">
-          <div className = "slidingBar">
-              <Slider
-                label={this.state.topK.toString().concat(" ",localization.importantWords)}
-                min={1}
-                max={this.state.maxK}
-                step={1}
-                defaultValue={(this.state.maxK / 2)}
-                showValue={true}
-                onChange={(value)=>this.setTopK(value)}
-              />
-            </div>
-          <div className = "textHighlight">
-            <TextHighlighting
-              text = {this.props.dataSummary.text}
-              localExplanations = {this.props.dataSummary.localExplanations}
-              classNames = {this.props.dataSummary.classNames}
-              prediction = {this.props.dataSummary.prediction}
-              topK = {this.state.topK}
-            />
-          </div>
+          <Slider
+            label={this.state.topK.toString().concat(" ",localization.importantWords)}
+            min={1}
+            max={this.state.maxK}
+            step={1}
+            defaultValue={(this.state.maxK / 2)}
+            showValue={true}
+            onChange={(value)=>this.setTopK(value)}
+          />
+          <TextHighlighting
+            text = {this.props.dataSummary.text}
+            localExplanations = {this.props.dataSummary.localExplanations}
+            classNames = {this.props.dataSummary.classNames}
+            prediction = {this.props.dataSummary.prediction}
+            topK = {this.state.topK}
+          />
         </div>
       </>
     )
