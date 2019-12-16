@@ -12,15 +12,19 @@ from pytorch_pretrained_bert import BertTokenizer
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
 
-from utils_msra import get_embedding, make_bert_embeddings
+from interpret_text.common.utils_msra import get_single_embedding, make_bert_embeddings
 
 
 class MSRAExplainer(PureStructuredModelMixin, nn.Module):
     """The MSRAExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, device, target_layer=12, total_layers=12):
+    def __init__(self, model, train_dataset, device, target_layer=14, total_layers=12):
         """ Initialize the MSRAExplainer
+        :param model: a pytorch model
+        :type: torch.nn
+        :param train_dataset: dataset used while training the model
+        :type train_dataset: list
         :param device: A pytorch device
         :type device: torch.device
         :param target_layer: The target layer to explain. Default is 14, which is the classification layer. if set to -1, all layers will be explained
@@ -40,72 +44,73 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.regular = None
         self.target_layer = target_layer
         self.total_layers = total_layers
+        self.model = model
+        self.train_dataset = train_dataset
 
-        assert self.scale >= 0, "the value for scale cannot be less than zero"
-        assert 1 >= self.rate >= 0, "the value for rate has to be between 0 and 1"
-        assert type(self.target_layer) == int and (self.target_layer == -1 or 1 <= self.target_layer <= 14), "the value of the target layer has to be an interger and either -1 (all bert layers), or 1 to 12 (specific bert layer) or 13 (pooler layer), or 14 (final classification layer). You want to  you want to access layer %d" % (self.target_layer)
+        assert self.train_dataset is not None, "Training dataset is required. please pass in the data used to train the model"
+        assert self.model is not None, "You have to pass in a trained model."
+        assert self.scale >= 0, "The value for scale cannot be less than zero"
+        assert 1 >= self.rate >= 0, "The value for rate has to be between 0 and 1"
+        assert type(self.target_layer) == int and (self.target_layer == -1 or 1 <= self.target_layer <= 14), "the value of the target layer has to be an interger and either -1 (all bert layers), or 1 to 12 (specific bert layer) or 13 (pooler layer), or 14 (final classification layer). You want to access layer %d" % (self.target_layer)
 
-    def explain_local(self, model, embedded_input, regularization, dataset=None):
+    #def explain_local(self, embedded_input):
+    def explain_local(self, text):
         """Explain the model by using MSRA's interpretor
-        :param model: a pytorch model
-        :type: torch.nn
-        :param embedded_input: The preprocessed text
-        :type embedded_input: numpy ndarray
+        :param text: The text
+        :type text: string
         :param regularization: The regularization term
         :type regularization: numpy ndarray
-        :param dataset: dataset used while training the model
-        :type dataset: numpy ndarray
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
         """
+        assert text is not None, "input text is required to generate explanation" 
+
+        embedded_input = get_single_embedding(self.model, text, self.device)
         self.input_embeddings = embedded_input
-        
-        assert self.input_embeddings is not None, "input embeddings are required to generate explanation"
-        
         
         self.input_size = self.input_embeddings.size(0)
         self.input_dimension = self.input_embeddings.size(1)
         self.ratio = nn.Parameter(torch.randn(self.input_size, 1), requires_grad=True)
         self.input_embeddings.to(self.device)
-        #self.regular = regularization
-
-        if regularization is not None:
+      
+        if self.regular is None:
+            assert self.train_dataset is not None, "Training dataset is required"
+            print("Calculating the regularization parameter for layer  %d" % (self.target_layer))
+            training_embeddings = make_bert_embeddings(self.train_dataset, self.model, self.device)
+            print(np.shape(training_embeddings))
+            regularization = self.calculate_regularization(training_embeddings, self.model).tolist()
             self.regular = nn.Parameter(torch.tensor(regularization).to(self.input_embeddings), requires_grad=False)
-            self.Phi = self.generate_Phi(model, self.target_layer, self.total_layers)
-        else:
-            assert dataset is not None, "Training dataset is required if explainer not initialized with regularization parameter"
-            self.regular = self._calculate_regularization(dataset, self.Phi) #TODO: fix this
-            self.Phi = self.generate_Phi(model, self.target_layer, self.total_layers)
-            
+            self.Phi = self.generate_Phi(self.target_layer, self.total_layers)   
+            print("Done calculating the regularization parameter for layer  %d" % (self.target_layer))        
 
         # values below are arbitarily set for now
-        self.optimize(iteration=5000, lr=0.01, show_progress=True)
+        self.optimize(iteration=50, lr=0.01, show_progress=True)
         local_importance_values = self.get_sigma()
         self.local_importance_values = local_importance_values
         return _create_local_explanation(local_importance_values=np.array(local_importance_values), method="neural network", model_task="classification")
 
-    def getRegularizationBERT(self, model):
-        """
-        :param model: A pytorch model
-        :type model: torch.nn
-        :param explain_layer: layer to explain
-        :type explain_layer: int
-        :return: the regularization value for BERT model
-        :rtype: list[float]
-        """
-        no_tries = 0
-        while True:
-            try:
-                data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
-                break
-            except:
-                no_tries += 1
-                if no_tries > 10:
-                    raise Exception("Too many failed HTTP Requests")
-                print("Request Failed, trying again...")
-        regularization_bert = json.loads(data)
-        self.Phi = self.generate_Phi(model, layer=self.target_layer, total_layers=self.total_layers)
-        return regularization_bert
+    # def getRegularizationBERT(self, model):
+    #     """
+    #     :param model: A pytorch model
+    #     :type model: torch.nn
+    #     :param explain_layer: layer to explain
+    #     :type explain_layer: int
+    #     :return: the regularization value for BERT model
+    #     :rtype: list[float]
+    #     """
+    #     no_tries = 0
+    #     while True:
+    #         try:
+    #             data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
+    #             break
+    #         except:
+    #             no_tries += 1
+    #             if no_tries > 10:
+    #                 raise Exception("Too many failed HTTP Requests")
+    #             print("Request Failed, trying again...")
+    #     regularization_bert = json.loads(data)
+    #     self.Phi = self.generate_Phi(layer=self.target_layer, total_layers=self.total_layers)
+    #     return regularization_bert
 
     def calculate_regularization(self, sampled_x, model, reduced_axes=None):
         """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
@@ -126,13 +131,14 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """
         sample_num = len(sampled_x)
         sample_s = []
-        self.Phi = self.generate_Phi(model, layer=self.target_layer, total_layers=self.total_layers)
+        self.Phi = self.generate_Phi(layer=self.target_layer, total_layers=self.total_layers)
         for n in range(sample_num):
             x = sampled_x[n]
             #print(np.shape(x))
             if self.device is not None:
                 x = x.to(self.device)
-            
+            #print(np.shape(x))
+
             s = self.Phi(x)
             if n==1: 
                 print(s)
@@ -205,7 +211,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
 
-    def generate_Phi(self, model, layer, total_layers):
+    def generate_Phi(self, layer, total_layers):
         """Generate the Phi/hidden state that needs to be interpreted
         /Generates a function that returns the new hidden state given a new perturbed input is passed
         :param model: a pytorch model
@@ -216,11 +222,6 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :return: The phi function
         :rtype: function
         """
-        # # Assuming below that model has only 12 layers, will change this later
-        # #changed
-        # assert (
-        #     1 <= layer <= 12
-        # ), "model only has 12 layers, while you want to access layer %d" % (layer)
 
         def Phi(x):
             x = x.unsqueeze(0)
@@ -240,17 +241,17 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             
             if layer == 14:
             #explain the classification layer
-                encoder = model.bert.encoder
-                pooler = model.bert.pooler
-                classifier = model.classifier 
+                encoder = self.model.bert.encoder
+                pooler = self.model.bert.pooler
+                classifier = self.model.classifier 
                 return classifier(pooler(encoder(hidden_states, attention_mask, False)[-1]))[0]
 
+            else:
             # extract one of the bert layers
-            model_list = model.bert.encoder.layer[:layer]
-            
-            for layer_module in model_list:
-                hidden_states = layer_module(hidden_states, extended_attention_mask)
-            return hidden_states[0][layer]
+                model_list = self.model.bert.encoder.layer[:layer]
+                for layer_module in model_list:
+                    hidden_states = layer_module(hidden_states, extended_attention_mask)
+                return hidden_states[0][layer]
         return Phi
         
     def visualize(self, text, max_alpha=0.5):
