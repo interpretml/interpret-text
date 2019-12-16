@@ -14,7 +14,8 @@ export interface IDashboardState {
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   state = {
-    topK:this.props.config.topK,
+    maxK: this.count_nonzeros(this.props.dataSummary.localExplanations),
+    topK: this.count_nonzeros(this.props.dataSummary.localExplanations) / 2
   }
   public render () {
     return (
@@ -23,11 +24,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
         <div className = "explainerDashboard">
           <div className = "slidingBar">
               <Slider
-                label={localization.topKwords}
-                min={0}
-                max={this.props.dataSummary.text.length}
+                label={this.state.topK.toString().concat(" ",localization.importantWords)}
+                min={1}
+                max={this.state.maxK}
                 step={1}
-                defaultValue={this.props.config.topK}
+                defaultValue={(this.state.maxK / 2)}
                 showValue={true}
                 onChange={(value)=>this.setTopK(value)}
               />
@@ -47,5 +48,14 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
   }
   private setTopK(newNumber: number):void{
     this.setState({topK:newNumber})
+  }
+  private count_nonzeros(numArr: number[]):number{
+    let counter = 0
+    for (let i in numArr){
+      if (numArr[i] == 0){
+        counter++
+      }
+    }
+    return counter
   }
 }

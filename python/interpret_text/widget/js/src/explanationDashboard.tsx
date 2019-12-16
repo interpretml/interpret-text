@@ -1,6 +1,5 @@
 import { DOMWidgetModel, DOMWidgetView } from '@jupyter-widgets/base';
-import { ExplanationDashboard } from '../../../../../visualization/dashboard/rel/ExplanationDashboard'
-import * as _ from 'lodash';
+import { ExplanationDashboard } from '../../../../../visualization/dashboard/rel/MLIDashboard/ExplanationDashboard'
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -48,7 +47,7 @@ export class ExplanationView extends DOMWidgetView {
                 text: data.text,
                 classNames: data.classNames,
                 localExplanations: data.localExplanations,
-                prediction: data.prediction
+                prediction: data.prediction,
                 }}
         />, root_element);
         this.el.appendChild(root_element)

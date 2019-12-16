@@ -18,7 +18,6 @@ import {newsgroupBinaryData} from './_mock_data/newsgroupBinaryData';
                       <ExplanationDashboard
                         modelInformation = {{modelInformation: 'msra'}}
                         dataSummary = {{text: data.text, localExplanations: data.localExplanations, classNames: data.classNames, prediction:data.prediction}}
-                        config = {{topK:Math.ceil(data.text.length/2)}}
                         />
                   </div>
               </div>

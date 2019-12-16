@@ -1,5 +1,6 @@
 import React from 'react'
 import { IDatasetSummary } from '../Interfaces/IExplanationDashboardProps'
+import StackUtils from 'stack-utils'
 
 const highlighted = {
   color: 'white',
@@ -20,19 +21,17 @@ export class TextHighlighting extends React.PureComponent<IDatasetSummary> {
     const k = this.props.topK
     const sortedList = this.argsort(importance).splice(0,k)
     return text.map((word, wordIndex) => {
+      let styleType:any
+      const score = importance[wordIndex]
       if (sortedList.includes(wordIndex)) {
-        const score = importance[wordIndex]
+        
         if (score > 0) {
-          return <span style = {highlighted} title={score.toString()}>{word + " "}</span>
+          styleType = highlighted
         } else if (score < 0) {
-          return <span style = {boldunderline} title={score.toString()}>{word + " "}</span>
-        } else {
-          return <span>{word + " "}</span>
-        }
+          styleType = boldunderline
+        } 
       }
-      else {
-        return <span>{word + " "}</span>
-      }
+    return <span style = {styleType} title = {score.toString()}>{word + " "}</span>
     })
   }
 
