@@ -3,8 +3,6 @@ import { IExplanationDashboardProps } from './Interfaces/IExplanationDashboardPr
 import { TextHighlighting } from './Control/TextHightlighting'
 import { localization } from '../Localization/localization'
 import { Slider } from 'office-ui-fabric-react/lib/Slider'
-import _ from "lodash";
-import { thisTypeAnnotation } from '@babel/types'
 
 export interface IDashboardContext {
 }
@@ -14,9 +12,10 @@ export interface IDashboardState {
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   state = {
-    maxK: this.count_nonzeros(this.props.dataSummary.localExplanations),
-    topK: this.count_nonzeros(this.props.dataSummary.localExplanations) / 2
+    maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
+    topK: this.countNonzeros(this.props.dataSummary.localExplanations) / 2
   }
+
   public render () {
     return (
       <>
@@ -24,13 +23,13 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
         <div className = "explainerDashboard">
           {console.log(this.state.maxK)}
           <Slider
-            label={this.state.topK.toString().concat(" ",localization.importantWords)}
+            label={this.state.topK.toString().concat(' ', localization.importantWords)}
             min={1}
             max={this.state.maxK}
             step={1}
             defaultValue={(this.state.maxK / 2)}
             showValue={true}
-            onChange={(value)=>this.setTopK(value)}
+            onChange={(value) => this.setTopK(value)}
           />
           <TextHighlighting
             text = {this.props.dataSummary.text}
@@ -43,13 +42,15 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
       </>
     )
   }
-  private setTopK(newNumber: number):void{
-    this.setState({topK:newNumber})
+
+  private setTopK (newNumber: number):void{
+    this.setState({ topK: newNumber })
   }
-  private count_nonzeros(numArr: number[]):number{
+
+  private countNonzeros (numArr: number[]):number {
     let counter = 0
-    for (let i in numArr){
-      if (numArr[i] !== 0){
+    for (const i in numArr) {
+      if (numArr[i] !== 0) {
         counter++
       }
     }
