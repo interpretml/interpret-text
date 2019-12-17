@@ -13,7 +13,7 @@ export interface IDashboardState {
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   state = {
     maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
-    topK: this.countNonzeros(this.props.dataSummary.localExplanations) / 2
+    topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2)
   }
 
   public render () {
@@ -27,7 +27,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
             min={1}
             max={this.state.maxK}
             step={1}
-            defaultValue={(this.state.maxK / 2)}
+            defaultValue={(this.state.topK)}
             showValue={true}
             onChange={(value) => this.setTopK(value)}
           />

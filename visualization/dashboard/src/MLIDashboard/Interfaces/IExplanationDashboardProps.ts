@@ -12,5 +12,5 @@ export interface IDatasetSummary {
     classNames: string[];
     localExplanations: number[];
     prediction: number[];
-    topK: number;
+    topK?: number;
 }
