@@ -1,6 +1,5 @@
 import React from 'react'
 import { IDatasetSummary } from '../Interfaces/IExplanationDashboardProps'
-// import StackUtils from 'stack-utils'
 
 const highlighted = {
   color: 'white',

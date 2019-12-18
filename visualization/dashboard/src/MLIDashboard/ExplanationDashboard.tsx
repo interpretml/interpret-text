@@ -21,7 +21,6 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
       <>
         <h1>{localization.interpretibilityDashboard}</h1>
         <div className = "explainerDashboard">
-          {console.log(this.state.maxK)}
           <Slider
             label={this.state.topK.toString().concat(' ', localization.importantWords)}
             min={1}
