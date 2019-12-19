@@ -3,6 +3,7 @@ import { IExplanationDashboardProps } from './Interfaces/IExplanationDashboardPr
 import { TextHighlighting } from './Control/TextHightlighting'
 import { localization } from '../Localization/localization'
 import { Slider } from 'office-ui-fabric-react/lib/Slider'
+import { BarChart } from './Control/BarChart'
 
 export interface IDashboardContext {
 }
@@ -33,8 +34,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
           <TextHighlighting
             text = {this.props.dataSummary.text}
             localExplanations = {this.props.dataSummary.localExplanations}
-            classNames = {this.props.dataSummary.classNames}
-            prediction = {this.props.dataSummary.prediction}
+            topK = {this.state.topK}
+          />
+          <BarChart
+            text = {this.props.dataSummary.text}
+            localExplanations = {this.props.dataSummary.localExplanations}
             topK = {this.state.topK}
           />
         </div>
