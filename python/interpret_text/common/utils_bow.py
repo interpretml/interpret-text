@@ -29,24 +29,21 @@ class BOWTokenizer:
 
         # Removing stop words
         if keep_ids is True:
-            mytokens = [
+            return [
                 word
                 if word not in self.stop_words and word not in self.punctuations
                 else "empty_token"
                 for word in mytokens
             ]
-            return mytokens
         else:
-            mytokens = [
+            return [
                 word
                 for word in mytokens
                 if word not in self.stop_words and word not in self.punctuations
             ]
-            return mytokens
 
     def parse(self, sentence):
-        mytokens = self.parser(sentence)
-        return mytokens
+        return self.parser(sentence)
 
 
 class BOWEncoder:
