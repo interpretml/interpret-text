@@ -120,5 +120,8 @@ temp/
 #node_modules
 visualization/node_modules
 
+#package-locks
+package-lock.json*
+
 #azureml
 .azureml/
