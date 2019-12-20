@@ -1,0 +1,46 @@
+trigger: none
+pr:
+  - master
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  artifactFeed: interpret-text
+
+steps:
+  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+    displayName: Add conda to PATH
+
+  - bash: conda create --yes --quiet --name inttext python=3.6
+    displayName: Create Anaconda environment
+
+  - bash: |
+      source activate inttext
+      pip install --upgrade pip
+    displayName: Upgrade pip to latest
+
+  - bash: |
+      source activate inttext
+      pip install -e ./python
+    displayName: Install interpret-text
+
+  - bash: |
+      source activate inttext
+      pip install --upgrade setuptools wheel twine
+      cd ./python
+      python setup.py bdist_wheel
+      cd ..
+    displayName: Create a wheel
+
+  - task: TwineAuthenticate@0
+    displayName: Configure twine authentication
+    inputs:
+      artifactFeeds: $(artifactFeed)
+
+  - bash: |
+      source activate interp
+      cd ./python
+      twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) dist/*
+      cd ..
+    displayName: Publish artifacts
