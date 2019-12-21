@@ -1,5 +1,5 @@
 import React from 'react';
-import {ExplanationDashboard}  from '../dashboard/rel/ExplanationDashboard';
+import {ExplanationDashboard}  from '../dashboard/rel/MLIDashboard/ExplanationDashboard';
 
 import {newsgroupBinaryData} from './_mock_data/newsgroupBinaryData';
 
@@ -18,7 +18,7 @@ import {newsgroupBinaryData} from './_mock_data/newsgroupBinaryData';
                       <ExplanationDashboard
                         modelInformation = {{modelInformation: 'msra'}}
                         dataSummary = {{text: data.text, localExplanations: data.localExplanations, classNames: data.classNames, prediction:data.prediction}}
-                      />
+                        />
                   </div>
               </div>
           </div>

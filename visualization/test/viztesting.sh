@@ -1,8 +1,8 @@
 cd ..
 cd dashboard
-yarn build
-yarn build-css
+npm run-script build
+npm run-script build-css
 cd ..
 cd test
-yarn build
-yarn start 
+npm run-script build
+npm start 
