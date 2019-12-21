@@ -53,7 +53,6 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         assert 1 >= self.rate >= 0, "The value for rate has to be between 0 and 1"
         assert type(self.target_layer) == int and (self.target_layer == -1 or 1 <= self.target_layer <= 14), "the value of the target layer has to be an interger and either -1 (all bert layers), or 1 to 12 (specific bert layer) or 13 (pooler layer), or 14 (final classification layer). You want to access layer %d" % (self.target_layer)
 
-    #def explain_local(self, embedded_input):
     def explain_local(self, text):
         """Explain the model by using MSRA's interpretor
         :param text: The text
@@ -88,29 +87,6 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         local_importance_values = self.get_sigma()
         self.local_importance_values = local_importance_values
         return _create_local_explanation(local_importance_values=np.array(local_importance_values), method="neural network", model_task="classification")
-
-    # def getRegularizationBERT(self, model):
-    #     """
-    #     :param model: A pytorch model
-    #     :type model: torch.nn
-    #     :param explain_layer: layer to explain
-    #     :type explain_layer: int
-    #     :return: the regularization value for BERT model
-    #     :rtype: list[float]
-    #     """
-    #     no_tries = 0
-    #     while True:
-    #         try:
-    #             data = request.urlopen("https://nlpbp.blob.core.windows.net/data/regular.json").read()
-    #             break
-    #         except:
-    #             no_tries += 1
-    #             if no_tries > 10:
-    #                 raise Exception("Too many failed HTTP Requests")
-    #             print("Request Failed, trying again...")
-    #     regularization_bert = json.loads(data)
-    #     self.Phi = self.generate_Phi(layer=self.target_layer, total_layers=self.total_layers)
-    #     return regularization_bert
 
     def calculate_regularization(self, sampled_x, model, reduced_axes=None):
         """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
@@ -160,7 +136,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :rtype: torch.FloatTensor
         """
         ratios = torch.sigmoid(self.ratio)  # S * 1
-        x = self.input_embeddings +  0.0 #torch.zeros(ratios.shape).to(self.device)#0.0  # S * D
+        x = self.input_embeddings +  0.0 
         x_tilde = x + ratios * torch.randn(self.input_size, self.input_dimension).to(x.device) * self.scale # S * D
         s = self.Phi(x)  # D or S * D
         s_tilde = self.Phi(x_tilde)
@@ -232,13 +208,10 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             
             hidden_states = x
 
-            #print('This is the layer num', layer)
-
             # if layer==13:
             # #explain the pooler
             #     print('not yet implemented')
-               
-            
+                        
             if layer == 14:
             #explain the classification layer
                 encoder = self.model.bert.encoder
