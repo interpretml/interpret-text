@@ -1,8 +1,8 @@
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 from interpret_text.common.utils_bow import plot_local_imp, plot_global_imp
 from interpret_text.common.utils_bow import get_important_words, BOWEncoder
-from sklearn.pipeline import Pipeline
 
 
 # BOW explainer class that allows extensibility to other encoders
