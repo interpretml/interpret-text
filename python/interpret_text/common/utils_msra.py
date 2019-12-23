@@ -1,13 +1,11 @@
-import numpy as np 
 import torch
-from pytorch_pretrained_bert import BertModel, BertTokenizer
+from pytorch_pretrained_bert import BertTokenizer
 from utils_nlp.models.bert.common import Language, Tokenizer
-
 
 
 def get_single_embedding(model, text, device):
     """Get the bert embedding for a single sentence
-    :param text: The current sentence 
+    :param text: The current sentence
     :type text: str
     :param device: A pytorch device
     :type device: torch.device
@@ -23,9 +21,18 @@ def get_single_embedding(model, text, device):
     embedding = model.bert.embeddings(token_tensor)[0]
     return embedding
 
-def make_bert_embeddings(train_data, model, device, LANGUAGE=Language.ENGLISH, TO_LOWER=True, BERT_CACHE_DIR='./temp', MAX_LEN=150):
+
+def make_bert_embeddings(
+    train_data,
+    model,
+    device,
+    LANGUAGE=Language.ENGLISH,
+    TO_LOWER=True,
+    BERT_CACHE_DIR="./temp",
+    MAX_LEN=150,
+):
     """Get the bert embedding for multiple sentences
-    :param train_data: A list of sentences 
+    :param train_data: A list of sentences
     :type df: list
     :param device: A pytorch device
     :type device: torch.device
@@ -39,13 +46,9 @@ def make_bert_embeddings(train_data, model, device, LANGUAGE=Language.ENGLISH, T
     :rtype: torch.embedding
     """
     tokenizer = Tokenizer(LANGUAGE, to_lower=TO_LOWER, cache_dir=BERT_CACHE_DIR)
-
     tokens = tokenizer.tokenize(train_data)
     tokens, mask, _ = tokenizer.preprocess_classification_tokens(tokens, MAX_LEN)
-
     tokens_tensor = torch.tensor(tokens, device=device)
     mask_tensor = torch.tensor(mask, device=device)
-
     embeddings = model.bert.embeddings(tokens_tensor, mask_tensor)
-
     return embeddings
