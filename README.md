@@ -1,22 +1,26 @@
-The Interpret Community Text builds on [Interpret](https://github.com/Microsoft/interpret), an open source python package from Microsoft Research for training interpretable models and helping to explain blackbox systems, by adding additional extensions to interpret NLP models.
-
-This repository contains an SDK and Jupyter notebooks (eventually) with examples to showcase its use.
-
 # Contents
 
-- [Try our notebooks in your favorite cloud](#try)
+- [Overview of Interpret-Text](#overview)
+- [Target Audience](#target-audience)
 - [Getting Started](#getting-started)
-- [Models](#models)
-- [Build Status](#BuildStatus)
+- [Supported Models and NLP Scenarios](#models)
+- [Supported Explainers](#explainers)
+- [Use Interpret-Text](#use)
+- [Contributing](#contrib)
+- [Code of Conduct](#code-of-conduct)
 - [Additional References](#Refs)
 
-# <a name="try"></a> 
+<a name="overview"></a>
+# Overview of Interpret-Text
+The Interpret Community Text builds on [Interpret](https://github.com/interpretml/interpret-community), an open source python package from Microsoft Research for training interpretable models and helping to explain blackbox systems. We have added extensions to interpret NLP models.
 
-# Try our notebooks in your favorite cloud
+This repository contains an SDK and Jupyter notebooks with examples to showcase its use.
 
-<a name="getting started"></a>
+<a name="target-audience"></a>
+# Target Audience
 
-## Getting Started
+<a name="getting-started"></a>
+# Getting Started
 
 This repo uses Anaconda to simplify package and environment management.
 
@@ -110,11 +114,25 @@ Install and run Jupyter Notebook
 --->
 
 # <a name="models"></a>
+# Supported Models and NLP Scenarios
 
-# Models
 
-# Build Status
+# <a name="explainers"></a>
+# Supported Explainers
+Explain what the baseline is, and MSRA/RNP as well as links to research/conferences
+
+<a name="use"></a>
+# Use Interpret-Text
+Teaches the user how to use this package and links to sample notebooks. 
+
+## Visualization Dashboard
+Documentation explaining how to set up the environment for visualizations and how to activate it
+
+<a name="contrib"></a>
+# Contributing
+
+<a name="code-of-conduct"></a>
+# Code of Conduct
 
 <a name=Refs></a>
-
 # Additional References
