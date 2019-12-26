@@ -4,18 +4,28 @@ import { TextHighlighting } from './Control/TextHightlighting'
 import { localization } from '../Localization/localization'
 import { Slider } from 'office-ui-fabric-react/lib/Slider'
 import { BarChart } from './Control/BarChart'
+import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 
 export interface IDashboardContext {
 }
 
 export interface IDashboardState {
+  maxK: number,
+  topK: number,
+  posToggle: boolean,
 }
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
-  state = {
-    maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
-    topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2)
+  constructor(props: IExplanationDashboardProps, IDashboardState){
+    super(props)
+    this.state = {
+      maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
+      topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2),
+      posToggle: false
+    }
+    this.setPosToggle = this.setPosToggle.bind(this)
   }
+
 
   public render () {
     return (
@@ -41,6 +51,8 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
             localExplanations = {this.props.dataSummary.localExplanations}
             topK = {this.state.topK}
           />
+          <Toggle label="With inline label and without onText and offText" inlineLabel onChange={this.setPosToggle} />
+
         </div>
       </>
     )
@@ -58,5 +70,10 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
       }
     }
     return counter
+  }
+  public setPosToggle(ev: React.MouseEvent<HTMLElement>, checked: boolean) {
+    //console.log('toggle is ' + (checked ? 'checked' : 'not checked'));
+    this.setState({posToggle: !this.state.posToggle})
+    console.log(this.state.posToggle)
   }
 }
