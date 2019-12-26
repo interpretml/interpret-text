@@ -13,6 +13,7 @@ export interface IDashboardState {
   maxK: number,
   topK: number,
   posToggle: boolean,
+  negToggle: boolean
 }
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
@@ -21,9 +22,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     this.state = {
       maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
       topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2),
-      posToggle: false
+      posToggle: false,
+      negToggle: false
     }
     this.setPosToggle = this.setPosToggle.bind(this)
+    this.setNegToggle = this.setNegToggle.bind(this)
   }
 
 
@@ -45,14 +48,18 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
             text = {this.props.dataSummary.text}
             localExplanations = {this.props.dataSummary.localExplanations}
             topK = {this.state.topK}
+            posOnly = {this.state.posToggle}
+            negOnly = {this.state.negToggle}
           />
           <BarChart
             text = {this.props.dataSummary.text}
             localExplanations = {this.props.dataSummary.localExplanations}
             topK = {this.state.topK}
+            posOnly = {this.state.posToggle}
+            negOnly = {this.state.negToggle}
           />
-          <Toggle label="With inline label and without onText and offText" inlineLabel onChange={this.setPosToggle} />
-
+          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
+          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
         </div>
       </>
     )
@@ -72,8 +79,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     return counter
   }
   public setPosToggle(ev: React.MouseEvent<HTMLElement>, checked: boolean) {
-    //console.log('toggle is ' + (checked ? 'checked' : 'not checked'));
     this.setState({posToggle: !this.state.posToggle})
-    console.log(this.state.posToggle)
+    //this.setState({negToggle: false})
+  }
+  public setNegToggle() {
+    this.setState({negToggle: !this.state.negToggle})
+    //this.setState({posToggle: false})
   }
 }

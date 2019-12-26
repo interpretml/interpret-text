@@ -1,5 +1,7 @@
 {
     "interpretibilityDashboard": "Interpretability Dashboard",
-    "importantWords": "Important Words",
-    "topFeatureList": "Top feature list analysis"
+    "importantWords": "Most Important Words",
+    "topFeatureList": "Top feature list analysis",
+    "posToggle": "Only Positive Feature Importance",
+    "negToggle": "Only Negative Feature Importance"
 }
