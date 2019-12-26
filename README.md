@@ -113,6 +113,10 @@ Install and run Jupyter Notebook
 <!---{% from interpret.ext.blackbox import TabularExplainer %}
 --->
 
+To set up on Azure:
+
+To set up your visualization dashboard:
+
 # <a name="models"></a>
 # Supported Models and NLP Scenarios
 
@@ -124,9 +128,6 @@ Explain what the baseline is, and MSRA/RNP as well as links to research/conferen
 <a name="use"></a>
 # Use Interpret-Text
 Teaches the user how to use this package and links to sample notebooks. 
-
-## Visualization Dashboard
-Documentation explaining how to set up the environment for visualizations and how to activate it
 
 <a name="contrib"></a>
 # Contributing
