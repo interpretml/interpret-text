@@ -1,4 +1,5 @@
 {
     "interpretibilityDashboard": "Interpretability Dashboard",
-    "importantWords": "Important Words"
+    "importantWords": "Important Words",
+    "topFeatureList": "Top feature list analysis"
 }

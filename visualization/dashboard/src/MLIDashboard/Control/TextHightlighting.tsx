@@ -1,5 +1,6 @@
 import React from 'react'
 import { IDatasetSummary } from '../Interfaces/IExplanationDashboardProps'
+import { Utils } from '../CommonUtils'
 
 const highlighted = {
   color: 'white',
@@ -17,12 +18,12 @@ const boldunderline = {
 export class TextHighlighting extends React.PureComponent<IDatasetSummary> {
   public render (): React.ReactNode[] {
     const text = this.props.text
-    const importance = this.props.localExplanations
+    const importances = this.props.localExplanations
     const k = this.props.topK
-    const sortedList = this.argsort(importance.map(Math.abs)).reverse().splice(0,k)
+    const sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k)
     return text.map((word, wordIndex) => {
       let styleType:any
-      const score = importance[wordIndex]
+      const score = importances[wordIndex]
       if (sortedList.includes(wordIndex)) {
         if (score > 0) {
           styleType = highlighted
@@ -33,11 +34,4 @@ export class TextHighlighting extends React.PureComponent<IDatasetSummary> {
       return <span style = {styleType} title = {score.toString()}>{word + ' '}</span>
     })
   }
-  public argsort(toSort: number[]): number[] {
-    const sorted = toSort.map((val, index) => [val, index]);
-      sorted.sort((a, b) => {
-          return a[0] - b[0];
-      });
-      return sorted.map(val => val[1]);
-     }
 }

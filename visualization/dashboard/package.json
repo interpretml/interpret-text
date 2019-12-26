@@ -43,7 +43,9 @@
   },
   "dependencies": {
     "localized-strings": "^0.2.4",
+    "mlchartlib": "^0.1.33",
     "office-ui-fabric-react": "^7.65.0",
+    "plotly.js-dist": "^1.51.3",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "typescript": "^3.6.4"
