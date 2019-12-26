@@ -5,5 +5,5 @@ export class Utils{
             return a[0] - b[0];
         });
         return sorted.map(val => val[1]);
-        }
+    }
 }

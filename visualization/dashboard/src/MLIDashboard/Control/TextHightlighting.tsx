@@ -1,5 +1,5 @@
 import React from 'react'
-import { IDatasetSummary } from '../Interfaces/IExplanationDashboardProps'
+import { IChartProps } from '../Interfaces/IChartProps'
 import { Utils } from '../CommonUtils'
 
 const highlighted = {
@@ -15,12 +15,21 @@ const boldunderline = {
   fontfamily: 'Segoe UI'
 } as React.CSSProperties
 
-export class TextHighlighting extends React.PureComponent<IDatasetSummary> {
+export class TextHighlighting extends React.PureComponent<IChartProps> {
   public render (): React.ReactNode[] {
     const text = this.props.text
     const importances = this.props.localExplanations
     const k = this.props.topK
-    const sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k)
+    let sortedList: number[]
+    if ((this.props.posOnly && this.props.negOnly) || (!this.props.posOnly && !this.props.posOnly)){
+      sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k)
+    }
+    else if (this.props.posOnly){
+      sortedList = Utils.argsort(importances).reverse().splice(0, k)
+    } 
+    else {
+      sortedList = Utils.argsort(importances).splice(0, k)
+    }
     return text.map((word, wordIndex) => {
       let styleType:any
       const score = importances[wordIndex]
