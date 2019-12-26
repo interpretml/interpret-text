@@ -21,14 +21,14 @@ export class TextHighlighting extends React.PureComponent<IChartProps> {
     const importances = this.props.localExplanations
     const k = this.props.topK
     let sortedList: number[]
-    if ((this.props.posOnly && this.props.negOnly) || (!this.props.posOnly && !this.props.posOnly)){
+    if ((this.props.posOnly && this.props.negOnly) || (!this.props.posOnly && !this.props.negOnly)){
       sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k)
-    }
-    else if (this.props.posOnly){
-      sortedList = Utils.argsort(importances).reverse().splice(0, k)
     } 
-    else {
+    else if (this.props.negOnly){
       sortedList = Utils.argsort(importances).splice(0, k)
+    }
+    else {
+      sortedList = Utils.argsort(importances).reverse().splice(0, k)
     }
     return text.map((word, wordIndex) => {
       let styleType:any
