@@ -62,7 +62,7 @@ PIP_BASE = {
     "interpret-community": "interpret-community>=0.1.0.2",
     "pre-commit": "pre-commit>=1.20.0",
     "utils_nlp": "git+https://github.com/microsoft/nlp.git",
-    "transformers": "transformers<=2.1.1",
+    "transformers": "transformers==2.1.1",
     "spacy": "spacy>=2.2.3",
 }
 PIP_GPU = {}
