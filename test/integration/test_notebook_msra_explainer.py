@@ -1,16 +1,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-import os
-import json
-import shutil
 import pytest
 import papermill as pm
 import scrapbook as sb
 
-
 ABS_TOL = 0.1
 KERNEL_NAME = "python3"
 OUTPUT_NOTEBOOK = "output.ipynb"
+
 
 @pytest.mark.integration
 def test_text_classification_mnli_bert(notebooks, tmp):
@@ -25,7 +22,8 @@ def test_text_classification_mnli_bert(notebooks, tmp):
             BATCH_SIZE=32,
             BATCH_SIZE_PRED=512,
             NUM_EPOCHS=1,
-            TEST = True,
+            TEST=True,
+            QUICK_RUN=True,
         ),
     )
     result = sb.read_notebook(OUTPUT_NOTEBOOK).scraps.data_dict
@@ -33,6 +31,7 @@ def test_text_classification_mnli_bert(notebooks, tmp):
     assert pytest.approx(result["precision"], 0.93, abs=ABS_TOL)
     assert pytest.approx(result["recall"], 0.93, abs=ABS_TOL)
     assert pytest.approx(result["f1"], 0.93, abs=ABS_TOL)
+
 
 @pytest.mark.integration
 def test_text_classification_bow_lr(notebooks, tmp):
