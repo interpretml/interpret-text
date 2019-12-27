@@ -2,7 +2,8 @@
 # Licensed under the MIT License.
 
 # Pull request against these branches will trigger this build
-pr: none
+pr:
+- master
 
 #Any commit to this branch will trigger the build.
 trigger: none
