@@ -9,7 +9,8 @@ export interface IModelInformation {
 
 export interface IDatasetSummary {
     text: string[];
-    classNames: string[];
+    classNames?: string[];
     localExplanations: number[];
-    prediction: number[];
+    prediction?: number[];
+    topK?: number;
 }
