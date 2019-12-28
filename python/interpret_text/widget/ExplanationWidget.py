@@ -12,10 +12,10 @@ from traitlets import Unicode, Dict
 class ExplanationWidget(widgets.DOMWidget):
     """The python widget definition for the explanation."""
 
-    _view_name = Unicode('ExplanationView').tag(sync=True)
-    _model_name = Unicode('ExplanationModel').tag(sync=True)
-    _view_module = Unicode('interpret-text-widget').tag(sync=True)
-    _model_module = Unicode('interpret-text-widget').tag(sync=True)
-    _view_module_version = Unicode('^0.1.1').tag(sync=True)
-    _model_module_version = Unicode('^0.1.0').tag(sync=True)
+    _view_name = Unicode("ExplanationView").tag(sync=True)
+    _model_name = Unicode("ExplanationModel").tag(sync=True)
+    _view_module = Unicode("interpret-text-widget").tag(sync=True)
+    _model_module = Unicode("interpret-text-widget").tag(sync=True)
+    _view_module_version = Unicode("^0.1.1").tag(sync=True)
+    _model_module_version = Unicode("^0.1.0").tag(sync=True)
     value = Dict().tag(sync=True)

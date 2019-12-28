@@ -51,13 +51,14 @@ jobs:
       pytest test/unit/test_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run MSR Asia tests'
 
-  # - bash: |
-  #     cd /usr/share/miniconda/bin
-  #     source activate interpret_cpu
-  #     cd /home/vsts/work/1/s
-  #     python -m pip install flake8
-  #     flake8 .
-  #   displayName: 'Run lint tests'
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      python -m pip install flake8
+      cd /python/
+      flake8 .
+    displayName: 'Run flake8'
 
   # Uncomment if needed
   - bash: |
