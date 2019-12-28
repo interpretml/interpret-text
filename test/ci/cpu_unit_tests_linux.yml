@@ -56,8 +56,7 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s
       python -m pip install flake8
-      cd /python/
-      flake8 .
+      flake8 ./python/
     displayName: 'Run flake8'
 
   # Uncomment if needed
