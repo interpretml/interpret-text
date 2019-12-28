@@ -106,9 +106,22 @@ venv.bak/
 #datasets
 datasets.1.17.2019/
 datasets.1.17.2019.zip
+notebooks/customer/models/
+notebooks/customer/prod_training_data/
+notebooks/explainers/dataset/
+notebooks/explainers/models/
+notebooks/temp/
+notebooks/text_classification/temp/
+temp/
 
 #vscode
 .vscode/
 
 #node_modules
 visualization/node_modules
+
+#package-locks
+package-lock.json*
+
+#azureml
+.azureml/

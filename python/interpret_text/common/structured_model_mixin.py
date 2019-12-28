@@ -15,5 +15,5 @@ class PureStructuredModelMixin(ChainedIdentity):
         :type model: A grey box model.
         """
         super(PureStructuredModelMixin, self).__init__(**kwargs)
-        self._logger.debug('Initializing PureStructuredModelMixin')
+        self._logger.debug("Initializing PureStructuredModelMixin")
         self.model = model

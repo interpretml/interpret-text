@@ -17,7 +17,7 @@ import warnings
 
 
 with warnings.catch_warnings():
-    warnings.filterwarnings('ignore', 'Starting from version 2.2.1', UserWarning)
+    warnings.filterwarnings("ignore", "Starting from version 2.2.1", UserWarning)
     import shap
 
 
@@ -36,12 +36,13 @@ class TextExplainer(BlackBoxExplainer):
         :type is_function: bool
         """
         super(TextExplainer, self).__init__(model, is_function=is_function, **kwargs)
-        self._logger.debug('Initializing TextExplainer')
-        self._method = 'text'
+        self._logger.debug("Initializing TextExplainer")
+        self._method = "text"
 
     def _explain_instance(self, row, function):
         """Explains the best example row with text data."""
         from sklearn.feature_extraction.text import CountVectorizer
+
         rowArr = [row]
         vectorizer = CountVectorizer(lowercase=False, min_df=0.0, binary=True)
 
@@ -58,7 +59,13 @@ class TextExplainer(BlackBoxExplainer):
             # tokens that are not in the inverse-transformed text data generated from shap samples
             filteredData = []
             for textDataPermuted in textData:
-                filteredData.append(''.join(filter(lambda x: x not in textDataPermuted, re.split('(\W+)', row))))
+                filteredData.append(
+                    "".join(
+                        filter(
+                            lambda x: x not in textDataPermuted, re.split("(\\W+)", row)
+                        )
+                    )
+                )
             prediction = function(filteredData)
             return prediction
 
@@ -108,7 +115,9 @@ class TextExplainer(BlackBoxExplainer):
         # find document with highest probability
         golden_doc = _find_golden_doc(self.function, evaluation_examples)
         # shap values for instance with highest prob
-        shap_values, explainer, features = self._explain_instance(golden_doc, self.function)
+        shap_values, explainer, features = self._explain_instance(
+            golden_doc, self.function
+        )
         shap_values = np.asarray(shap_values)
         if explainer is not None and hasattr(explainer, Attributes.EXPECTED_VALUE):
             expected_values = explainer.expected_value
@@ -127,6 +136,10 @@ class TextExplainer(BlackBoxExplainer):
             kwargs[ExplainParams.MODEL_TYPE] = str(type(self.model))
         else:
             kwargs[ExplainParams.MODEL_TYPE] = ExplainType.FUNCTION
-        return _create_local_explanation(local_importance_values=np.array(local_importance_values),
-                                         expected_values=expected_values, text_explanation=True,
-                                         features=features, **kwargs)
+        return _create_local_explanation(
+            local_importance_values=np.array(local_importance_values),
+            expected_values=expected_values,
+            text_explanation=True,
+            features=features,
+            **kwargs
+        )
