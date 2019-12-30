@@ -34,32 +34,41 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     return (
       <>
         <h1>{localization.interpretibilityDashboard}</h1>
-        <div className = "explainerDashboard">
-          <Slider
-            label={this.state.topK.toString().concat(' ', localization.importantWords)}
-            min={1}
-            max={this.state.maxK}
-            step={1}
-            defaultValue={(this.state.topK)}
-            showValue={true}
-            onChange={(value) => this.setTopK(value)}
-          />
-          <TextHighlighting
-            text = {this.props.dataSummary.text}
-            localExplanations = {this.props.dataSummary.localExplanations}
-            topK = {this.state.topK}
-            posOnly = {this.state.posToggle}
-            negOnly = {this.state.negToggle}
-          />
-          <BarChart
-            text = {this.props.dataSummary.text}
-            localExplanations = {this.props.dataSummary.localExplanations}
-            topK = {this.state.topK}
-            posOnly = {this.state.posToggle}
-            negOnly = {this.state.negToggle}
-          />
-          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
-          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+          <div className = "explainerDashboard">
+            <div className="ms-Grid" dir="ltr">
+              <div className="ms-Grid-row">
+                <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6">
+            
+              <Slider
+                label={this.state.topK.toString().concat(' ', localization.importantWords)}
+                min={1}
+                max={this.state.maxK}
+                step={1}
+                defaultValue={(this.state.topK)}
+                showValue={true}
+                onChange={(value) => this.setTopK(value)}
+              />
+              <TextHighlighting
+                text = {this.props.dataSummary.text}
+                localExplanations = {this.props.dataSummary.localExplanations}
+                topK = {this.state.topK}
+                posOnly = {this.state.posToggle}
+                negOnly = {this.state.negToggle}
+              />
+              </div>
+              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6">
+              <BarChart
+                text = {this.props.dataSummary.text}
+                localExplanations = {this.props.dataSummary.localExplanations}
+                topK = {this.state.topK}
+                posOnly = {this.state.posToggle}
+                negOnly = {this.state.negToggle}
+              />
+              <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
+              <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+              </div>
+            </div>
+          </div>
         </div>
       </>
     )
@@ -68,6 +77,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
   private setTopK (newNumber: number):void{
     this.setState({ topK: newNumber })
   }
+  
 
   private countNonzeros (numArr: number[]):number {
     let counter = 0

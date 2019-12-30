@@ -18,9 +18,10 @@ export class BarChart extends React.PureComponent<IChartProps> {
   private buildPlotlyProps (props): IPlotlyProperty {
     const importances = props.localExplanations
     let sortedList: number[]
+    let color: string[]
     const k = props.topK
     if ((this.props.posOnly && this.props.negOnly) || (!this.props.posOnly && !this.props.negOnly)){
-      sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k).reverse()
+      sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k).reverse()      
     } 
     else if (this.props.negOnly){
       sortedList = Utils.argsort(importances).splice(0, k).reverse()
@@ -28,6 +29,10 @@ export class BarChart extends React.PureComponent<IChartProps> {
     else {
       sortedList = Utils.argsort(importances).reverse().splice(0, k).reverse()
     }
+    
+  
+    color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)');
+    console.log(importances);
     const [data, x, y] = [[], [], []]
     sortedList.map(idx => {
       y.push(props.text[idx])
@@ -37,6 +42,13 @@ export class BarChart extends React.PureComponent<IChartProps> {
       hoverinfo: 'text',
       orientation: 'h',
       type: 'bar',
+      marker:{
+        color,
+        line: {
+          color: 'rgb(0,120,212)',
+          width: 1.5
+        }
+      },
       x,
       y
     })
