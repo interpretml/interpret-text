@@ -5,7 +5,7 @@ import { localization } from '../Localization/localization'
 import { Slider } from 'office-ui-fabric-react/lib/Slider'
 import { BarChart } from './Control/BarChart'
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
-
+import { Text } from 'office-ui-fabric-react/lib/Text';
 export interface IDashboardContext {
 }
 
@@ -32,26 +32,25 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
 
   public render() {
     return (
-      <>
-        <h1>{localization.interpretibilityDashboard}</h1>
-        <div className="explainerDashboard" style={{ backgroundColor: "rgb(216,216,216)" }}>
+      <div style={{ backgroundColor: "rgb(220,220,220)", fontFamily: 'Segoe UI' }} >
+         <div className="explainerDashboard" >
           <div className="ms-Grid" dir="ltr">
             <div className="ms-Grid-row">
               <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                <div style={{ margin: '70px' }}>
-                  <h1>User Input Text</h1>
-                  <div style={{}}>
+                <div style={{ marginRight: '5px' }}>
+                  <div style={{ fontFamily: 'Segoe UI', fontSize: '2.0em', fontWeight: "bold" }} >User-input Text</div>
+                  <div style={{ marginTop: '5%' }}>
                     <Slider
-                      //label={this.state.topK.toString().concat(' ', localization.importantWords)}
                       min={1}
                       max={this.state.maxK}
                       step={1}
                       defaultValue={(this.state.topK)}
-                      showValue={true}
+                      showValue={false}
                       onChange={(value) => this.setTopK(value)}
                     />
                   </div>
-                  <div style={{ backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '600px' }}>
+                  <div style={{ fontSize: '1.8em', textAlign: 'center', fontStyle: 'italic', fontFamily: 'Segoe UI', color: '#636363', margin: '30px' }}>{this.state.topK.toString().concat(' ', localization.importantWords)}</div>
+                  <div style={{ backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '600px', padding:'20px' }}>
                     <TextHighlighting
                       text={this.props.dataSummary.text}
                       localExplanations={this.props.dataSummary.localExplanations}
@@ -61,28 +60,48 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
 
                     />
                   </div>
+                  <div style={{ margin: '30px 10px 10px 10px' }}>
+                    FEATURE LEGEND
+                  </div>
+                  <span style={{ color: 'white', fontWeight: 'bold', backgroundColor: '#0078D4', margin: '10px' }}>Word with positive feature importance</span>
+                  <br></br>
+                  <span style={{ margin: '10px', fontWeight: 'bold', textDecorationLine: 'underline' }}>Word with negative feature importance</span>
                 </div>
               </div>
-              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                <div style={{ margin: '70px'}}>
-                <h1>Label: Spam</h1>
-                  <div >
-                  <BarChart
-                    text={this.props.dataSummary.text}
-                    localExplanations={this.props.dataSummary.localExplanations}
-                    topK={this.state.topK}
-                    posOnly={this.state.posToggle}
-                    negOnly={this.state.negToggle}
-                  />
-                  <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
-                  <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
-                </div>
+              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" style={{ padding:'20px',  }} >
+                <div style={{ marginLeft: '5px',}}>
+                  <div style={{ fontFamily: 'Segoe UI', fontSize: '2.0em', fontWeight: "bold", marginBottom:'20px' }}>Label: Spam</div>
+                  <div style={{ borderTopStyle: "solid", borderColor: 'rgb(0,120,212)', backgroundColor: 'white' }} >
+                    <div style={{ marginLeft: '5%', fontFamily: 'Segoe UI', fontSize: '2.5em', marginTop:'20px'}}>{localization.topFeatureList}</div>
+                    <div style={{ marginLeft: '5%', fontFamily: 'Segoe UI', fontSize: '1.8em', }}>Model used: MSR-Asia</div>
+                   <div style={{marginLeft:'5%'}}>
+                   <BarChart
+                      text={this.props.dataSummary.text}
+                      localExplanations={this.props.dataSummary.localExplanations}
+                      topK={this.state.topK}
+                      posOnly={this.state.posToggle}
+                      negOnly={this.state.negToggle}
+                    />
+                    </div>
+                    <div className="ms-Grid" dir="ltr" >
+                      <div className="ms-Grid-row" style={{ margin: '5%' }}>
+                        <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
+                          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
+                          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+                        </div>
+                        <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
+                          Feature importance ranges between [-1,1] where positive scalar represents the extent that the word was important towards the classification of your selected label, and negative scalar represents words that encouraged your model away from your selected label.
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </>
+      </div>
     )
   }
 

@@ -6,7 +6,7 @@ const highlighted = {
   color: 'white',
   backgroundColor: '#0078D4',
   fontFamily: 'Segoe UI',
-  fontSize: '1.2em',
+  fontSize: '1.5em',
 } as React.CSSProperties
 
 const boldunderline = {
@@ -14,12 +14,12 @@ const boldunderline = {
   fontWeight: 'bold',
   textDecorationLine: 'underline',
   fontFamily: 'Segoe UI',
-  fontSize: '1.2em',
+  fontSize: '1.5em',
 } as React.CSSProperties
 
 const normal = {
   fontFamily: 'Segoe UI',
-  fontSize: '1.2em',
+  fontSize: '1.5em',
 } as React.CSSProperties
 
 export class TextHighlighting extends React.PureComponent<IChartProps> {

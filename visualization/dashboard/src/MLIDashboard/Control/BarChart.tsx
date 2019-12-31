@@ -55,7 +55,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
     const chart = {
       data: data,
       layout: {
-        title: localization.topFeatureList,
+        title: 'FEATURE IMPORTANCE',
         xaxis:{range:[-1,1]}
       }
     }
