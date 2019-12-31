@@ -34,44 +34,50 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     return (
       <>
         <h1>{localization.interpretibilityDashboard}</h1>
-        <div className="explainerDashboard" style={{backgroundColor: "rgb(216,216,216)"}}>
+        <div className="explainerDashboard" style={{ backgroundColor: "rgb(216,216,216)" }}>
           <div className="ms-Grid" dir="ltr">
             <div className="ms-Grid-row">
               <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                <div style={{margin: '70px'}}>
-                <div style={{}}>
-                <Slider
-                  label={this.state.topK.toString().concat(' ', localization.importantWords)}
-                  min={1}
-                  max={this.state.maxK}
-                  step={1}
-                  defaultValue={(this.state.topK)}
-                  showValue={true}
-                  onChange={(value) => this.setTopK(value)}
-                />
-                </div>
-                  <div style={{backgroundColor:'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px',  height: '600px'}}>
-                <TextHighlighting
-                  text={this.props.dataSummary.text}
-                  localExplanations={this.props.dataSummary.localExplanations}
-                  topK={this.state.topK}
-                  posOnly={this.state.posToggle}
-                  negOnly={this.state.negToggle}
-                  
-                />
-                </div>
+                <div style={{ margin: '70px' }}>
+                  <h1>User Input Text</h1>
+                  <div style={{}}>
+                    <Slider
+                      //label={this.state.topK.toString().concat(' ', localization.importantWords)}
+                      min={1}
+                      max={this.state.maxK}
+                      step={1}
+                      defaultValue={(this.state.topK)}
+                      showValue={true}
+                      onChange={(value) => this.setTopK(value)}
+                    />
+                  </div>
+                  <div style={{ backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '600px' }}>
+                    <TextHighlighting
+                      text={this.props.dataSummary.text}
+                      localExplanations={this.props.dataSummary.localExplanations}
+                      topK={this.state.topK}
+                      posOnly={this.state.posToggle}
+                      negOnly={this.state.negToggle}
+
+                    />
+                  </div>
                 </div>
               </div>
               <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                <BarChart
-                  text={this.props.dataSummary.text}
-                  localExplanations={this.props.dataSummary.localExplanations}
-                  topK={this.state.topK}
-                  posOnly={this.state.posToggle}
-                  negOnly={this.state.negToggle}
-                />
-                <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
-                <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+                <div style={{ margin: '70px'}}>
+                <h1>Label: Spam</h1>
+                  <div >
+                  <BarChart
+                    text={this.props.dataSummary.text}
+                    localExplanations={this.props.dataSummary.localExplanations}
+                    topK={this.state.topK}
+                    posOnly={this.state.posToggle}
+                    negOnly={this.state.negToggle}
+                  />
+                  <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
+                  <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+                </div>
+                </div>
               </div>
             </div>
           </div>
