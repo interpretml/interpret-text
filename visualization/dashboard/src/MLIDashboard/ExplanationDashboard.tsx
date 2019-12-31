@@ -17,7 +17,7 @@ export interface IDashboardState {
 }
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
-  constructor(props: IExplanationDashboardProps, IDashboardState){
+  constructor(props: IExplanationDashboardProps, IDashboardState) {
     super(props)
     this.state = {
       maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
@@ -30,42 +30,48 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
   }
 
 
-  public render () {
+  public render() {
     return (
       <>
         <h1>{localization.interpretibilityDashboard}</h1>
-          <div className = "explainerDashboard">
-            <div className="ms-Grid" dir="ltr">
-              <div className="ms-Grid-row">
-                <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6">
-            
-              <Slider
-                label={this.state.topK.toString().concat(' ', localization.importantWords)}
-                min={1}
-                max={this.state.maxK}
-                step={1}
-                defaultValue={(this.state.topK)}
-                showValue={true}
-                onChange={(value) => this.setTopK(value)}
-              />
-              <TextHighlighting
-                text = {this.props.dataSummary.text}
-                localExplanations = {this.props.dataSummary.localExplanations}
-                topK = {this.state.topK}
-                posOnly = {this.state.posToggle}
-                negOnly = {this.state.negToggle}
-              />
+        <div className="explainerDashboard" style={{backgroundColor: "rgb(216,216,216)"}}>
+          <div className="ms-Grid" dir="ltr">
+            <div className="ms-Grid-row">
+              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
+                <div style={{margin: '70px'}}>
+                <div style={{}}>
+                <Slider
+                  label={this.state.topK.toString().concat(' ', localization.importantWords)}
+                  min={1}
+                  max={this.state.maxK}
+                  step={1}
+                  defaultValue={(this.state.topK)}
+                  showValue={true}
+                  onChange={(value) => this.setTopK(value)}
+                />
+                </div>
+                  <div style={{backgroundColor:'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px',  height: '600px'}}>
+                <TextHighlighting
+                  text={this.props.dataSummary.text}
+                  localExplanations={this.props.dataSummary.localExplanations}
+                  topK={this.state.topK}
+                  posOnly={this.state.posToggle}
+                  negOnly={this.state.negToggle}
+                  
+                />
+                </div>
+                </div>
               </div>
-              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6">
-              <BarChart
-                text = {this.props.dataSummary.text}
-                localExplanations = {this.props.dataSummary.localExplanations}
-                topK = {this.state.topK}
-                posOnly = {this.state.posToggle}
-                negOnly = {this.state.negToggle}
-              />
-              <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
-              <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
+                <BarChart
+                  text={this.props.dataSummary.text}
+                  localExplanations={this.props.dataSummary.localExplanations}
+                  topK={this.state.topK}
+                  posOnly={this.state.posToggle}
+                  negOnly={this.state.negToggle}
+                />
+                <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
+                <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
               </div>
             </div>
           </div>
@@ -74,12 +80,12 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     )
   }
 
-  private setTopK (newNumber: number):void{
+  private setTopK(newNumber: number): void {
     this.setState({ topK: newNumber })
   }
-  
 
-  private countNonzeros (numArr: number[]):number {
+
+  private countNonzeros(numArr: number[]): number {
     let counter = 0
     for (const i in numArr) {
       if (numArr[i] !== 0) {
@@ -89,11 +95,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     return counter
   }
   public setPosToggle(ev: React.MouseEvent<HTMLElement>, checked: boolean) {
-    this.setState({posToggle: !this.state.posToggle})
+    this.setState({ posToggle: !this.state.posToggle })
     //this.setState({negToggle: false})
   }
   public setNegToggle() {
-    this.setState({negToggle: !this.state.negToggle})
+    this.setState({ negToggle: !this.state.negToggle })
     //this.setState({posToggle: false})
   }
 }
