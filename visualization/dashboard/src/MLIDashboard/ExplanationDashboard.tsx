@@ -49,7 +49,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                       onChange={(value) => this.setTopK(value)}
                     />
                   </div>
-                  <div style={{fontSize: '1.8em', textAlign: 'center', fontStyle: 'italic', fontFamily: 'Segoe UI', color: '#636363', margin: '30px'}}>{this.state.topK.toString() + ' ' + localization.importantWords)}</div>
+                  <div style={{fontSize: '1.8em', textAlign: 'center', fontStyle: 'italic', fontFamily: 'Segoe UI', color: '#636363', margin: '30px'}}>{this.state.topK.toString() + ' ' + localization.importantWords}</div>
                   <div style={{backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '600px', padding:'20px'}}>
                     <TextHighlighting
                       text={this.props.dataSummary.text}
@@ -70,7 +70,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
               </div>
               <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" style={{padding:'20px',}} >
                 <div style={{marginLeft: '5px',}}>
-                  <div style={{fontFamily: 'Segoe UI', fontSize: '2.0em', fontWeight: "bold", marginBottom:'20px'}}>Label: Spam</div>
+                  <div style={{fontFamily: 'Segoe UI', fontSize: '2.0em', fontWeight: "bold", marginBottom:'20px'}}>{localization.label + localization.colon + this.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}</div>
                   <div style={{borderTopStyle: "solid", borderColor: 'rgb(0,120,212)', backgroundColor: 'white'}} >
                     <div style={{marginLeft: '5%', fontFamily: 'Segoe UI', fontSize: '2.5em', marginTop:'20px'}}>{localization.topFeatureList}</div>
                     <div style={{marginLeft: '5%', fontFamily: 'Segoe UI', fontSize: '1.8em',}}>{localization.model + localization.colon + this.props.modelInformation.model}</div>
@@ -126,5 +126,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
   public setNegToggle() {
     this.setState({negToggle: !this.state.negToggle})
     //this.setState({posToggle: false})
+  }
+  public predictClass(classname, prediciton):string{
+    console.log(classname)
+    console.log("000")
+    console.log(prediciton)
+    return classname[Utils.argsort(prediciton)[0]]
   }
 }
