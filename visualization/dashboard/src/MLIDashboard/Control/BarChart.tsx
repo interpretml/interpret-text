@@ -21,16 +21,14 @@ export class BarChart extends React.PureComponent<IChartProps> {
     let color: string[]
     const k = props.topK
     if ((this.props.posOnly && this.props.negOnly) || (!this.props.posOnly && !this.props.negOnly)){
-      sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k).reverse()      
+      sortedList = Utils.argsort(importances.map(Math.abs)).reverse().splice(0, k).reverse()
     } 
     else if (this.props.negOnly){
       sortedList = Utils.argsort(importances).splice(0, k).reverse()
     }
     else {
       sortedList = Utils.argsort(importances).reverse().splice(0, k).reverse()
-    }
-    
-  
+    }   
     color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)');
     console.log(importances);
     const [data, x, y] = [[], [], []]
@@ -55,7 +53,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
     const chart = {
       data: data,
       layout: {
-        title: 'FEATURE IMPORTANCE',
+        title: localization.featureImportance,
         xaxis:{range:[-1,1]}
       }
     }

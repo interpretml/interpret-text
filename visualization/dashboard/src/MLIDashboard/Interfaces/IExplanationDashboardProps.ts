@@ -4,7 +4,7 @@ export interface IExplanationDashboardProps {
     }
 
 export interface IModelInformation {
-    modelClass: 'msra'| 'bow' | 'rmp';
+    model: 'msra'| 'bow' | 'rmp';
 }
 
 export interface IDatasetSummary {
