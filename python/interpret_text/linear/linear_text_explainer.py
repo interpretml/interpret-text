@@ -3,6 +3,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from interpret_text.common.utils_bow import plot_local_imp, plot_global_imp
 from interpret_text.common.utils_bow import get_important_words, BOWEncoder
+from interpret_text.common.constants import ExplainerParams
 
 
 # BOW explainer class that allows extensibility to other encoders
@@ -16,12 +17,11 @@ class LinearTextExplainer:
         self.hyperparam_range = hyperparam_range
         if self.model is not None and self.hyperparam_range is None:
             raise Exception(
-                "custom model needs to be supplied with custom hyper paramter range to search over"
+                "custom model needs to be supplied with custom hyperparamter range to search over"
             )
         self.preprocessor = BOWEncoder() if preprocessor is None else preprocessor
 
     def _encode(self, X_str):
-        # , train_test_split_params = {"train_size" : 0.8, "test_size" : 0.2}):
         X_vec, _ = self.preprocessor.encode_features(X_str)
         return X_vec
 
@@ -32,13 +32,11 @@ class LinearTextExplainer:
         X_train = self._encode(X_str)
         if self.model is None:
             self.model = LogisticRegression()
-            # Hyper parameters were chosen through hyperparamter optimization on MNLI
-            self.hyperparam_range = [
-                {"solver": ["saga"], "multi_class": ["multinomial"], "C": [10 ** 4]}
-            ]
+            # Hyperparameters were chosen through hyperparamter optimization on MNLI
+            self.hyperparam_range = [ExplainerParams.HYPERPARAM_RANGE]
         elif self.model is not None and self.hyperparam_range is None:
             raise Exception(
-                "custom model needs to be supplied with custom hyper paramter range to search over"
+                "custom model needs to be supplied with custom hyperparamter range to search over"
             )
         classifier_CV = GridSearchCV(
             self.model, self.hyperparam_range, cv=3, scoring="accuracy"
