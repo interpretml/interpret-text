@@ -6,7 +6,7 @@ pool:
   vmImage: "ubuntu-latest"
 
 variables:
-  artifactFeed: interpret-text
+  interpFeed: interpret-text-preview
 
 steps:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
@@ -33,14 +33,14 @@ steps:
       cd ..
     displayName: Create a wheel
 
-  - task: TwineAuthenticate@0
+  - task: TwineAuthenticate@1
     displayName: Configure twine authentication
     inputs:
-      artifactFeeds: $(artifactFeed)
+      artifactFeed: $(interpFeed)
 
   - bash: |
       source activate interp
       cd ./python
-      twine upload -r $(artifactFeed) --config-file $(PYPIRC_PATH) dist/*
+      twine upload -r $(interpFeed) --config-file $(PYPIRC_PATH) dist/*
       cd ..
     displayName: Publish artifacts
