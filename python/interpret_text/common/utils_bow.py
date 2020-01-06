@@ -19,6 +19,7 @@ class BOWTokenizer:
         self.punctuations = string.punctuation
 
     def tokenize(self, sentence, keep_ids=False):
+        EMPTYTOKEN = "empty_token"
         # Creating our token object, which is used to create documents with linguistic annotations.
         mytokens = self.parser(sentence)
 
@@ -33,7 +34,7 @@ class BOWTokenizer:
             return [
                 word
                 if word not in self.stop_words and word not in self.punctuations
-                else "empty_token"
+                else EMPTYTOKEN
                 for word in mytokens
             ]
         else:
@@ -83,6 +84,7 @@ class BOWEncoder:
         return [y_vec, self.labelEncoder]
 
     def decode_imp(self, encoded_imp, input_text):
+        EMPTYTOKEN = "empty_token"
         parsed_sentence = []
         # obtain parsed sentence, while preserving token -> position in sentence mapping
         for i in self.tokenizer.parse(input_text):
@@ -91,7 +93,7 @@ class BOWEncoder:
 
         # replace words with an empty token if deleted when tokenizing
         encoded_word_ids = [
-            None if word == "empty_token" else self.vectorizer.vocabulary_.get(word)
+            None if word == EMPTYTOKEN else self.vectorizer.vocabulary_.get(word)
             for word in encoded_text
         ]
         # obtain word importance corresponding to the word vectors of the encoded sentence
