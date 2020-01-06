@@ -121,11 +121,9 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
   }
   public setPosToggle(ev: React.MouseEvent<HTMLElement>, checked: boolean) {
     this.setState({posToggle: !this.state.posToggle})
-    //this.setState({negToggle: false})
   }
   public setNegToggle() {
     this.setState({negToggle: !this.state.negToggle})
-    //this.setState({posToggle: false})
   }
   public predictClass(classname, prediciton):string{
     console.log(classname)
