@@ -12,11 +12,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 # Tokenizer is class instead of function to avoid multiple reloads of parser, stopwords and punctuation
 # Uses spacy's inbuilt language tool for preprocessing in English [model](https://github.com/explosion/spaCy/tree/master/spacy/lang/en) 
 class BOWTokenizer:
-    def __init__(self, parser):
+    def __init__(self, parser,
+                 stop_words=spacy.lang.en.stop_words.STOP_WORDS,
+                 punctuations=string.punctuation):
         self.parser = parser
         # list of stop words and punctuation marks
-        self.stop_words = spacy.lang.en.stop_words.STOP_WORDS
-        self.punctuations = string.punctuation
+        self.stop_words = stop_words
+        self.punctuations = punctuations
 
     def tokenize(self, sentence, keep_ids=False):
         EMPTYTOKEN = "empty_token"
