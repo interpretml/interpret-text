@@ -10,6 +10,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 
 # Tokenizer is class instead of function to avoid multiple reloads of parser, stopwords and punctuation
+# Uses spacy's inbuilt language tool for preprocessing in English [model](https://github.com/explosion/spaCy/tree/master/spacy/lang/en) 
 class BOWTokenizer:
     def __init__(self, parser):
         self.parser = parser
@@ -95,7 +96,7 @@ class BOWEncoder:
         ]
         # obtain word importance corresponding to the word vectors of the encoded sentence
         decoded_imp = [
-            0 if idx is None else encoded_imp[0, idx] for idx in encoded_word_ids
+            0 if idx is None else encoded_imp[idx] for idx in encoded_word_ids
         ]
         return (decoded_imp, parsed_sentence)
 
@@ -137,22 +138,27 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
         label_coefs_all = classifier.coef_
         # obtain label number / row corresponding to labelname
         label_row_num = bow_encoder.labelEncoder.transform([label_name])
+        #convert from vector to scalar
+        label_row_num = label_row_num[0]
         # obtain importance row corresponding to label number
         label_coefs = label_coefs_all[label_row_num, :]
-        # obtain feature ids of top labels sorted inascending order
-        # use np.abs to obtain highest magnitude of importance, discarding directionality
-        # np.argsort to ids corresponding to descending order of importances
-        # np.flip to convert descending order to ascending order
-        sorting_ids = (np.flip(np.argsort(np.abs(label_coefs)))).flatten()
-        top_ids = sorting_ids[0:20]  # view top 20 features per label
-        # obtain raw words corresponding to top feature ids
-        top_words = [bow_encoder.vectorizer.get_feature_names()[i] for i in top_ids]
-        # obtain importance magnitudes corresponding to top feature ids
-        top_importances = [label_coefs[0, i] for i in top_ids]
-        return [top_words, top_importances]
+    elif clf_type == "feature_importances":
+        label_coefs = classifier.feature_importances_
     else:
         raise Exception("This feature is not yet supported.")
-        # TODO : Add support for sklearn classifiers that use feature importances instead
+    # obtain feature ids of top labels sorted inascending order
+    # use np.abs to obtain highest magnitude of importance, discarding directionality
+    # np.argsort to ids corresponding to descending order of importances
+    # np.flip to convert descending order to ascending order
+    # TODO : Remove flatten below
+    sorting_ids = (np.flip(np.argsort(np.abs(label_coefs))))
+    top_ids = sorting_ids[0:20]  # view top 20 features per label
+    # obtain raw words corresponding to top feature ids
+    top_words = [bow_encoder.vectorizer.get_feature_names()[i] for i in top_ids]
+    # obtain importance magnitudes corresponding to top feature ids
+    top_importances = [label_coefs[i] for i in top_ids]
+    return [top_words, top_importances]
+
 
 
 def plot_global_imp(top_words, top_importances, label_name):

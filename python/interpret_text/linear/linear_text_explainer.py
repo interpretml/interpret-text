@@ -73,9 +73,17 @@ class LinearTextExplainer:
             input_text, needs_fit=False
         )
         encoded_label = self.model.predict(encoded_text)
-        # TODO : Vectorize list comprehensions to speed up word importance finding process
+        # convert from vector to scalar
+        encoded_label = encoded_label[0]
         # Obtain the top feature ids for the selected class label
-        encoded_imp = self.model.coef_[encoded_label, :]
+        if hasattr(self.model, 'coef_'):
+            encoded_imp = self.model.coef_[encoded_label, :]
+        elif hasattr(self.model, 'feature_importances_'):
+            encoded_imp = self.model.feature_importances_
+        else:
+            raise Exception(
+                "model is missing coef_ or feature_importances_ attribute"
+                )
         decoded_imp, parsed_sentence = self.preprocessor.decode_imp(
             encoded_imp, input_text
         )
@@ -84,8 +92,17 @@ class LinearTextExplainer:
     def explain_global(self, label_name):
         # Obtain the top feature ids for the selected class label.
         # Map top features back to words.
+        clf_type = ""
+        if hasattr(self.model, "coef_"):
+            clf_type = "coef"
+        elif hasattr(self.model, "feature_importances_"):
+            clf_type = "feature_importances"
+        else:
+            raise Exception(
+                "model is missing coef_ or feature_importances_ attribute"
+                )
         top_words, top_importances = get_important_words(
-            self.model, label_name, self.preprocessor, clf_type="coef"
+            self.model, label_name, self.preprocessor, clf_type=clf_type
         )
         # Plot the feature importances
         plot_global_imp(top_words, top_importances, label_name)
