@@ -31,19 +31,3 @@ def test_text_classification_mnli_bert(notebooks, tmp):
     assert pytest.approx(result["precision"], 0.93, abs=ABS_TOL)
     assert pytest.approx(result["recall"], 0.93, abs=ABS_TOL)
     assert pytest.approx(result["f1"], 0.93, abs=ABS_TOL)
-
-
-@pytest.mark.integration
-def test_text_classification_bow_lr(notebooks, tmp):
-    notebook_path = notebooks["text_classification_mnli_bow_lr"]
-    pm.execute_notebook(
-        notebook_path,
-        OUTPUT_NOTEBOOK,
-        kernel_name=KERNEL_NAME,
-        parameters=dict(DATA_FOLDER=tmp),
-    )
-    result = sb.read_notebook(OUTPUT_NOTEBOOK).scraps.data_dict
-    assert pytest.approx(result["accuracy"], 0.83, abs=ABS_TOL)
-    assert pytest.approx(result["precision"], 0.83, abs=ABS_TOL)
-    assert pytest.approx(result["recall"], 0.83, abs=ABS_TOL)
-    assert pytest.approx(result["f1"], 0.83, abs=ABS_TOL)
