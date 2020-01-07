@@ -1,0 +1,46 @@
+trigger: none
+pr:
+  - master
+
+pool:
+  vmImage: "ubuntu-latest"
+
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+
+variables:
+  interpFeed: "responsibleai"
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(python.version)'
+    displayName: 'Use Python $(python.version)'
+
+  - script: |
+      python -m pip install --upgrade pip
+    displayName: Upgrade pip to latest
+
+  - script: |
+      python -m pip install -e ./python
+    displayName: Install interpret-text
+
+  - script: |
+      python -m pip install --upgrade setuptools wheel twine
+      cd ./python
+      python setup.py bdist_wheel
+      cd ..
+    displayName: Create a wheel
+
+  - task: TwineAuthenticate@1
+    displayName: Configure twine authentication
+    inputs:
+      artifactFeed: "responsibleai"
+
+  - script: |
+      cd ./python
+      python -m twine upload -r "responsibleai" --config-file $(PYPIRC_PATH) dist/*
+      cd ..
+    displayName: Publish artifacts
