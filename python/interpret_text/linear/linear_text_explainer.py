@@ -74,14 +74,12 @@ class LinearTextExplainer:
         # convert from vector to scalar
         encoded_label = encoded_label[0]
         # Obtain the top feature ids for the selected class label
-        if hasattr(self.model, 'coef_'):
+        if hasattr(self.model, "coef_"):
             encoded_imp = self.model.coef_[encoded_label, :]
-        elif hasattr(self.model, 'feature_importances_'):
+        elif hasattr(self.model, "feature_importances_"):
             encoded_imp = self.model.feature_importances_
         else:
-            raise Exception(
-                "model is missing coef_ or feature_importances_ attribute"
-                )
+            raise Exception("model is missing coef_ or feature_importances_ attribute")
         decoded_imp, parsed_sentence = self.preprocessor.decode_imp(
             encoded_imp, input_text
         )
@@ -96,9 +94,7 @@ class LinearTextExplainer:
         elif hasattr(self.model, "feature_importances_"):
             clf_type = "feature_importances"
         else:
-            raise Exception(
-                "model is missing coef_ or feature_importances_ attribute"
-                )
+            raise Exception("model is missing coef_ or feature_importances_ attribute")
         top_words, top_importances = get_important_words(
             self.model, label_name, self.preprocessor, clf_type=clf_type
         )

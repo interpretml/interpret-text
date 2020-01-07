@@ -10,11 +10,15 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 
 # Tokenizer is class instead of function to avoid multiple reloads of parser, stopwords and punctuation
-# Uses spacy's inbuilt language tool for preprocessing in English [model](https://github.com/explosion/spaCy/tree/master/spacy/lang/en) 
+# Uses spacy's inbuilt language tool for preprocessing
+# in English [model](https://github.com/explosion/spaCy/tree/master/spacy/lang/en)
 class BOWTokenizer:
-    def __init__(self, parser,
-                 stop_words=spacy.lang.en.stop_words.STOP_WORDS,
-                 punctuations=string.punctuation):
+    def __init__(
+        self,
+        parser,
+        stop_words=spacy.lang.en.stop_words.STOP_WORDS,
+        punctuations=string.punctuation,
+    ):
         self.parser = parser
         # list of stop words and punctuation marks
         self.stop_words = stop_words
@@ -142,7 +146,7 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
         label_coefs_all = classifier.coef_
         # obtain label number / row corresponding to labelname
         label_row_num = bow_encoder.labelEncoder.transform([label_name])
-        #convert from vector to scalar
+        # convert from vector to scalar
         label_row_num = label_row_num[0]
         # obtain importance row corresponding to label number
         label_coefs = label_coefs_all[label_row_num, :]
@@ -155,14 +159,13 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
     # np.argsort to ids corresponding to descending order of importances
     # np.flip to convert descending order to ascending order
     # TODO : Remove flatten below
-    sorting_ids = (np.flip(np.argsort(np.abs(label_coefs))))
+    sorting_ids = np.flip(np.argsort(np.abs(label_coefs)))
     top_ids = sorting_ids[0:20]  # view top 20 features per label
     # obtain raw words corresponding to top feature ids
     top_words = [bow_encoder.vectorizer.get_feature_names()[i] for i in top_ids]
     # obtain importance magnitudes corresponding to top feature ids
     top_importances = [label_coefs[i] for i in top_ids]
     return [top_words, top_importances]
-
 
 
 def plot_global_imp(top_words, top_importances, label_name):
