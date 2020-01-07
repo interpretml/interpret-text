@@ -35,7 +35,7 @@ steps:
     displayName: Create a wheel
 
   - task: TwineAuthenticate@1
-    displayName: Configure twine auth
+    displayName: Configure twine authentication
     inputs:
       artifactFeed: "responsibleai"
 
