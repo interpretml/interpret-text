@@ -41,6 +41,6 @@ steps:
 
   - script: |
       cd ./python
-      python -m twine upload -r "responsibleai" --verbose --config-file $(PYPIRC_PATH) dist/*
+      python -m twine upload -r "responsibleai" --config-file $(PYPIRC_PATH) dist/*
       cd ..
     displayName: Publish artifacts
