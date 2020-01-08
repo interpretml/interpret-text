@@ -5,7 +5,7 @@
     "posToggle": "Only Positive Feature Importance",
     "negToggle": "Only Negative Feature Importance",
     "featureImportance": "Feature Importance",
-    "userText": "User-Inputed Text",
+    "userText": "User-Inputted Text",
     "featureLegend": "Feature Legend",
     "posFeatureImportance": "Words with Positive Feature Importance",
     "negFeatureImportance": "Words with Negative Feature Importance",

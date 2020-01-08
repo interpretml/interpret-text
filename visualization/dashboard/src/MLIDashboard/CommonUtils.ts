@@ -10,13 +10,13 @@ export class Utils {
   public static sortedTopK(list:number[], k:number, posOnly:boolean, negOnly:boolean): number[]{
     let sortedList: number[]
     if ((posOnly && negOnly) || (!posOnly && !negOnly)){
-      sortedList = this.argsort(list.map(Math.abs)).reverse().splice(0, k)
+      sortedList = this.argsort(list.map(Math.abs)).reverse().splice(0, k).reverse()
     } 
     else if (negOnly){
-      sortedList = this.argsort(list).splice(0, k)
+      sortedList = this.argsort(list).splice(0, k).reverse()
     }
     else {
-      sortedList = this.argsort(list).reverse().splice(0, k)
+      sortedList = this.argsort(list).reverse().splice(0, k).reverse()
     }
     return sortedList
   }

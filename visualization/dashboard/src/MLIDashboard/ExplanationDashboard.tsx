@@ -65,7 +65,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                   </div>
                   <span style={{color: 'white', fontWeight: 'bold', backgroundColor: '#0078D4', margin: '10px'}}>{localization.posFeatureImportance}</span>
                   <br></br>
-                  <span style={{margin: '10px', fontWeight: 'bold', textDecorationLine: 'underline'}}>{localization.negFeatureImportance}</span>
+                  <span style={{margin: '10px', fontWeight: 'bold', textDecorationLine: 'underline', color: '#0078D4'}}>{localization.negFeatureImportance}</span>
                 </div>
               </div>
               <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" style={{padding:'20px',}} >
@@ -86,8 +86,8 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                     <div className="ms-Grid" dir="ltr" >
                       <div className="ms-Grid-row" style={{margin: '5%'}}>
                         <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} />
-                          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} />
+                          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} checked={this.state.posToggle} />
+                          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} checked={this.state.negToggle} />
                         </div>
                         <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
                           {localization.legendText}
@@ -120,10 +120,10 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     return counter
   }
   public setPosToggle(ev: React.MouseEvent<HTMLElement>, checked: boolean) {
-    this.setState({posToggle: !this.state.posToggle})
+    this.setState({posToggle: !this.state.posToggle, negToggle: false})
   }
   public setNegToggle() {
-    this.setState({negToggle: !this.state.negToggle})
+    this.setState({negToggle: !this.state.negToggle, posToggle: false})
   }
   public predictClass(classname, prediciton):string{
     console.log(classname)
