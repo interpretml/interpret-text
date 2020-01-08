@@ -26,12 +26,15 @@ def get_device(
             if num_gpus is not None
             else torch.cuda.device_count()
         )
-        device = torch.device("cuda" if torch.cuda.is_available() and num_gpus > 0 else "cpu")
+        device = torch.device(
+            "cuda" if torch.cuda.is_available() and num_gpus > 0 else "cpu"
+        )
     else:
         torch.cuda.set_device(local_rank)
         device = torch.device("cuda", local_rank)
         # torch.distributed.init_process_group(backend="nccl")
-        # torch.distributed.init_process_group(backend=backend, rank=rank, world_size=world_size, init_method=init_method)
+        # torch.distributed.init_process_group(backend=backend, rank=rank,
+        # world_size=world_size, init_method=init_method)
         num_gpus = 1
     return device, num_gpus
 
@@ -68,7 +71,9 @@ def move_to_device(model, device, num_gpus=None):
             if num_cuda_devices < 1:
                 raise Exception("CUDA devices are not available.")
             elif num_cuda_devices < 2:
-                print("Warning: Only 1 CUDA device is available. Data parallelism is not possible.")
+                print(
+                    "Warning: Only 1 CUDA device is available. Data parallelism is not possible."
+                )
                 return model
             else:
                 if num_gpus is None:

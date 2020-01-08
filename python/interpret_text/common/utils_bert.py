@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 import numpy as np
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader, RandomSampler, SequentialSampler, TensorDataset
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
 from pytorch_pretrained_bert.modeling import BertForSequenceClassification
 from pytorch_pretrained_bert.optimization import BertAdam
 
@@ -74,7 +74,10 @@ class Tokenizer:
         if isinstance(text[0], str):
             return [self.tokenizer.tokenize(x) for x in tqdm(text)]
         else:
-            return [[self.tokenizer.tokenize(x) for x in sentences] for sentences in tqdm(text)]
+            return [
+                [self.tokenizer.tokenize(x) for x in sentences]
+                for sentences in tqdm(text)
+            ]
 
     def _truncate_seq_pair(self, tokens_a, tokens_b, max_length):
         """Truncates a sequence pair in place to the maximum length."""
@@ -139,13 +142,18 @@ class Tokenizer:
             # construct token_type_ids
             # [[0, 0, 0, 0, ... 0, 1, 1, 1, ... 1], [0, 0, 0, ..., 1, 1, ]
             token_type_ids = [
-                [[i] * len(sentence) for i, sentence in enumerate(example)] for example in tokens
+                [[i] * len(sentence) for i, sentence in enumerate(example)]
+                for example in tokens
             ]
             # merge sentences
-            tokens = [[token for sentence in example for token in sentence] for example in tokens]
+            tokens = [
+                [token for sentence in example for token in sentence]
+                for example in tokens
+            ]
             # prefix with [0] for [CLS]
             token_type_ids = [
-                [0] + [i for sentence in example for i in sentence] for example in token_type_ids
+                [0] + [i for sentence in example for i in sentence]
+                for example in token_type_ids
             ]
             # pad sequence
             token_type_ids = [x + [0] * (max_len - len(x)) for x in token_type_ids]
@@ -196,13 +204,18 @@ class Tokenizer:
             # construct token_type_ids
             # [[0, 0, 0, 0, ... 0, 1, 1, 1, ... 1], [0, 0, 0, ..., 1, 1, ]
             token_type_ids = [
-                [[i] * len(sentence) for i, sentence in enumerate(example)] for example in tokens
+                [[i] * len(sentence) for i, sentence in enumerate(example)]
+                for example in tokens
             ]
             # merge sentences
-            tokens = [[token for sentence in example for token in sentence] for example in tokens]
+            tokens = [
+                [token for sentence in example for token in sentence]
+                for example in tokens
+            ]
             # prefix with [0] for [CLS]
             token_type_ids = [
-                [0] + [i for sentence in example for i in sentence] for example in token_type_ids
+                [0] + [i for sentence in example for i in sentence]
+                for example in token_type_ids
             ]
             # pad sequence
             token_type_ids = [x + [0] * (max_len - len(x)) for x in token_type_ids]
@@ -217,7 +230,12 @@ class Tokenizer:
         return tokens, input_ids, input_mask, token_type_ids
 
     def tokenize_ner(
-        self, text, max_len=BERT_MAX_LEN, labels=None, label_map=None, trailing_piece_tag="X"
+        self,
+        text,
+        max_len=BERT_MAX_LEN,
+        labels=None,
+        label_map=None,
+        trailing_piece_tag="X",
     ):
         """
         Tokenize and preprocesses input word lists, involving the following steps
@@ -275,7 +293,9 @@ class Tokenizer:
             return isinstance(obj, Iterable) and not isinstance(obj, str)
 
         if max_len > BERT_MAX_LEN:
-            warnings.warn("setting max_len to max allowed tokens: {}".format(BERT_MAX_LEN))
+            warnings.warn(
+                "setting max_len to max allowed tokens: {}".format(BERT_MAX_LEN)
+            )
             max_len = BERT_MAX_LEN
 
         if not _is_iterable_but_not_string(text):
@@ -364,7 +384,12 @@ class Tokenizer:
             label_ids_all.append(label_ids)
 
         if label_available:
-            return (input_ids_all, input_mask_all, trailing_token_mask_all, label_ids_all)
+            return (
+                input_ids_all,
+                input_mask_all,
+                trailing_token_mask_all,
+                label_ids_all,
+            )
         else:
             return input_ids_all, input_mask_all, trailing_token_mask_all, None
 
@@ -451,23 +476,34 @@ class BERTSequenceClassifier:
         if token_type_ids:
             token_type_ids_tensor = torch.tensor(token_type_ids, dtype=torch.long)
             train_dataset = TensorDataset(
-                token_ids_tensor, input_mask_tensor, token_type_ids_tensor, labels_tensor
+                token_ids_tensor,
+                input_mask_tensor,
+                token_type_ids_tensor,
+                labels_tensor,
             )
         else:
-            train_dataset = TensorDataset(token_ids_tensor, input_mask_tensor, labels_tensor)
+            train_dataset = TensorDataset(
+                token_ids_tensor, input_mask_tensor, labels_tensor
+            )
         train_sampler = RandomSampler(train_dataset)
 
-        train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch_size)
+        train_dataloader = DataLoader(
+            train_dataset, sampler=train_sampler, batch_size=batch_size
+        )
         # define optimizer and model parameters
         param_optimizer = list(self.model.named_parameters())
         no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
         optimizer_grouped_parameters = [
             {
-                "params": [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+                "params": [
+                    p for n, p in param_optimizer if not any(nd in n for nd in no_decay)
+                ],
                 "weight_decay": 0.01,
             },
             {
-                "params": [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+                "params": [
+                    p for n, p in param_optimizer if any(nd in n for nd in no_decay)
+                ],
                 "weight_decay": 0.0,
             },
         ]
@@ -572,17 +608,23 @@ class BERTSequenceClassifier:
 
         if token_type_ids:
             token_type_ids_tensor = torch.tensor(token_type_ids, dtype=torch.long)
-            test_dataset = TensorDataset(token_ids_tensor, input_mask_tensor, token_type_ids_tensor)
+            test_dataset = TensorDataset(
+                token_ids_tensor, input_mask_tensor, token_type_ids_tensor
+            )
         else:
             test_dataset = TensorDataset(token_ids_tensor, input_mask_tensor)
 
         test_sampler = SequentialSampler(test_dataset)
-        test_dataloader = DataLoader(test_dataset, sampler=test_sampler, batch_size=batch_size)
+        test_dataloader = DataLoader(
+            test_dataset, sampler=test_sampler, batch_size=batch_size
+        )
 
         preds = []
         for i, batch in enumerate(tqdm(test_dataloader, desc="Iteration")):
             if token_type_ids:
-                x_batch, mask_batch, token_type_ids_batch = tuple(t.to(device) for t in batch)
+                x_batch, mask_batch, token_type_ids_batch = tuple(
+                    t.to(device) for t in batch
+                )
             else:
                 token_type_ids_batch = None
                 x_batch, mask_batch = tuple(t.to(device) for t in batch)

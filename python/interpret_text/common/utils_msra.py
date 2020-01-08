@@ -18,9 +18,6 @@ import logging
 
 from tempfile import TemporaryDirectory
 
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-
 import torch
 from pytorch_pretrained_bert import BertTokenizer
 from interpret_text.common.utils_bert import Language, Tokenizer
@@ -68,7 +65,10 @@ def maybe_download(url, filename=None, work_directory=".", expected_bytes=None):
 
         with open(filepath, "wb") as file:
             for data in tqdm(
-                r.iter_content(block_size), total=num_iterables, unit="KB", unit_scale=True
+                r.iter_content(block_size),
+                total=num_iterables,
+                unit="KB",
+                unit_scale=True,
             ):
                 file.write(data)
     else:
@@ -96,11 +96,14 @@ def extract_zip(file_path, dest_path="."):
         z.extractall(dest_path, filter(lambda f: not f.endswith("\r"), z.namelist()))
 
 
-def download_file_and_extract(local_cache_path: str = ".", file_split: str = "train") -> None:
+def download_file_and_extract(
+    local_cache_path: str = ".", file_split: str = "train"
+) -> None:
     """Download and extract the dataset files
 
     Args:
-        local_cache_path (str [optional]) -- Directory to cache files to. Defaults to current working directory (default: {"."})
+        local_cache_path (str [optional]) -- Directory to cache files to. Defaults to current working
+        directory (default: {"."})
         file_split {str} -- [description] (default: {"train"})
 
     Returns:
@@ -128,7 +131,10 @@ def load_pandas_df(local_cache_path=".", file_split="train"):
         download_file_and_extract(local_cache_path, file_split)
     except Exception as e:
         raise e
-    return pd.read_json(os.path.join(local_cache_path, DATA_FILES[file_split]), lines=True)
+    return pd.read_json(
+        os.path.join(local_cache_path, DATA_FILES[file_split]), lines=True
+    )
+
 
 @contextmanager
 def download_path(path):
