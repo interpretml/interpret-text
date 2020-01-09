@@ -42,7 +42,7 @@ export class TextHighlighting extends React.PureComponent<IChartProps> {
       }
       return ( <span style = {styleType} title = {score.toString()}>{word}</span>)
     })
-    return val.map((word, index)=>{
+    return val.map((word)=>{
       return <span>{word} </span>
     })
   }

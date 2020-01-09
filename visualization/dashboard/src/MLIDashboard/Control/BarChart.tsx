@@ -43,7 +43,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
     })
     const chart = {
       config:{displaylogo: false, responsive: true, modeBarButtonsToRemove: ['toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 
-      'sendDataToCloud', 'toImage', 'resetScale2d', 'autoScale2d','zoom2d','pan2d','zoomIn2d', 'zoomOut2d']},
+      'sendDataToCloud', 'toImage', 'resetScale2d', 'autoScale2d', 'zoom2d', 'pan2d', 'zoomIn2d', 'zoomOut2d']},
       data: data,
       layout: {
         title: localization.featureImportance,
