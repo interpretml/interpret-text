@@ -158,7 +158,6 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
     # use np.abs to obtain highest magnitude of importance, discarding directionality
     # np.argsort to ids corresponding to descending order of importances
     # np.flip to convert descending order to ascending order
-    # TODO : Remove flatten below
     sorting_ids = np.flip(np.argsort(np.abs(label_coefs)))
     top_ids = sorting_ids[0:20]  # view top 20 features per label
     # obtain raw words corresponding to top feature ids
