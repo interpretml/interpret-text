@@ -50,7 +50,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                     />
                   </div>
                   <div style={{fontSize: '1.8em', textAlign: 'center', fontStyle: 'italic', fontFamily: 'Segoe UI', color: '#636363', margin: '30px'}}>{this.state.topK.toString() + ' ' + localization.importantWords}</div>
-                  <div style={{backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '600px', padding:'20px'}}>
+                  <div style={{backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '250px', padding:'20px', overflowY: 'auto'}}>
                     <TextHighlighting
                       text={this.props.dataSummary.text}
                       localExplanations={this.props.dataSummary.localExplanations}
