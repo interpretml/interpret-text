@@ -84,7 +84,7 @@ class LinearTextExplainer:
             encoded_imp = self.model.feature_importances_
         else:
             raise Exception("model is missing coef_ or feature_importances_ attribute")
-        decoded_imp, parsed_sentence = self.preprocessor.decode_imp(
+        decoded_imp, parsed_sentence_list = self.preprocessor.decode_imp(
             encoded_imp, input_text
         )
         local_explanantion = _create_local_explanation(
@@ -93,7 +93,7 @@ class LinearTextExplainer:
             local_importance_values=np.array(decoded_imp),
             method=str(type(self.model)),
             model_task="classification",
-            features=parsed_sentence,
+            features=parsed_sentence_list,
             classes=self.preprocessor.labelEncoder.classes_,
         )
         return local_explanantion
