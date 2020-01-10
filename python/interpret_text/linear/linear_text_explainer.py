@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
@@ -87,10 +88,13 @@ class LinearTextExplainer:
             encoded_imp, input_text
         )
         local_explanantion = _create_local_explanation(
-            local_importance_values=decoded_imp,
+            classification=True,
+            text_explanation=True,
+            local_importance_values=np.array(decoded_imp),
             method=str(type(self.model)),
             model_task="classification",
             features=parsed_sentence,
+            classes=self.preprocessor.labelEncoder.classes_,
         )
         return local_explanantion
 
