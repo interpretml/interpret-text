@@ -11,8 +11,12 @@ from IPython.display import display
 class ExplanationDashboard(object):
     """The dashboard class, wraps the dashboard component."""
 
-    def __init__(self, explanation, text=None, prediction=None, classNames=None):
+    def __init__(self, explanation):
         """Initialize the Explanation Dashboard for a single sentence."""
+        classNames = explanation._classes.tolist()
+        text = explanation._features
+        explanation = explanation._local_importance_values.tolist()
+        prediction = [i for i in range(len(classNames))]
         self._widget_instance = ExplanationWidget()
         self._widget_instance.value = {
             "text": text,

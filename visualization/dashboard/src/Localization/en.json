@@ -1,5 +1,16 @@
 {
     "interpretibilityDashboard": "Interpretability Dashboard",
-    "importantWords": "Important Words",
-    "topFeatureList": "Top feature list analysis"
+    "importantWords": "Most Important Words",
+    "topFeatureList": "Top feature list analysis",
+    "posToggle": "Only Positive Feature Importance",
+    "negToggle": "Only Negative Feature Importance",
+    "featureImportance": "Feature Importance",
+    "userText": "User-Inputted Text",
+    "featureLegend": "Feature Legend",
+    "posFeatureImportance": "Words with Positive Feature Importance",
+    "negFeatureImportance": "Words with Negative Feature Importance",
+    "legendText": "Feature importance ranges between [-1,1] where positive scalar represents the extent that the word was important towards the classification of your selected label, and negative scalar represents words that encouraged your model away from your selected label.",
+    "label": "Label",
+    "model": "Model used",
+    "colon": ": "
 }
