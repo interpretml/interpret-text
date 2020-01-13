@@ -50,14 +50,36 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                     />
                   </div>
                   <div style={{fontSize: '1.8em', textAlign: 'center', fontStyle: 'italic', fontFamily: 'Segoe UI', color: '#636363', margin: '30px'}}>{this.state.topK.toString() + ' ' + localization.importantWords}</div>
-                  <div style={{backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '250px', padding:'20px', overflowY: 'auto'}}>
+                  <div style={{marginLeft:'5%', height: '350px'}}>
+                   <BarChart
+                      text={this.props.dataSummary.text}
+                      localExplanations={this.props.dataSummary.localExplanations}
+                      topK={this.state.topK}
+                      posOnly={this.state.posToggle}
+                      negOnly={this.state.negToggle}
+                    />
+                    </div> 
+                    <div style={{fontFamily: 'Segoe UI', fontSize: '2.0em', fontWeight: "bold", marginBottom:'20px'}}>{localization.label + localization.colon + this.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}</div>
+                    <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
+                          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} checked={this.state.posToggle} />
+                          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} checked={this.state.negToggle} />
+                        </div>
+                    <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
+                      {localization.legendText}
+                    </div>
+                </div>
+              </div>
+              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" style={{padding:'20px',}} >
+                <div style={{marginLeft: '5px',}}>
+                  
+                  <div style={{borderTopStyle: "solid", borderColor: 'rgb(0,120,212)', backgroundColor: 'white'}} >
+                    <div style={{backgroundColor: 'white', borderStyle: 'groove', borderBlockColor: 'black', borderRadius: '5px', height: '200px', padding:'20px', overflowY: 'auto'}}>
                     <TextHighlighting
                       text={this.props.dataSummary.text}
                       localExplanations={this.props.dataSummary.localExplanations}
                       topK={this.state.topK}
                       posOnly={this.state.posToggle}
                       negOnly={this.state.negToggle}
-
                     />
                   </div>
                   <div style={{margin: '30px 10px 10px 10px'}}>
@@ -66,32 +88,8 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                   <span style={{color: 'white', fontWeight: 'bold', backgroundColor: '#0078D4', margin: '10px'}}>{localization.posFeatureImportance}</span>
                   <br></br>
                   <span style={{margin: '10px', fontWeight: 'bold', textDecorationLine: 'underline', color: '#0078D4'}}>{localization.negFeatureImportance}</span>
-                </div>
-              </div>
-              <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" style={{padding:'20px',}} >
-                <div style={{marginLeft: '5px',}}>
-                  <div style={{fontFamily: 'Segoe UI', fontSize: '2.0em', fontWeight: "bold", marginBottom:'20px'}}>{localization.label + localization.colon + this.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}</div>
-                  <div style={{borderTopStyle: "solid", borderColor: 'rgb(0,120,212)', backgroundColor: 'white'}} >
-                    <div style={{marginLeft: '5%', fontFamily: 'Segoe UI', fontSize: '2.5em', marginTop:'20px'}}>{localization.topFeatureList}</div>
-                    <div style={{marginLeft: '5%', fontFamily: 'Segoe UI', fontSize: '1.8em',}}>{localization.model + localization.colon + this.props.modelInformation.model}</div>
-                   <div style={{marginLeft:'5%'}}>
-                   <BarChart
-                      text={this.props.dataSummary.text}
-                      localExplanations={this.props.dataSummary.localExplanations}
-                      topK={this.state.topK}
-                      posOnly={this.state.posToggle}
-                      negOnly={this.state.negToggle}
-                    />
-                    </div>
                     <div className="ms-Grid" dir="ltr" >
                       <div className="ms-Grid-row" style={{margin: '5%'}}>
-                        <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                          <Toggle label={localization.posToggle} inlineLabel onChange={this.setPosToggle} checked={this.state.posToggle} />
-                          <Toggle label={localization.negToggle} inlineLabel onChange={this.setNegToggle} checked={this.state.negToggle} />
-                        </div>
-                        <div className="ms-Grid-col ms-sm6 ms-md6 ms-lg6" >
-                          {localization.legendText}
-                        </div>
                       </div>
                     </div>
                     
