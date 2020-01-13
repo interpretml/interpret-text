@@ -8,7 +8,7 @@
 # Microsoft NLP recipes repo:
 # https://github.com/microsoft/nlp-recipes/tree/master/utils_nlp
 
-
+import logging
 import warnings
 from collections.abc import Iterable
 from enum import Enum
@@ -121,12 +121,14 @@ class Tokenizer:
                             Defaults to 512.
         Returns:
             tuple: A tuple containing the following three lists
-                list of preprocesssed token lists
+                list of preprocessed token lists
                 list of input mask lists
                 list of token type id lists
         """
         if max_len > BERT_MAX_LEN:
-            print("setting max_len to max allowed tokens: {}".format(BERT_MAX_LEN))
+            logging.info(
+                "setting max_len to max allowed tokens: {}".format(BERT_MAX_LEN)
+            )
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
@@ -182,13 +184,15 @@ class Tokenizer:
                             Defaults to 512.
         Returns:
             tuple: A tuple containing the following four lists
-                list of preprocesssed token lists
+                list of preprocessed token lists
                 list of input id lists
                 list of input mask lists
                 list of token type id lists
         """
         if max_len > BERT_MAX_LEN:
-            print("setting max_len to max allowed tokens: {}".format(BERT_MAX_LEN))
+            logging.info(
+                "setting max_len to max allowed tokens: {}".format(BERT_MAX_LEN)
+            )
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
@@ -554,7 +558,7 @@ class BERTSequenceClassifier:
                 opt.step()
                 if verbose:
                     if i % ((num_batches // 10) + 1) == 0:
-                        print(
+                        logging.info(
                             "epoch:{}/{}; batch:{}->{}/{}; average training loss:{:.6f}".format(
                                 epoch + 1,
                                 num_epochs,
