@@ -147,7 +147,8 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
         # special case if labels are binary.
         # cast importances to be size (2,#features) and not (#features,)
         if len(bow_encoder.labelEncoder.classes_) == 2:
-            label_coefs_all = np.vstack(-1*label_coefs_all, label_coefs_all)
+            # when #labels == 2, coef_ returns 1D array
+            label_coefs_all = np.vstack((-1*label_coefs_all, label_coefs_all))
         # obtain label number / row corresponding to labelname
         label_row_num = bow_encoder.labelEncoder.transform([label_name])
         # convert from vector to scalar
