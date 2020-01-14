@@ -79,7 +79,11 @@ class LinearTextExplainer:
         encoded_label = encoded_label[0]
         # Obtain the top feature ids for the selected class label
         if hasattr(self.model, "coef_"):
-            encoded_imp = self.model.coef_[encoded_label, :]
+            # when #labels == 2, coef_ returns 1D array
+            if len(self.preprocessor.labelEncoder.classes_) == 2:
+                label_coefs_all = np.vstack((-1*self.model.coef_,
+                                            self.model.coef_))
+            encoded_imp = label_coefs_all[encoded_label, :]
         elif hasattr(self.model, "feature_importances_"):
             encoded_imp = self.model.feature_importances_
         else:
