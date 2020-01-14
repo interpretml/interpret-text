@@ -13,16 +13,23 @@ from interpret_community.explanation.explanation import _create_global_explanati
 
 
 class LinearTextExplainer:
-    def __init__(self, preprocessor=None, model=None, hyperparam_range=None):
+    def __init__(self, preprocessor=None, model=None,
+                 hyperparam_range=None, is_trained=False):
         self.parsed_sentence = None
         self.word_importances = None
-        self.is_trained = False
         self.model = model
-        self.hyperparam_range = hyperparam_range
-        if self.model is not None and self.hyperparam_range is None:
+        self.is_trained = is_trained
+        if self.model is None and self.is_trained is True:
             raise Exception(
-                "custom model needs to be supplied with custom hyperparamter range to search over"
+                "is_trained flag can't be set to true, if custom model not provided"
             )
+        self.hyperparam_range = hyperparam_range
+        if self.model is not None:
+            # model is user defined
+            if not self.is_trained and self.hyperparam_range is None:
+                raise Exception(
+                    "custom model needs to be supplied with custom hyperparamter range to search over"
+                )
         self.preprocessor = BOWEncoder() if preprocessor is None else preprocessor
 
     def _encode(self, X_str):
@@ -34,21 +41,20 @@ class LinearTextExplainer:
 
     def fit(self, X_str, y_train):
         X_train = self._encode(X_str)
-        if self.model is None:
-            self.model = LogisticRegression()
-            # Hyperparameters were chosen through hyperparamter optimization on MNLI
-            self.hyperparam_range = [ExplainerParams.HYPERPARAM_RANGE]
-        elif self.model is not None and self.hyperparam_range is None:
-            raise Exception(
-                "custom model needs to be supplied with custom hyperparamter range to search over"
+        if self.is_trained is False:
+            if self.model is None:
+                self.model = LogisticRegression()
+                # Hyperparameters were chosen through hyperparamter optimization on MNLI
+                self.hyperparam_range = [ExplainerParams.HYPERPARAM_RANGE]
+            classifier_CV = GridSearchCV(
+                self.model, self.hyperparam_range, cv=3, scoring="accuracy"
             )
-        classifier_CV = GridSearchCV(
-            self.model, self.hyperparam_range, cv=3, scoring="accuracy"
-        )
-        classifier_CV.fit(X_train, y_train)
-        # set model as the best estimator from grid search results
-        self.model = classifier_CV.best_estimator_
-        best_params = classifier_CV.best_params_
+            classifier_CV.fit(X_train, y_train)
+            # set model as the best estimator from grid search results
+            self.model = classifier_CV.best_estimator_
+            best_params = classifier_CV.best_params_
+        else:
+            best_params = self.model.get_params()
 
         # report metrics
         class Encoder:
