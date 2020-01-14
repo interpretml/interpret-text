@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from interpret_text.common.utils_bow import plot_local_imp, plot_global_imp
-from interpret_text.common.utils_bow import get_important_words, BOWEncoder
+from interpret_text.common.utils_classical import plot_local_imp, plot_global_imp
+from interpret_text.common.utils_classical import get_important_words, BOWEncoder
 from interpret_text.common.constants import ExplainerParams
 from interpret_text.explanation.explanation import _create_local_explanation
 from interpret_community.explanation.explanation import _create_global_explanation
@@ -12,7 +12,7 @@ from interpret_community.explanation.explanation import _create_global_explanati
 # Uses logistic regression and 1-gram model by default
 
 
-class LinearTextExplainer:
+class ClassicalTextExplainer:
     def __init__(self, preprocessor=None, model=None, hyperparam_range=None):
         self.parsed_sentence = None
         self.word_importances = None
