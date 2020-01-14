@@ -7,15 +7,15 @@ export class Utils {
     return sorted.map(val => val[1])
   }
 
-  public static sortedTopK(list:number[], k:number, posOnly:boolean, negOnly:boolean): number[]{
+  public static sortedTopK(list:number[], k:number, radio:string): number[]{
     let sortedList: number[]
-    if ((posOnly && negOnly) || (!posOnly && !negOnly)){
+    if (radio === "all"){
       sortedList = this.argsort(list.map(Math.abs)).reverse().splice(0, k).reverse()
     } 
-    else if (negOnly){
+    else if (radio == "neg"){
       sortedList = this.argsort(list).splice(0, k).reverse()
     }
-    else {
+    else if (radio == "pos"){
       sortedList = this.argsort(list).reverse().splice(0, k).reverse()
     }
     return sortedList
