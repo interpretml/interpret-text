@@ -76,7 +76,7 @@ class LinearTextExplainer:
 
         return [text_model, best_params]
 
-    def explain_local(self, input_text):
+    def explain_local(self, input_text, abs_sum_to_one=False):
         [encoded_text, _] = self.preprocessor.encode_features(
             input_text, needs_fit=False
         )
@@ -86,9 +86,10 @@ class LinearTextExplainer:
         # Obtain the top feature ids for the selected class label
         if hasattr(self.model, "coef_"):
             # when #labels == 2, coef_ returns 1D array
+            label_coefs_all = self.model.coef_
             if len(self.preprocessor.labelEncoder.classes_) == 2:
-                label_coefs_all = np.vstack((-1*self.model.coef_,
-                                            self.model.coef_))
+                label_coefs_all = np.vstack((-1*label_coefs_all,
+                                            label_coefs_all))
             encoded_imp = label_coefs_all[encoded_label, :]
         elif hasattr(self.model, "feature_importances_"):
             encoded_imp = self.model.feature_importances_
@@ -97,6 +98,10 @@ class LinearTextExplainer:
         decoded_imp, parsed_sentence_list = self.preprocessor.decode_imp(
             encoded_imp, input_text
         )
+
+        if abs_sum_to_one is True:
+            decoded_imp = decoded_imp / (np.sum(np.abs(decoded_imp)))
+
         local_explanantion = _create_local_explanation(
             classification=True,
             text_explanation=True,
