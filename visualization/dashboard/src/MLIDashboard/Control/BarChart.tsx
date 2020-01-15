@@ -19,7 +19,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
     const importances = props.localExplanations
     let color: string[]
     const k = props.topK
-    let sortedList = Utils.sortedTopK(importances, k, this.props.posOnly, this.props.negOnly)
+    let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
     color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)');
     console.log(importances);
     const [data, x, y] = [[], [], []]
