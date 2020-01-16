@@ -8,11 +8,13 @@ import torch
 from numpy import dot
 from numpy.linalg import norm
 
-from interpret_text.msra.MSRAExplainer import MSRAExplainer
+from interpret_text.unified_information.unified_information_explainer import (
+    UnifiedInformationExplainer,
+)
 from utils_test import get_mnli_test_dataset, get_bert_model
 
 
-class TestMSRAExplainer(object):
+class TestUnifiedInformationExplainer(object):
     def test_working(self):
         assert True
 
@@ -22,13 +24,13 @@ class TestMSRAExplainer(object):
         text = "rare bird has more than enough charm to make it memorable."
         model = get_bert_model()
         model.to(device)
-        interpreter_msra = MSRAExplainer(
+        interpreter_unified = UnifiedInformationExplainer(
             model=model,
             train_dataset=list(mnli_test_dataset),
             device=device,
             target_layer=14,
         )
-        explanation_msra = interpreter_msra.explain_local(text)
+        explanation_unified = interpreter_unified.explain_local(text)
         valid_imp_vals = np.array(
             [
                 0.2620866596698761,
@@ -47,8 +49,8 @@ class TestMSRAExplainer(object):
                 0.260466068983078,
             ]
         )
-        print(explanation_msra.local_importance_values)
-        local_importance_values = np.array(explanation_msra.local_importance_values)
+        print(explanation_unified.local_importance_values)
+        local_importance_values = np.array(explanation_unified.local_importance_values)
         cos_sim = dot(valid_imp_vals, local_importance_values) / (
             norm(valid_imp_vals) * norm(local_importance_values)
         )
