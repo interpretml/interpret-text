@@ -1,4 +1,4 @@
-from interpret_text.common.utils_msra import load_pandas_df
+from interpret_text.common.utils_unified import load_pandas_df
 from interpret_text.common.utils_bert import BERTSequenceClassifier
 
 
