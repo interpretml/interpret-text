@@ -9,15 +9,18 @@ from pytorch_pretrained_bert import BertTokenizer
 
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
-from interpret_text.common.utils_msra import get_single_embedding, make_bert_embeddings
+from interpret_text.common.utils_unified import (
+    get_single_embedding,
+    make_bert_embeddings,
+)
 
 
-class MSRAExplainer(PureStructuredModelMixin, nn.Module):
-    """The MSRAExplainer for returning explanations for pytorch NN models.
+class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
+    """The UnifiedInformationExplainer for returning explanations for pytorch NN models.
     """
 
     def __init__(self, model, train_dataset, device, target_layer=14, total_layers=12):
-        """ Initialize the MSRAExplainer
+        """ Initialize the UnifiedInformationExplainer
         :param model: a pytorch model
         :type: torch.nn
         :param train_dataset: dataset used while training the model
@@ -30,7 +33,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         :param total_layer: The total number of bert hidden layers
         :type total_layer: int
         """
-        super(MSRAExplainer, self).__init__()
+        super(UnifiedInformationExplainer, self).__init__()
         self.device = device
         # Constant paramters for now, will modify based on the model later
         # Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where
@@ -88,18 +91,18 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             training_embeddings = make_bert_embeddings(
                 self.train_dataset, self.model, self.device
             )
-            regularization = self.calculate_regularization(
+            regularization = self._calculate_regularization(
                 training_embeddings, self.model
             ).tolist()
             self.regular = nn.Parameter(
                 torch.tensor(regularization).to(self.input_embeddings),
                 requires_grad=False,
             )
-            self.Phi = self.generate_Phi(self.target_layer, self.total_layers)
+            self.Phi = self._generate_Phi(self.target_layer, self.total_layers)
 
         # values below are arbitarily set for now
-        self.optimize(iteration=50, lr=0.01, show_progress=True)
-        local_importance_values = self.get_sigma()
+        self._optimize(iteration=50, lr=0.01, show_progress=True)
+        local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
         return _create_local_explanation(
             local_importance_values=np.array(local_importance_values),
@@ -107,7 +110,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
             model_task="classification",
         )
 
-    def calculate_regularization(self, sampled_x, model, reduced_axes=None):
+    def _calculate_regularization(self, sampled_x, model, reduced_axes=None):
         """ Calculate the variance of the state generated from the perturbed inputs that is used for Interpreter
         :param sampled_x: A list of sampled input embeddings $x$, each $x$ is of shape ``[length, dimension]``.
         All the $x$s can have different length, but should have the same dimension. Sampled number should be higher
@@ -130,7 +133,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         """
         sample_num = len(sampled_x)
         sample_s = []
-        self.Phi = self.generate_Phi(
+        self.Phi = self._generate_Phi(
             layer=self.target_layer, total_layers=self.total_layers
         )
         for n in range(sample_num):
@@ -172,7 +175,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
 
         return loss - torch.mean(torch.log(ratios)) * self.rate
 
-    def optimize(self, iteration=5000, lr=0.01, show_progress=False):
+    def _optimize(self, iteration=5000, lr=0.01, show_progress=False):
         """ Optimize the loss function
         :param iteration: Total optimizing iteration
         :type iteration: int
@@ -204,7 +207,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         self.eval()
         self.load_state_dict(state_dict)
 
-    def get_sigma(self):
+    def _get_sigma(self):
         """ Calculate and return the sigma
         :return: Sigma values of shape ``[seqLen]``, the ``sigma``.
         :rtype: np.ndarray
@@ -212,7 +215,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
 
-    def generate_Phi(self, layer, total_layers):
+    def _generate_Phi(self, layer, total_layers):
         """Generate the Phi/hidden state that needs to be interpreted
         /Generates a function that returns the new hidden state given a new perturbed input is passed
         :param model: a pytorch model
@@ -266,7 +269,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
         parsed_sentence = CLS_TOKEN + tokenizer.tokenize(text) + SEP_TOKEN
 
-        self.plot_global_imp(
+        self._plot_global_imp(
             parsed_sentence[1:-2],
             [0.4 - i for i in self.local_importance_values[1:-2]],
             "positive",
@@ -302,7 +305,7 @@ class MSRAExplainer(PureStructuredModelMixin, nn.Module):
         highlighted_text = " ".join(highlighted_text)
         display(HTML(highlighted_text))
 
-    def plot_global_imp(self, top_words, top_importances, label_name):
+    def _plot_global_imp(self, top_words, top_importances, label_name):
         plt.figure(figsize=(8, 4))
         plt.title(
             "most important words for class label: " + str(label_name), fontsize=18
