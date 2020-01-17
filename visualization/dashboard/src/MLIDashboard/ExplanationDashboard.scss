@@ -1,6 +1,6 @@
 
 
-.explainerDashboard{
+.explainerDashboard {
     width: 100%;
     height: 100%;
     background-color: #f2f2f2;
@@ -12,15 +12,15 @@
         .slider {
             margin-top: 5%;
         }
-        .textBelowSlider{
+        .textBelowSlider {
             font-size: 1.8em;
             text-align: center;
             font-style: italic;
             color: #636363;
-            margin: 30px
+            margin: 30px;
         }
     }
-    .chartWithRadio{
+    .chartWithRadio {
         display: flex;
         flex-direction: row;
         .barChart{
@@ -29,7 +29,7 @@
             width: 970px;
             height: 350px;
         }
-        .chartRight{
+        .chartRight {
             flex-direction: column;
             margin: 5%;
             .label {
@@ -38,19 +38,19 @@
                 margin-bottom:20px;
                 color: black;
             }
-            .radio{
+            .radio {
                 padding: 10px;
             }
-            .legend{
+            .legend {
                 padding: 10px;
             }
         }
     }
-    .highlightWithLegend{
-        background-color: white;;
+    .highlightWithLegend {
+        background-color: white;
         display: flex;
         flex-direction: row;
-        .textHighlighting{
+        .textHighlighting {
             margin-left: 5%;
             margin-top: 5%;
             border-style: groove;
@@ -62,7 +62,7 @@
             line-height: 32px;
             padding: 20px;
         }
-        .textRight{
+        .textRight {
             flex-direction: column;
             margin-top: 5%;
             .legend {
@@ -70,14 +70,14 @@
                 margin-right: 10px;
                 margin-bottom: 10px;
             }
-            .posFeatureImportance{
+            .posFeatureImportance {
                 margin: 10px 10px 10px 5px;
                 background-color: #5A53FF;
                 color: white;
                 text-decoration-line: underline;
                 font-weight: bold;
             }
-            .negFeatureImportance{
+            .negFeatureImportance {
                 margin: 10px 10px 10px 5px;
                 font-weight: bold;
                 text-decoration-line: underline;

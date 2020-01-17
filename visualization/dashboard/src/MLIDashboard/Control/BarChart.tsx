@@ -47,8 +47,24 @@ export class BarChart extends React.PureComponent<IChartProps> {
       data: data,
       layout: {
         xaxis:{
-          title: localization.featureImportance
-        }
+          range: [Math.floor(Math.min(...importances))-0.1, Math.ceil(Math.max(...importances))+0.1],
+          title: localization.featureImportance,
+          titlefont: {
+            family: 'Segoe UI'
+          }
+        },
+        yaxis: {
+          ticks: 'outside',
+          ticklen: 35,
+          tickwidth: 1,
+          tickcolor: 'white',
+          titlefont: {
+            family: 'Segoe UI'
+          },
+          // automargin: true,
+        },
+        paper_bgcolor: '#F2F2F2',
+        plot_bgcolor: '#FFFFFF'
       }
     }
     return chart

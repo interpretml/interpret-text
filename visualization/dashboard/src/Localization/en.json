@@ -10,7 +10,7 @@
     "featureLegend": "Feature Legend",
     "posFeatureImportance": "Words with Positive Feature Importance",
     "negFeatureImportance": "Words with Negative Feature Importance",
-    "legendText": "Feature importance ranges between [-1,1] where positive scalar represents the extent that the word was important towards the classification of your selected label, and negative scalar represents words that encouraged your model away from your selected label.",
+    "legendText": "Positive scalar feature importances represents the extent that the word was important towards the classification of your selected label, and negative scalar feature importances represents words that encouraged your model away from your selected label.",
     "label": "Label",
     "model": "Model used",
     "colon": ": "
