@@ -1,0 +1,88 @@
+
+
+.explainerDashboard{
+    width: 100%;
+    height: 100%;
+    background-color: #f2f2f2;
+    font-family: 'Segoe UI';
+    display: flex;
+    flex-direction: column;
+    .sliderWithText {
+        margin-right: 5px;
+        .slider {
+            margin-top: 5%;
+        }
+        .textBelowSlider{
+            font-size: 1.8em;
+            text-align: center;
+            font-style: italic;
+            color: #636363;
+            margin: 30px
+        }
+    }
+    .chartWithRadio{
+        display: flex;
+        flex-direction: row;
+        .barChart{
+            margin-left:5%;
+            margin-bottom: 5%;
+            width: 970px;
+            height: 350px;
+        }
+        .chartRight{
+            flex-direction: column;
+            margin: 5%;
+            .label {
+                font-size: 2.0em;
+                font-weight: bold;
+                margin-bottom:20px;
+                color: black;
+            }
+            .radio{
+                padding: 10px;
+            }
+            .legend{
+                padding: 10px;
+            }
+        }
+    }
+    .highlightWithLegend{
+        background-color: white;;
+        display: flex;
+        flex-direction: row;
+        .textHighlighting{
+            margin-left: 5%;
+            margin-top: 5%;
+            border-style: groove;
+            border-color: black;
+            border-radius: 10px;
+            height: 250px;
+            width: 380px;
+            overflow-y: auto;
+            line-height: 32px;
+            padding: 20px;
+        }
+        .textRight{
+            flex-direction: column;
+            margin-top: 5%;
+            .legend {
+                margin-left: 10px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+            }
+            .posFeatureImportance{
+                margin: 10px 10px 10px 5px;
+                background-color: #5A53FF;
+                color: white;
+                text-decoration-line: underline;
+                font-weight: bold;
+            }
+            .negFeatureImportance{
+                margin: 10px 10px 10px 5px;
+                font-weight: bold;
+                text-decoration-line: underline;
+                color: #5A53FF;
+            }
+        }
+    }
+}

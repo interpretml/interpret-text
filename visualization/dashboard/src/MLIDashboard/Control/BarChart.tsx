@@ -20,8 +20,8 @@ export class BarChart extends React.PureComponent<IChartProps> {
     let color: string[]
     const k = props.topK
     let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
-    color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)');
-    console.log(importances);
+    // color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)')
+    color = sortedList.map(x=>importances[x]<0?'#FFFFFF':'#5A53FF');
     const [data, x, y] = [[], [], []]
     sortedList.map(idx => {
       y.push(props.text[idx])
@@ -46,8 +46,9 @@ export class BarChart extends React.PureComponent<IChartProps> {
       'sendDataToCloud', 'toImage', 'resetScale2d', 'autoScale2d', 'zoom2d', 'pan2d', 'zoomIn2d', 'zoomOut2d']},
       data: data,
       layout: {
-        title: localization.featureImportance,
-        xaxis:{range:[-1,1]}
+        xaxis:{
+          title: localization.featureImportance
+        }
       }
     }
     return chart

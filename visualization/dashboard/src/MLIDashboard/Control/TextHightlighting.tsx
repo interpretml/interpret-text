@@ -4,13 +4,13 @@ import { Utils } from '../CommonUtils'
 
 const highlighted = {
   color: 'white',
-  backgroundColor: '#0078D4',
+  backgroundColor: '#5A53FF',
   fontFamily: 'Segoe UI',
   fontSize: '1.5em',
 } as React.CSSProperties
 
 const boldunderline = {
-  color: '#0078D4',
+  color: '#5A53FF',
   fontWeight: 'bold',
   textDecorationLine: 'underline',
   fontFamily: 'Segoe UI',
