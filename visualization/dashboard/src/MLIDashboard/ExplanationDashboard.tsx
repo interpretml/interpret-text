@@ -8,6 +8,7 @@ import {Toggle} from 'office-ui-fabric-react/lib/Toggle';
 import {Text} from 'office-ui-fabric-react/lib/Text';
 import { Utils } from './CommonUtils'
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
+import { FontWeights } from 'office-ui-fabric-react/lib/Styling'
 
 const s = require("./ExplanationDashboard.css");
 
@@ -28,7 +29,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
   constructor(props: IExplanationDashboardProps, IDashboardState) {
     super(props)
     this.state = {
-      maxK: this.countNonzeros(this.props.dataSummary.localExplanations),
+      maxK: Math.min(15,Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations))),
       topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2),
       radio: "all"
     }
@@ -64,7 +65,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
             />
           </div>
             <div className = 'chartRight'>
-              <div className = 'label' >
+              <div className = 'labelPrediction' >
                 {localization.label + localization.colon + this.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}
               </div>
               <div className = 'radio'>
@@ -89,12 +90,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                 {localization.featureLegend}
               </div>
               <div>
-              <span className = "posFeatureImportance"> A</span>
+    <span className = "posFeatureImportance">A</span>
               <span>{localization.posFeatureImportance}</span>
               </div>
-              <br></br>
               <div>
-                <span className = "negFeatureImportance"> A</span>
+                <span className = "negFeatureImportance">A</span>
                 <span> {localization.negFeatureImportance}</span>             
               </div>
                   

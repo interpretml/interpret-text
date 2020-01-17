@@ -10,7 +10,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
       <AccessibleChart
         plotlyProps= {this.buildPlotlyProps(this.props)}
         sharedSelectionContext={undefined}
-        theme = "light"
+        theme={undefined}
       />
     )
   }
@@ -22,14 +22,16 @@ export class BarChart extends React.PureComponent<IChartProps> {
     let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
     // color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)')
     color = sortedList.map(x=>importances[x]<0?'#FFFFFF':'#5A53FF');
-    const [data, x, y] = [[], [], []]
-    sortedList.map(idx => {
-      y.push(props.text[idx])
+    const [data, x, y, ylabel] = [[], [], [],[]]
+    sortedList.map((idx, i) => {
+      y.push(i)
       x.push(importances[idx])
+      ylabel.push(this.props.text[idx])
     })
     data.push({
-      hoverinfo: 'text',
+      hoverinfo: 'x+text',
       orientation: 'h',
+      text:y,
       type: 'bar',
       marker:{
         color,
@@ -47,23 +49,32 @@ export class BarChart extends React.PureComponent<IChartProps> {
       data: data,
       layout: {
         xaxis:{
-          range: [Math.floor(Math.min(...importances))-0.1, Math.ceil(Math.max(...importances))+0.1],
+          range: [Math.floor(Math.min(...importances))-1, Math.ceil(Math.max(...importances))+1],
+          fixedrange: true,
           title: localization.featureImportance,
           titlefont: {
             family: 'Segoe UI'
           }
         },
         yaxis: {
+          fixedrange: true,
+          autotick: false,
+          tickvals: y,
+          ticktext: [],
           ticks: 'outside',
-          ticklen: 35,
+          ticklen: 8,
           tickwidth: 1,
-          tickcolor: 'white',
+          tickcolor: '#F2F2F2',
           titlefont: {
             family: 'Segoe UI'
           },
-          // automargin: true,
+          automargin: true
         },
-        paper_bgcolor: '#F2F2F2',
+        margin: {
+          t: 10,
+          r: 0,
+        },
+        paper_bgcolor: '#f2f2f2',
         plot_bgcolor: '#FFFFFF'
       }
     }

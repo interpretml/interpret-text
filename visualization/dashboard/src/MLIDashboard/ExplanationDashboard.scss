@@ -8,41 +8,52 @@
     display: flex;
     flex-direction: column;
     .sliderWithText {
-        margin-right: 5px;
+        margin-right: 5%;
+        margin-left: 5%;
         .slider {
             margin-top: 5%;
         }
         .textBelowSlider {
-            font-size: 1.8em;
+            font-size: 20px;
             text-align: center;
-            font-style: italic;
             color: #636363;
             margin: 30px;
+            font-weight: lighter;
         }
     }
     .chartWithRadio {
         display: flex;
         flex-direction: row;
+        justify-content: space-between;
         .barChart{
             margin-left:5%;
             margin-bottom: 5%;
-            width: 970px;
-            height: 350px;
+            min-height: 400px;
+            max-height: 700px;
+            min-width: 400px;
+            flex: 1;
         }
         .chartRight {
             flex-direction: column;
-            margin: 5%;
-            .label {
-                font-size: 2.0em;
-                font-weight: bold;
+            margin-left: 5%;
+            margin-right: 5%;
+            max-width: 230px;
+            min-width: 230px;
+            .labelPrediction {
+                font-size: 24px;
+                font-weight: 500;
                 margin-bottom:20px;
                 color: black;
+                font-size: 24px;
             }
             .radio {
-                padding: 10px;
+                font-weight: lighter;
+                font-size: 12px;
             }
             .legend {
-                padding: 10px;
+                margin-top: 10px;
+                color: #666666;
+                font-size: 11px;
             }
         }
     }
@@ -54,34 +65,42 @@
             margin-left: 5%;
             margin-top: 5%;
             border-style: groove;
-            border-color: black;
-            border-radius: 10px;
-            height: 250px;
-            width: 380px;
+            border-color: #CCCCCC;
+            border-radius: 2px;
             overflow-y: auto;
+            max-height: 250px;
+            min-width: 400px;
             line-height: 32px;
-            padding: 20px;
+            padding: 25px;
+            font-weight: lighter;
         }
         .textRight {
             flex-direction: column;
-            margin-top: 5%;
+            margin: 5%;
+            font-size: 11px;
+            max-width: 230px;
+            min-width: 230px;
             .legend {
-                margin-left: 10px;
-                margin-right: 10px;
-                margin-bottom: 10px;
+                margin-bottom: 17px;
+                color: #b7b7b7;
             }
             .posFeatureImportance {
-                margin: 10px 10px 10px 5px;
+                margin-bottom: 5px;
                 background-color: #5A53FF;
                 color: white;
-                text-decoration-line: underline;
                 font-weight: bold;
+                font-weight: lighter;
+                margin-right: 3px;
+                padding: 2px;
             }
             .negFeatureImportance {
-                margin: 10px 10px 10px 5px;
+                margin-top: 5px;
                 font-weight: bold;
                 text-decoration-line: underline;
                 color: #5A53FF;
+                font-weight: lighter;
+                margin-right: 3px;
+                padding: 2px;
             }
         }
     }

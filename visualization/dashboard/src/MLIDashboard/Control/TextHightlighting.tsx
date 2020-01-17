@@ -4,6 +4,7 @@ import { Utils } from '../CommonUtils'
 
 const highlighted = {
   color: 'white',
+  fontweight: '400px',
   backgroundColor: '#5A53FF',
   fontFamily: 'Segoe UI',
   fontSize: '1.5em',
