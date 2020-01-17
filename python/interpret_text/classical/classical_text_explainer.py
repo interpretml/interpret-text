@@ -13,7 +13,8 @@ from interpret_community.explanation.explanation import _create_global_explanati
 
 
 class ClassicalTextExplainer:
-    def __init__(self, preprocessor=None, model=None, hyperparam_range=None):
+    def __init__(self, preprocessor=None, model=None,
+                 is_trained=False, hyperparam_range=None):
         self.parsed_sentence = None
         self.word_importances = None
         self.model = model
