@@ -22,16 +22,31 @@ export class BarChart extends React.PureComponent<IChartProps> {
     let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
     // color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)')
     color = sortedList.map(x=>importances[x]<0?'#FFFFFF':'#5A53FF');
-    const [data, x, y, ylabel] = [[], [], [],[]]
+    const [data, x, y, ylabel, tooltip] = [[], [], [],[],[]]
     sortedList.map((idx, i) => {
+      let str = ""
+      if (idx > 1){
+        str += "..."
+      }
+      if (idx > 0){
+        str += this.props.text[idx-1] + " "
+      }
+      str += this.props.text[idx]
+      if (idx < this.props.text.length - 1){
+        str += " " + this.props.text[idx+1] 
+      }
+      if (idx < this.props.text.length - 2){
+        str += "..."
+      }
       y.push(i)
       x.push(importances[idx])
       ylabel.push(this.props.text[idx])
+      tooltip.push(str)
     })
     data.push({
       hoverinfo: 'x+text',
       orientation: 'h',
-      text:y,
+      text: tooltip,
       type: 'bar',
       marker:{
         color,
@@ -54,13 +69,15 @@ export class BarChart extends React.PureComponent<IChartProps> {
           title: localization.featureImportance,
           titlefont: {
             family: 'Segoe UI'
-          }
+          },
+          automargin:true
         },
         yaxis: {
           fixedrange: true,
           autotick: false,
+          tickmode: "array",
           tickvals: y,
-          ticktext: [],
+          ticktext: ylabel,
           ticks: 'outside',
           ticklen: 8,
           tickwidth: 1,
