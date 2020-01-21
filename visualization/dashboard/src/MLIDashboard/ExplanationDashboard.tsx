@@ -1,16 +1,16 @@
 import * as React from 'react'
-import {IExplanationDashboardProps} from './Interfaces/IExplanationDashboardProps'
-import {TextHighlighting} from './Control/TextHightlighting'
-import {localization} from '../Localization/localization'
-import {Slider} from 'office-ui-fabric-react/lib/Slider'
-import {BarChart} from './Control/BarChart'
-import {Toggle} from 'office-ui-fabric-react/lib/Toggle';
-import {Text} from 'office-ui-fabric-react/lib/Text';
+import { IExplanationDashboardProps } from './Interfaces/IExplanationDashboardProps'
+import { TextHighlighting } from './Control/TextHightlighting'
+import { localization } from '../Localization/localization'
+import { Slider } from 'office-ui-fabric-react/lib/Slider'
+import { BarChart } from './Control/BarChart'
+import { Toggle } from 'office-ui-fabric-react/lib/Toggle'
+import { Text } from 'office-ui-fabric-react/lib/Text'
 import { Utils } from './CommonUtils'
-import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
+import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup'
 import { FontWeights } from 'office-ui-fabric-react/lib/Styling'
 
-const s = require("./ExplanationDashboard.css");
+const s = require('./ExplanationDashboard.css')
 
 export interface IDashboardContext {}
 
@@ -22,26 +22,25 @@ export interface IDashboardState {
 const options: IChoiceGroupOption[] = [
   { key: 'all', text: localization.allButton },
   { key: 'pos', text: localization.posButton },
-  { key: 'neg', text: localization.negButton}
+  { key: 'neg', text: localization.negButton }
 ]
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   constructor(props: IExplanationDashboardProps, IDashboardState) {
     super(props)
     this.state = {
-      maxK: Math.min(15,Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations))),
+      maxK: Math.min(15, Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations))),
       topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2),
-      radio: "all"
+      radio: 'all'
     }
     this.changeRadioButton = this.changeRadioButton.bind(this)
   }
 
-
-  public render() {
+  public render () {
     return (
-      <div className="explainerDashboard">
-        <div className = "sliderWithText" >
-          <div className = "slider">
+      <div className='explainerDashboard'>
+        <div className = 'sliderWithText' >
+          <div className = 'slider'>
             <Slider
               min={1}
               max={this.state.maxK}
@@ -51,11 +50,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
               onChange={(value) => this.setTopK(value)}
             />
           </div>
-          <div className = "textBelowSlider">
+          <div className = 'textBelowSlider'>
             {this.state.topK.toString() + ' ' + localization.importantWords}
           </div>
         </div>
-        <div className = "chartWithRadio">
+        <div className = 'chartWithRadio'>
           <div className = 'barChart'>
             <BarChart
               text={this.props.dataSummary.text}
@@ -69,14 +68,14 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
                 {localization.label + localization.colon + this.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}
               </div>
               <div className = 'radio'>
-                <ChoiceGroup defaultSelectedKey="all" options={options} onChange={this.changeRadioButton} required={true} />
+                <ChoiceGroup defaultSelectedKey='all' options={options} onChange={this.changeRadioButton} required={true} />
               </div>
-              <div className = "legend">
+              <div className = 'legend'>
                 {localization.legendText}
               </div>
             </div>
         </div>
-        <div className = "highlightWithLegend">
+        <div className = 'highlightWithLegend'>
           <div className = 'textHighlighting'>
               <TextHighlighting
                 text={this.props.dataSummary.text}
@@ -86,39 +85,41 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
               />
           </div>
             <div className = 'textRight'>
-              <div className = "legend">
+              <div className = 'legend'>
                 {localization.featureLegend}
               </div>
               <div>
-    <span className = "posFeatureImportance">A</span>
+    <span className = 'posFeatureImportance'>A</span>
               <span>{localization.posFeatureImportance}</span>
               </div>
               <div>
-                <span className = "negFeatureImportance">A</span>
-                <span> {localization.negFeatureImportance}</span>             
+                <span className = 'negFeatureImportance'>A</span>
+                <span> {localization.negFeatureImportance}</span>
               </div>
-                  
             </div>
         </div>
         </div>
     )
 }
-  private setTopK(newNumber: number): void {
-    this.setState({topK: newNumber})
+  private setTopK (newNumber: number): void {
+    this.setState({ topK: newNumber })
   }
-  private countNonzeros(numArr: number[]): number {
+
+  private countNonzeros (numArr: number[]): number {
     let counter = 0
     for (const i in numArr) {
       if (numArr[i] !== 0) {
         counter++
-  }
-}
+      }
+    }
     return counter
   }
-  public predictClass(classname, prediciton):string{
+
+  public predictClass (classname, prediciton):string{
     return classname[Utils.argsort(prediciton)[0]]
   }
-  public changeRadioButton(ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
-    this.setState({radio: option.key})
+
+  public changeRadioButton (ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
+    this.setState({ radio: option.key })
   }
 }

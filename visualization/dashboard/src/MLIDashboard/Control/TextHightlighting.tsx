@@ -7,7 +7,7 @@ const highlighted = {
   fontweight: '400px',
   backgroundColor: '#5A53FF',
   fontFamily: 'Segoe UI',
-  fontSize: '1.5em',
+  fontSize: '1.5em'
 } as React.CSSProperties
 
 const boldunderline = {
@@ -15,12 +15,12 @@ const boldunderline = {
   fontWeight: 'bold',
   textDecorationLine: 'underline',
   fontFamily: 'Segoe UI',
-  fontSize: '1.5em',
+  fontSize: '1.5em'
 } as React.CSSProperties
 
 const normal = {
   fontFamily: 'Segoe UI',
-  fontSize: '1.5em',
+  fontSize: '1.5em'
 } as React.CSSProperties
 
 export class TextHighlighting extends React.PureComponent<IChartProps> {
@@ -28,8 +28,8 @@ export class TextHighlighting extends React.PureComponent<IChartProps> {
     const text = this.props.text
     const importances = this.props.localExplanations
     const k = this.props.topK
-    let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
-    let val = text.map((word, wordIndex) => {
+    const sortedList = Utils.sortedTopK(importances, k, this.props.radio)
+    const val = text.map((word, wordIndex) => {
       let styleType = normal
       const score = importances[wordIndex]
       if (sortedList.includes(wordIndex)) {
@@ -43,7 +43,7 @@ export class TextHighlighting extends React.PureComponent<IChartProps> {
       }
       return ( <span style = {styleType} title = {score.toString()}>{word}</span>)
     })
-    return val.map((word)=>{
+    return val.map((word) => {
       return <span>{word} </span>
     })
   }

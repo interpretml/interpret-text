@@ -9,8 +9,8 @@ export class BarChart extends React.PureComponent<IChartProps> {
     return (
       <AccessibleChart
         plotlyProps= {this.buildPlotlyProps(this.props)}
-        sharedSelectionContext={undefined}
-        theme={undefined}
+        sharedSelectionContext= {undefined}
+        theme= {undefined}
       />
     )
   }
@@ -20,23 +20,22 @@ export class BarChart extends React.PureComponent<IChartProps> {
     let color: string[]
     const k = props.topK
     let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
-    // color = sortedList.map(x=>importances[x]<0?'rgb(255,255,255)':'rgb(0,120,212)')
-    color = sortedList.map(x=>importances[x]<0?'#FFFFFF':'#5A53FF');
-    const [data, x, y, ylabel, tooltip] = [[], [], [],[],[]]
+    color = sortedList.map(x => importances[x] < 0 ? '#FFFFFF':'#5A53FF')
+    const [data, x, y, ylabel, tooltip] = [[], [], [], [], []]
     sortedList.map((idx, i) => {
-      let str = ""
-      if (idx > 1){
-        str += "..."
+      let str = ''
+      if (idx > 1) {
+        str += '...'
       }
-      if (idx > 0){
-        str += this.props.text[idx-1] + " "
+      if (idx > 0) {
+        str += this.props.text[idx - 1] + ' '
       }
       str += this.props.text[idx]
-      if (idx < this.props.text.length - 1){
-        str += " " + this.props.text[idx+1] 
+      if (idx < this.props.text.length - 1) {
+        str += ' ' + this.props.text[idx + 1]
       }
-      if (idx < this.props.text.length - 2){
-        str += "..."
+      if (idx < this.props.text.length - 2) {
+        str += '...'
       }
       y.push(i)
       x.push(importances[idx])
@@ -48,7 +47,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
       orientation: 'h',
       text: tooltip,
       type: 'bar',
-      marker:{
+      marker: {
         color,
         line: {
           color: 'rgb(0,120,212)',
@@ -59,12 +58,13 @@ export class BarChart extends React.PureComponent<IChartProps> {
       y
     })
     const chart = {
-      config:{displaylogo: false, responsive: true, modeBarButtonsToRemove: ['toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 
-      'sendDataToCloud', 'toImage', 'resetScale2d', 'autoScale2d', 'zoom2d', 'pan2d', 'zoomIn2d', 'zoomOut2d']},
+      config: { displaylogo: false, responsive: true,
+        modeBarButtonsToRemove: ['toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d', 'sendDataToCloud', 'toImage', 'resetScale2d', 'autoScale2d', 'zoom2d', 'pan2d', 'zoomIn2d', 'zoomOut2d']
+      },
       data: data,
       layout: {
-        xaxis:{
-          range: [Math.floor(Math.min(...importances))-1, Math.ceil(Math.max(...importances))+1],
+        xaxis: {
+          range: [Math.floor(Math.min(...importances)) - 1, Math.ceil(Math.max(...importances)) + 1],
           fixedrange: true,
           title: localization.featureImportance,
           titlefont: {
@@ -75,7 +75,7 @@ export class BarChart extends React.PureComponent<IChartProps> {
         yaxis: {
           fixedrange: true,
           autotick: false,
-          tickmode: "array",
+          tickmode: 'array',
           tickvals: y,
           ticktext: ylabel,
           ticks: 'outside',

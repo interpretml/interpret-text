@@ -7,15 +7,13 @@ export class Utils {
     return sorted.map(val => val[1])
   }
 
-  public static sortedTopK(list:number[], k:number, radio:string): number[]{
+  public static sortedTopK (list:number[], k:number, radio:string): number[] {
     let sortedList: number[]
-    if (radio == "all"){
+    if (radio === 'all') {
       sortedList = this.argsort(list.map(Math.abs)).reverse().splice(0, k).reverse()
-    } 
-    else if (radio == "neg"){
+    } else if (radio === 'neg') {
       sortedList = this.argsort(list).splice(0, k).reverse()
-    }
-    else if (radio == "pos") {
+    } else if (radio === 'pos') {
       sortedList = this.argsort(list).reverse().splice(0, k).reverse()
     }
     return sortedList
