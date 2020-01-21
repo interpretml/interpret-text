@@ -433,6 +433,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         x, mask, _ = self.generate_data(df_test)
         word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
         z_scores, cls_predict = self.generator(word_embeddings, mask)
+        z_scores = F.softmax(z_scores, dim=-1)
+
 
         return z_scores, cls_predict
 

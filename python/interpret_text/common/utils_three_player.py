@@ -2,6 +2,36 @@ import numpy as np
 import pandas as pd
 import os
 
+from interpret_text.common.utils_unified import maybe_download
+
+DATA_URLS = {
+    "train": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.train",
+    "dev": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.dev",
+    "test": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.test",
+}
+
+def load_pandas_df(file_split, label_col, text_col, local_cache_path="."):
+    """Loads extracted dataset into pandas
+    Args:
+        local_cache_path ([type], optional): [description]. Defaults to current working directory.
+        file_split (str, optional): The subset to load.
+            One of: {"train", "dev", "split"}
+            Defaults to "train".
+        label_col: the header of the column containing labels
+        text_col: the header of the column containing text
+    Returns:
+        pd.DataFrame: pandas DataFrame containing the specified
+            SST2 subset.
+    """
+    try:
+        URL = DATA_URLS[file_split]
+        file_name = URL.split("/")[-1]
+        file_path = maybe_download(URL, file_name, local_cache_path)
+    except Exception as e:
+        raise e
+    
+    return load_data(file_path, label_col, text_col)
+
 def load_data(fpath, label_col, text_col):
     df_dict = {label_col: [], text_col: []}
     with open(fpath, 'r') as f:

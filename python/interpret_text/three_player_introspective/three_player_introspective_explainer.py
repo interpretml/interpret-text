@@ -55,8 +55,9 @@ class ThreePlayerIntrospectiveExplainer:
             zs, _ = self.model.get_z_scores(df_predict)
             predict_class_idx = np.argmax(predict.detach())
             zs = zs.detach()[:, :, predict_class_idx]
-            # TODO: normalize importances?
 
+        zs = np.array(zs.tolist())
+        
         local_explanation = _create_local_explanation(
             classification=True,
             text_explanation=False,
@@ -70,4 +71,4 @@ class ThreePlayerIntrospectiveExplainer:
         return local_explanation
 
     def visualize(self, word_importances, parsed_sentence):
-        plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)
+        plot_local_imp(parsed_sentence, word_importances, max_alpha=.5)
