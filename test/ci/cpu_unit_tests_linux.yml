@@ -48,7 +48,7 @@ jobs:
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
-      pytest test/unit/test_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+      pytest test/unit/test_unified_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run MSR Asia tests'
 
   - bash: |
@@ -56,7 +56,7 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s
       python -m pip install flake8
-      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821 ./python/
+      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
     displayName: 'Run flake8'
 
   # Uncomment if needed

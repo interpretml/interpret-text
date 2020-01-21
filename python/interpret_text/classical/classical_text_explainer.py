@@ -1,14 +1,18 @@
+import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from interpret_text.common.utils_bow import plot_local_imp, plot_global_imp
-from interpret_text.common.utils_bow import get_important_words, BOWEncoder
+from interpret_text.common.utils_classical import plot_local_imp, plot_global_imp
+from interpret_text.common.utils_classical import get_important_words, BOWEncoder
 from interpret_text.common.constants import ExplainerParams
-
+from interpret_text.explanation.explanation import _create_local_explanation
+from interpret_community.explanation.explanation import _create_global_explanation
 
 # BOW explainer class that allows extensibility to other encoders
 # Uses logistic regression and 1-gram model by default
-class LinearTextExplainer:
+
+
+class ClassicalTextExplainer:
     def __init__(self, preprocessor=None, model=None, hyperparam_range=None):
         self.parsed_sentence = None
         self.word_importances = None
@@ -80,10 +84,19 @@ class LinearTextExplainer:
             encoded_imp = self.model.feature_importances_
         else:
             raise Exception("model is missing coef_ or feature_importances_ attribute")
-        decoded_imp, parsed_sentence = self.preprocessor.decode_imp(
+        decoded_imp, parsed_sentence_list = self.preprocessor.decode_imp(
             encoded_imp, input_text
         )
-        return (decoded_imp, parsed_sentence)
+        local_explanantion = _create_local_explanation(
+            classification=True,
+            text_explanation=True,
+            local_importance_values=np.array(decoded_imp),
+            method=str(type(self.model)),
+            model_task="classification",
+            features=parsed_sentence_list,
+            classes=self.preprocessor.labelEncoder.classes_,
+        )
+        return local_explanantion
 
     def explain_global(self, label_name):
         # Obtain the top feature ids for the selected class label.
@@ -98,9 +111,16 @@ class LinearTextExplainer:
         top_words, top_importances = get_important_words(
             self.model, label_name, self.preprocessor, clf_type=clf_type
         )
+        global_explanation = _create_global_explanation(
+            global_importance_values=top_importances,
+            features=top_words,
+            method=str(type(self.model)),
+            model_task="classification",
+        )
         # Plot the feature importances
         plot_global_imp(top_words, top_importances, label_name)
-        return [top_words, top_importances]
+
+        return global_explanation
 
     def visualize(self, word_importances, parsed_sentence):
         plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)

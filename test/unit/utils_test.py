@@ -1,5 +1,5 @@
-from utils_nlp.models.bert.sequence_classification import BERTSequenceClassifier
-from utils_nlp.dataset.multinli import load_pandas_df
+from interpret_text.common.utils_unified import load_pandas_df
+from interpret_text.common.utils_bert import BERTSequenceClassifier
 
 
 def get_mnli_test_dataset():

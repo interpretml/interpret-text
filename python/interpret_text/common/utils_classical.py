@@ -144,6 +144,10 @@ def plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5):
 def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
     if clf_type == "coef":
         label_coefs_all = classifier.coef_
+        # special case if labels are binary.
+        # cast importances to be size (2,#features) and not (#features,)
+        if len(bow_encoder.labelEncoder.classes_) == 2:
+            label_coefs_all = np.vstack(-1 * label_coefs_all, label_coefs_all)
         # obtain label number / row corresponding to labelname
         label_row_num = bow_encoder.labelEncoder.transform([label_name])
         # convert from vector to scalar
@@ -158,7 +162,6 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
     # use np.abs to obtain highest magnitude of importance, discarding directionality
     # np.argsort to ids corresponding to descending order of importances
     # np.flip to convert descending order to ascending order
-    # TODO : Remove flatten below
     sorting_ids = np.flip(np.argsort(np.abs(label_coefs)))
     top_ids = sorting_ids[0:20]  # view top 20 features per label
     # obtain raw words corresponding to top feature ids

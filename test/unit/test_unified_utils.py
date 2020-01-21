@@ -1,5 +1,8 @@
 import torch
-from interpret_text.common.utils_msra import get_single_embedding, make_bert_embeddings
+from interpret_text.common.utils_unified import (
+    get_single_embedding,
+    make_bert_embeddings,
+)
 from utils_test import get_mnli_test_dataset, get_bert_model
 
 
