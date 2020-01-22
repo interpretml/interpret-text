@@ -54,6 +54,7 @@ class ThreePlayerIntrospectiveExplainer:
         df_label = pd.DataFrame.from_dict({"labels": [label]})
         df_sentence = pd.concat([df_label, tokenizer.tokenize([sentence.lower()])], axis=1)
 
+        x, m, _ = self.model.generate_data(df_sentence)
         predict, _, _, zs, _ = self.predict(df_sentence)
         if not hard_importances:
             zs, _ = self.model.get_z_scores(df_sentence)
@@ -61,17 +62,22 @@ class ThreePlayerIntrospectiveExplainer:
             zs = zs.detach()[:, :, predict_class_idx]
 
         zs = np.array(zs.tolist())
-        
+
+        # generate human-readable tokens (individual words)
+        seq_len = int(m.sum().item())
+        ids = x[:seq_len][0]
+        tokens = [self.model.reverse_word_vocab[i.item()] for i in ids]
+
         local_explanation = _create_local_explanation(
             classification=True,
             text_explanation=False,
             local_importance_values=zs[0],
             method=str(type(self.model)),
             model_task="classification",
-            features=sentence.split(),
+            features=tokens,
             classes=self.labels,
         )
-        
+    
         return local_explanation
 
     def visualize(self, word_importances, parsed_sentence):
