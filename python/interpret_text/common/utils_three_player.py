@@ -10,6 +10,30 @@ DATA_URLS = {
     "test": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.test",
 }
 
+class ModelArguments():
+    def __init__(self, **kwargs):
+        # to initialize classifierModule and introspectionGeneratorModule
+        self.embedding_dim = 100
+        self.hidden_dim = 200
+        self.layer_num = 1
+        self.z_dim = 2
+        self.dropout_rate = 0.5
+
+        # to init only introspectionGeneratorModule
+        self.label_embedding_dim = 400
+        self.fixed_classifier = True
+
+        # to init model
+        self.fine_tuning = False
+        self.lambda_sparsity = 1.0
+        self.lambda_continuity = 1.0
+        self.lambda_anti = 1.0
+        self.exploration_rate = 0.05
+        self.count_tokens = 8
+        self.count_pieces = 4
+        self.lambda_acc_gap = 1.2
+        self.lr=0.001
+
 def load_pandas_df(file_split, label_col, text_col, local_cache_path="."):
     """Loads extracted dataset into pandas
     Args:

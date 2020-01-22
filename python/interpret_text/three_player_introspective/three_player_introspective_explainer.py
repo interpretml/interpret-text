@@ -16,6 +16,7 @@ class ThreePlayerIntrospectiveExplainer:
         that will be initialized based on parameters listed in args
         '''
         self.model = ThreePlayerIntrospectiveModel(args, word_vocab, explainer, anti_explainer, generator, classifier)
+        self.labels = args.labels
 
     def train(self, *args, **kwargs):
         return self.fit(*args, **kwargs)
@@ -49,10 +50,13 @@ class ThreePlayerIntrospectiveExplainer:
         accuracy, anti_accuracy, sparsity = self.model.test(df_test, test_batch_size)
         return accuracy, anti_accuracy, sparsity
 
-    def explain_local(self, sentence, df_predict, classes, hard_importances=True):
-        predict, _, _, zs, _ = self.predict(df_predict)
+    def explain_local(self, sentence, label, tokenizer, hard_importances=True):
+        df_label = pd.DataFrame.from_dict({"labels": [label]})
+        df_sentence = pd.concat([df_label, tokenizer.tokenize([sentence.lower()])], axis=1)
+
+        predict, _, _, zs, _ = self.predict(df_sentence)
         if not hard_importances:
-            zs, _ = self.model.get_z_scores(df_predict)
+            zs, _ = self.model.get_z_scores(df_sentence)
             predict_class_idx = np.argmax(predict.detach())
             zs = zs.detach()[:, :, predict_class_idx]
 
@@ -65,7 +69,7 @@ class ThreePlayerIntrospectiveExplainer:
             method=str(type(self.model)),
             model_task="classification",
             features=sentence.split(),
-            classes=classes,
+            classes=self.labels,
         )
         
         return local_explanation
