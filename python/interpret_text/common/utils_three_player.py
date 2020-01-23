@@ -1,29 +1,19 @@
 import numpy as np
 import pandas as pd
-import os
 
-from interpret_text.common.utils_unified import maybe_download
-
-DATA_URLS = {
-    "train": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.train",
-    "dev": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.dev",
-    "test": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.test",
-}
-
+# default parameters used to initialize the model
 class ModelArguments():
     def __init__(self, **kwargs):
-        # to initialize classifierModule and introspectionGeneratorModule
+        # to initialize model modules
         self.embedding_dim = 100
         self.hidden_dim = 200
         self.layer_num = 1
         self.z_dim = 2
         self.dropout_rate = 0.5
-
-        # to init only introspectionGeneratorModule
         self.label_embedding_dim = 400
         self.fixed_classifier = True
 
-        # to init model
+        # to initialize model
         self.fine_tuning = False
         self.lambda_sparsity = 1.0
         self.lambda_continuity = 1.0
@@ -34,68 +24,54 @@ class ModelArguments():
         self.lambda_acc_gap = 1.2
         self.lr=0.001
 
-def load_pandas_df(file_split, label_col, text_col, local_cache_path="."):
-    """Loads extracted dataset into pandas
-    Args:
-        local_cache_path ([type], optional): [description]. Defaults to current working directory.
-        file_split (str, optional): The subset to load.
-            One of: {"train", "dev", "split"}
-            Defaults to "train".
-        label_col: the header of the column containing labels
-        text_col: the header of the column containing text
-    Returns:
-        pd.DataFrame: pandas DataFrame containing the specified
-            SST2 subset.
-    """
-    try:
-        URL = DATA_URLS[file_split]
-        file_name = URL.split("/")[-1]
-        file_path = maybe_download(URL, file_name, local_cache_path)
-    except Exception as e:
-        raise e
-    
-    return load_data(file_path, label_col, text_col)
-
-def load_data(fpath, label_col, text_col):
-    df_dict = {label_col: [], text_col: []}
-    with open(fpath, 'r') as f:
-        label_start = 0
-        sentence_start = 2
-        for line in f:
-            label = int(line[label_start])
-            sentence = line[sentence_start:]
-            df_dict[label_col].append(label)
-            df_dict[text_col].append(sentence)
-    return pd.DataFrame.from_dict(df_dict)
-
-# Using glove embeddings (used in the original paper)
+# Splits words into tokens that are passed into glove embeddings
 class GloveTokenizer:
     def __init__(self, text, count_thresh, token_cutoff):
-        '''
-        text: a list of sentences (strings)
-        count_thresh: the number of times a word has to appear in a sentence to be
+        """
+        text (list): a list of sentences (strings)
+        count_thresh (int): the number of times a word has to appear in a sentence to be
         counted as part of the vocabulary
-        token_cutoff: the maximum number of tokens a sentence can have
-        '''
+        token_cutoff (int): the maximum number of tokens a sentence can have
+        """
         self.word_vocab, self.reverse_word_vocab, self.counts = self.build_vocab(text)
         self.count_thresh = count_thresh
         self.token_cutoff = token_cutoff
     
-    # build the vocabulary (all words that appear at least once in the data)
+    
     def build_vocab(self, text):
-        d = {"<PAD>":0, "<UNK>":1}
+        """
+        Build the vocabulary (all words that appear at least once in text)
+        Args:
+            text (list): a list of sentences (strings)
+        Returns:
+            words_to_idxs (dict): a mapping of the set of unique words (keys) found in text 
+                (appearing more times than count_thresh) to unique indices (values)
+            idxs_to_words (dict): a mapping from vocabulary indices (keys) to words (values)
+            counts (dict): a mapping of the a word (key) to the number of times it appears in text (value)
+        """
+        words_to_idxs = {"<PAD>":0, "<UNK>":1}
         counts = {}
         for sentence in text:
             for word in sentence.split():
-                if word not in d:
-                    d[word] = len(d)
+                if word not in words_to_idxs:
+                    words_to_idxs[word] = len(words_to_idxs)
                     counts[word] = 1
                 else:
                     counts[word] += 1
-        reverse_d = {v: k for k, v in d.items()}
-        return d, reverse_d, counts
+        idxs_to_words = {v: k for k, v in words_to_idxs.items()}
+        return words_to_idxs, idxs_to_words, counts
 
-    def generate_tokens_glove(self, word_vocab, text):
+    def generate_tokens(self, text):
+        """
+        Split text into padded lists of tokens that are part of the recognized vocabulary
+        Args:
+            text (str): a piece of text (e.g. a sentence)
+        Returns:
+            indexed_text (np.array): the token/vocabulary indices of recognized words in text, 
+                padded to the maximum sentence length
+            mask (np.array): a mask indicating which indices in indexed_text correspond to words (1s)
+                and which correspond to pads (0s)
+        """
         indexed_text = [self.word_vocab[word] if (self.counts[word] > self.count_thresh) else self.word_vocab["<UNK>"] for word in text.split()]
         pad_length = self.token_cutoff - len(indexed_text)
         mask = [1] * len(indexed_text) + [0] * pad_length
@@ -104,16 +80,26 @@ class GloveTokenizer:
         
         return np.array(indexed_text), np.array(mask)
     
-    # tokenize using glove embeddings
     def tokenize(self, data):
-        l = []
-        m = []
+        """
+        Converts a list of text into a dataframe containing padded token ids,
+        masks distinguishing word tokens from pads, and word token counts for
+        each text in the list. 
+        Args:
+            data (list): a list of strings (e.g. sentences)
+        Returns:
+            tokens (pd.Dataframe): a dataframe containing
+            lists of word token ids, pad/word masks, and token counts 
+            for each string in the list
+        """
+        token_lists = []
+        masks = []
         counts = []
         for sentence in data:
-            token_list, mask = self.generate_tokens_glove(self.word_vocab, sentence)
-            l.append(token_list)
-            m.append(mask)
+            token_list, mask = self.generate_tokens(sentence)
+            token_lists.append(token_list)
+            masks.append(mask)
             counts.append(np.sum(mask))
-        tokens = pd.DataFrame({"tokens": l, "mask": m, "counts": counts})
+        tokens = pd.DataFrame({"tokens": token_lists, "mask": masks, "counts": counts})
         return tokens
         

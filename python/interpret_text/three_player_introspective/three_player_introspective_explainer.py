@@ -7,8 +7,6 @@ import os
 import numpy as np
 import pandas as pd
 
-# from ThreePlayerIntrospectiveModel import ClassifierModule, IntrospectionGeneratorModule, ThreePlayerIntrospectiveModel
-
 class ThreePlayerIntrospectiveExplainer:
     def __init__(self, args, word_vocab, explainer=ClassifierModule, anti_explainer=ClassifierModule, generator=IntrospectionGeneratorModule, classifier=ClassifierModule):
         '''
@@ -70,8 +68,8 @@ class ThreePlayerIntrospectiveExplainer:
 
         local_explanation = _create_local_explanation(
             classification=True,
-            text_explanation=False,
-            local_importance_values=zs[0],
+            text_explanation=True,
+            local_importance_values=np.array(zs[0]),
             method=str(type(self.model)),
             model_task="classification",
             features=tokens,
