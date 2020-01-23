@@ -153,4 +153,4 @@ class GlovePreprocessor:
         '''
         id_list: a list of token ids
         '''
-        return [self.reverse_word_vocab[i.item()] for i in ids]
+        return [self.reverse_word_vocab[i.item()] for i in id_list]

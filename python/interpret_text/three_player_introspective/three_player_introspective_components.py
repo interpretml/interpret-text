@@ -142,8 +142,10 @@ class ClassifierModule(nn.Module):
         """  
         word_embeddings = self.embed_layer(X_tokens)
         if z is None:
-            dtype = torch.cuda.float if torch.cuda.is_available() else torch.float
-            z = torch.ones_like(X_tokens).type(dtype)
+            # dtype = torch.cuda.float if torch.cuda.is_available() else torch.float
+            z = torch.ones_like(X_tokens) # TODO: do we need a dtype of float here??
+            # z = torch.FloatTensor(torch.ones_like(X_tokens))
+
 
         masked_input = word_embeddings * z.unsqueeze(-1)
         hiddens = self.encoder(masked_input, attention_mask)

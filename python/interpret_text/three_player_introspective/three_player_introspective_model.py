@@ -398,10 +398,11 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         anti_accuracy = anti_accuracy / len(df_test)
         sparsity = sparsity_total / len(df_test)
 
-        rand_idx = random.randint(0, test_batch_size-1)
-        # display an example
-        print("Gold Label: ", batch_y_[rand_idx].item(), " Pred label: ", y_pred[rand_idx].item())
-        self.display_example(batch_x_[rand_idx], batch_m_[rand_idx], z[rand_idx])
+        for i in range(0, 5):
+            rand_idx = random.randint(0, test_batch_size-1)
+            # display an example
+            print("Gold Label: ", batch_y_[rand_idx].item(), " Pred label: ", y_pred[rand_idx].item())
+            self.display_example(batch_x_[rand_idx], batch_m_[rand_idx], z[rand_idx])
 
         return accuracy, anti_accuracy, sparsity
 

@@ -48,13 +48,16 @@ class ThreePlayerIntrospectiveExplainer:
         self.model = ThreePlayerIntrospectiveModel(args, preprocessor, self.explainer, self.anti_explainer, self.generator, self.gen_classifier)
         self.labels = args.labels
 
+        if args.cuda:
+            self.model.cuda()
+
     def freeze_bert_classifier(self, classifier, entire=False):
         if entire:
             for name, param in classifier.named_parameters():
                 param.requires_grad = False
         else:
             for name, param in classifier.named_parameters():
-                if "bert.embeddings" in name or ("bert.encoder" in name):
+                if "bert.embeddings" in name or ("bert.encoder" in name and "layer.11" not in name):
                     param.requires_grad = False
     
     def train(self, *args, **kwargs):
