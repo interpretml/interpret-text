@@ -15,13 +15,12 @@ DATA_URLS = {
     "test": "https://github.com/AcademiaSinicaNLPLab/sentiment_dataset/raw/master/data/stsa.binary.test",
 }
 
-def load_pandas_df(file_split, local_cache_path="."):
-    """Downloads and  into pandas
+def load_sst2_pandas_df(file_split, local_cache_path="."):
+    """Downloads and extracts dataset into a pandas dataframe
     Args:
-        local_cache_path (str, optional): Defaults to current working directory.
         file_split (str): The subset to load.
             One of: {"train", "dev", "split"}
-            Defaults to "train".
+        local_cache_path (str, optional): Defaults to current working directory.
     Returns:
         pd.DataFrame: pandas DataFrame containing the specified
             SST2 subset.

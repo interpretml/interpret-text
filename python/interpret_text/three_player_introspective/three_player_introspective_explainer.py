@@ -8,11 +8,18 @@ import numpy as np
 import pandas as pd
 
 class ThreePlayerIntrospectiveExplainer:
+    """
+    An explainer for training an explainable neural network for natural language 
+    processing and generating rationales used by that network.
+    Based on the paper "Rethinking Cooperative Rationalization: Introspective 
+    Extraction and Complement Control" by Yu et. al.
+    """
     def __init__(self, args, word_vocab, explainer=None, anti_explainer=None, generator=None, gen_classifier=None):
-        '''
+        """ 
+        Initialize the ThreePlayerIntrospectiveExplainer
+        """
         explainer, anti_explainer, generator, and classifier: classes 
         that will be initialized based on parameters listed in args
-        '''
         if not explainer:
             explainer = ClassifierModule(args, word_vocab)
         if not anti_explainer:
@@ -27,7 +34,7 @@ class ThreePlayerIntrospectiveExplainer:
     def train(self, *args, **kwargs):
         return self.fit(*args, **kwargs)
 
-    def fit(self, df_train, df_test, batch_size, num_iteration=40000, pretrain_cls=True):
+    def fit(self, df_train, df_test, batch_size, num_iteration=40000, pretrain_cls=True, pretrain_train_iters=1000, pretrain_test_iters=200):
         '''
         x_train: list of sentences (strings)
         y_train: list of labels (ex. 0 -- negative and 1 -- positive)
@@ -35,7 +42,7 @@ class ThreePlayerIntrospectiveExplainer:
         # tokenize/otherwise process the lists of sentences
         if pretrain_cls:
             print('pre-training the classifier')
-            self.model.pretrain_classifier(df_train, df_test, batch_size)
+            self.model.pretrain_classifier(df_train, df_test, batch_size, pretrain_train_iters, pretrain_test_iters)
         # encode the list
         self.model.fit(df_train, batch_size, num_iteration)
         
