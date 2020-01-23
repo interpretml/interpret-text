@@ -14,13 +14,18 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from tqdm import tqdm
 
-# classes needed for Rationale3Player
+# Modules that can be used in the three player introspective model
 class RnnModel(nn.Module):
+    """RNN Module
+    """
     def __init__(self, input_dim, hidden_dim, layer_num, dropout_rate):
-        """
-        input_dim -- dimension of input
-        hidden_dim -- dimension of filters
-        layer_num -- number of RNN layers   
+        """Initialize an RNN.
+        :param input_dim: dimension of input
+        :type input_dim: int
+        :param hidden_dim: dimension of filters
+        :type input_dim: int
+        :param layer_num: number of RNN layers   
+        :type input_dim: int
         """
         super(RnnModel, self).__init__()
         self.rnn_layer = nn.GRU(input_size=input_dim, 
@@ -28,14 +33,20 @@ class RnnModel(nn.Module):
                                 num_layers=layer_num,
                                 bidirectional=True, dropout=dropout_rate)
     
-    def forward(self, embeddings, mask=None, h0=None, c0=None):
-        """
-        Inputs:
-            embeddings -- sequence of word embeddings, (batch_size, sequence_length, embedding_dim)
-            mask -- a float tensor of masks, (batch_size, length)
-            h0, c0 --  (num_layers * num_directions, batch, hidden_size)
-        Outputs:
-            hiddens -- sentence embedding tensor, (batch_size, hidden_dim, sequence_length)
+    def forward(self, embeddings, mask=None, h0=None):
+        """Forward pass in the RNN.
+        :param embeddings: sequence of word embeddings with dimension
+            (batch_size, sequence_length, embedding_dim)
+        :type embeddings: torch.FloatTensor
+        :param mask: a float tensor of masks with dimension (batch_size, length),
+            defaults to None
+        :type mask: torch.FloatTensor, optional
+        :param h0: initial RNN weights with dimension 
+            (num_layers * num_directions, batch, hidden_size), defaults to None
+        :type h0: torch.FloatTensor, optional
+        :return: hiddens, a sentence embedding tensor with dimension 
+            (batch_size, hidden_dim, sequence_length)
+        :rtype: torch.FloatTensor
         """
         embeddings_ = embeddings.transpose(0, 1) #(sequence_length, batch_size, embedding_dim)
         
@@ -57,10 +68,17 @@ class RnnModel(nn.Module):
         return hidden.permute(1, 2, 0) #(batch_size, hidden_dim, sequence_length)
 
 class ClassifierModule(nn.Module):
-    '''
-    classifier for both E and E_anti models provided with RNP paper code
-    '''
+    """Module for classifying text used in original paper code.
+    """
+
     def __init__(self, args, word_vocab):
+        """Initialize a ClassifierModule.
+        
+        :param args: model structure parameters and hyperparameters
+        :type args: ModelArguments
+        :param word_vocab: a mapping of a set of words (keys) to indices (values)
+        :type word_vocab: dict
+        """
         super(ClassifierModule, self).__init__()
         self.args = args
         self.encoder = RnnModel(self.args.embedding_dim, self.args.hidden_dim, self.args.layer_num, self.args.dropout_rate)
@@ -74,6 +92,11 @@ class ClassifierModule(nn.Module):
         self.NEG_INF = -1.0e6
     
     def init_embedding_layer(self, word_vocab):
+        """Initialize the layer that embeds tokens according to a provided embedding
+
+        :param word_vocab: a mapping of a set of words (keys) to indices (values)
+        :type word_vocab: dict
+        """
         # get initial vocab embeddings
         vocab_size = len(word_vocab)
         # initialize a numpy embedding matrix 
@@ -104,14 +127,19 @@ class ClassifierModule(nn.Module):
         self.embed_layer.weight.requires_grad = self.fine_tuning
 
     def forward(self, X_tokens, attention_mask, z=None):
-        """
-        Inputs:
-            word_embeddings -- torch Variable in shape of (batch_size, length, embed_dim)
-            z -- rationale (batch_size, length)
-            mask -- torch Variable in shape of (batch_size, length)
-        Outputs:
-            predict -- (batch_size, num_label)
-        """        
+        """Forward pass in the classifier module
+        :param X_tokens: tokenized and embedded text with shape 
+            (batch_size, length, embed_dim)
+        :type X_tokens: torch Variable
+        :param attention_mask: mask indicating word tokens (1) and padding (0) 
+            with shape (batch_size, length)
+        :type attention_mask: torch.FloatTensor
+        :param z: chosen rationales for sentence tokens (whether a given token is important for classification)
+            with shape (batch_size, length), defaults to None
+        :type z: torch.FloatTensor, optional
+        :return: prediction (batch_size, num_label), word_embeddings, encoded input, None
+        :rtype: tuple
+        """  
         word_embeddings = self.embed_layer(X_tokens)
         if z is None:
             dtype = torch.cuda.float if torch.cuda.is_available() else torch.float
@@ -126,53 +154,61 @@ class ClassifierModule(nn.Module):
         # return cls_pred_logits, [hidden_states], _ b/c that is what bert does
         return predict, [word_embeddings, hiddens], None # the last one is for attention in the BERT model
 
-# extra classes needed for introspective model 
+# extra classes needed to make model introspective
 class DepGenerator(nn.Module):
-    
+    """Rationale generator module
+    """
     def __init__(self, input_dim, hidden_dim, layer_num, dropout_rate, z_dim):
-        """     
-        input_dim -- dimension of input   
-        hidden_dim -- dimension of filters
-        z_dim -- rationale or not, always 2    
-        layer_num -- number of RNN layers   
+        """
+        :param input_dim: dimension of input
+        :type input_dim: int
+        :param hidden_dim: dimension of filters
+        :type hidden_dim: int
+        :param layer_num: number of RNN layers
+        :type layer_num: int
+        :param dropout_rate: dropout rate of RNN
+        :type dropout_rate: float
+        :param z_dim: z indicates whether something is a rationale, dimension always 2
+        :type z_dim: int
         """
         super(DepGenerator, self).__init__()
         
         self.generator_model = RnnModel(input_dim, hidden_dim, layer_num, dropout_rate)
         self.output_layer = nn.Linear(hidden_dim, z_dim)
         
-    def forward(self, X_embeddings, h0=None, c0=None, mask=None):
+    def forward(self, X_embeddings, h0=None, mask=None):
+        """Forward pass in the DepGenerator
+
+        :param X_embeddings: input sequence of word embeddings
+        :type X_embeddings: (batch_size, sequence_length, embedding_dim)
+        :param h0: initial RNN weights, defaults to None
+        :type h0: torch.FloatTensor, optional
+        :param mask: mask indicating word tokens (1) and padding (0) 
+            with shape (batch_size, length), defaults to None
+        :type mask: torch.FloatTensor, optional
+        :return: scores of the importance of each word in X_embeddings
+        :rtype: torch.FloatTensor
         """
-        Given input x in shape of (batch_size, sequence_length) generate a 
-        "binary" mask as the rationale
-        Inputs:
-            x -- input sequence of word embeddings, (batch_size, sequence_length, embedding_dim)
+        '''
         Outputs:
             z -- output rationale, "binary" mask, (batch_size, sequence_length)
-        """
+        '''
         #(batch_size, sequence_length, hidden_dim)
-        hiddens = self.generator_model(X_embeddings, mask, h0, c0).transpose(1, 2).contiguous() 
+        hiddens = self.generator_model(X_embeddings, mask, h0).transpose(1, 2).contiguous() 
         scores = self.output_layer(hiddens) # (batch_size, sequence_length, 2)
         return scores
         
 class IntrospectionGeneratorModule(nn.Module):
-    '''
-    classifier for both E and E_anti models
-    RNN:
-        """
-        input_dim -- dimension of input
-        hidden_dim -- dimension of filters
-        layer_num -- number of RNN layers   
-        """
-    DepGenerator:
-        """        
-        input_dim -- dimension of input   
-        hidden_dim -- dimension of filters
-        z_dim -- rationale or not, always 2    
-        layer_num -- number of RNN layers   
-        """
-    '''
+    """Introspective rationale generator used in paper
+    """
     def __init__(self, args, classifier):
+        """Initialize the IntrospectionGeneratorModule
+        
+        :param args: model structure parameters and hyperparameters
+        :type args: ModelArguments
+        :param classifier: an instantiated classifier module with an embedding layer and forward method
+        :type classifier: an instantiated classifier module e.g. ClassifierModule
+        """
         super(IntrospectionGeneratorModule, self).__init__()
         self.args = args
         
@@ -207,6 +243,19 @@ class IntrospectionGeneratorModule(nn.Module):
         return embed_layer
         
     def forward(self, X_tokens, mask):
+        """Forward pass of the introspection generator module
+        
+        :param X_tokens: tokenized and embedded text with shape 
+            (batch_size, length, embed_dim)
+        :type X_tokens: torch Variable
+        :param mask: mask indicating word tokens (1) and padding (0) 
+            with shape (batch_size, length)
+        :type mask: torch.FloatTensor
+        :return: z_scores_ (scores of token importances), 
+        cls_pred_logits (internal classifier predictions), 
+        word_embeddings (embedded tokenized text input)
+        :rtype: tuple()
+        """
         cls_pred_logits, hidden_states, _ = self.classifier(X_tokens, attention_mask=mask)
         
         # hidden states must be in shape (batch_size, hidden_dim, length)

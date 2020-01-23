@@ -10,7 +10,7 @@ class ModelArguments():
         self.embedding_dim = 100
         self.hidden_dim = 200
         self.layer_num = 1
-        self.z_dim = 2
+        self.z_dim = 2 # z indicates whether something is a rationale, dimension always 2
         self.dropout_rate = 0.5
         self.label_embedding_dim = 400
         self.fixed_classifier = True

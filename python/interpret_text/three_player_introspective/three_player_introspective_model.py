@@ -112,7 +112,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         """
         Compute regularization loss, based on a given rationale sequence
         Use Yujia's formulation
-
         Inputs:
             z -- torch variable, "binary" rationale, (batch_size, sequence_length)
             percentage -- the percentage of words to keep
@@ -220,9 +219,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             z_scores -- non-softmaxed rationale, (batch_size, length)
             cls_predict -- prediction of generator's classifier, (batch_size, num_label)
         """        
-        x, mask, _ = self.generate_data(df_test)
-        word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
-        z_scores, cls_predict = self.generator(word_embeddings, mask)
+        x_tokens, mask, _ = self.generate_data(df_test)
+        z_scores, cls_predict, _ = self.generator(x_tokens, mask)
         z_scores = F.softmax(z_scores, dim=-1)
 
 
@@ -522,3 +520,4 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                     logging.info('last test sparsity: %.4f'%test_sparsity)
                     logging.info('supervised_loss: %.4f, sparsity_loss: %.4f, continuity_loss: %.4f'%(losses['e_loss'], torch.mean(sparsity_loss).cpu().data, torch.mean(continuity_loss).cpu().data))
                 best_test_acc = test_acc
+

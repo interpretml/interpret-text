@@ -25,8 +25,6 @@ class ThreePlayerIntrospectiveExplainer:
         self.gen_classifier = gen_classifier
 
         self.BERT = use_bert
-        if not use_bert and word_vocab is None:
-            print("Must specify a word vocab to use RNN model.")
         if self.BERT:
             args.BERT = True
             args.embedding_dim = 768
@@ -36,6 +34,7 @@ class ThreePlayerIntrospectiveExplainer:
             self.gen_classifier = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = 2, output_hidden_states=True, output_attentions=True)
         else:
             args.BERT = False
+            word_vocab = preprocessor.word_vocab
 
         if self.explainer is None:
             self.explainer = ClassifierModule(args, word_vocab)
@@ -95,9 +94,9 @@ class ThreePlayerIntrospectiveExplainer:
         accuracy, anti_accuracy, sparsity = self.model.test(df_test, test_batch_size)
         return accuracy, anti_accuracy, sparsity
 
-    def explain_local(self, sentence, label, tokenizer, hard_importances=True):
+    def explain_local(self, sentence, label, preprocessor, hard_importances=True):
         df_label = pd.DataFrame.from_dict({"labels": [label]})
-        df_sentence = pd.concat([df_label, tokenizer.tokenize([sentence.lower()])], axis=1)
+        df_sentence = pd.concat([df_label, preprocessor.tokenize([sentence.lower()])], axis=1)
 
         x, m, _ = self.model.generate_data(df_sentence)
         predict, _, _, zs, _ = self.predict(df_sentence)
@@ -111,7 +110,7 @@ class ThreePlayerIntrospectiveExplainer:
         # generate human-readable tokens (individual words)
         seq_len = int(m.sum().item())
         ids = x[:seq_len][0]
-        tokens = [self.model.reverse_word_vocab[i.item()] for i in ids]
+        tokens = [preprocessor.reverse_word_vocab[i.item()] for i in ids]
 
         local_explanation = _create_local_explanation(
             classification=True,
