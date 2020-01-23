@@ -212,10 +212,11 @@ class IntrospectionGeneratorModule(nn.Module):
         # hidden states must be in shape (batch_size, hidden_dim, length)
         # RNN returns (batch_size, hidden_dim, length)
         # BERT returns (batch_size, length, hidden_dim) #TODO replace with if BERT:
-        if hidden_states[-1].shape[1] != self.hidden_dim:
-            hidden_states[-1] = hidden_states[-1].transpose(1, 2)
+        last_hidden_state = hidden_states[-1]
+        if last_hidden_state.shape[1] != self.hidden_dim:
+            last_hidden_state = hidden_states[-1].transpose(1, 2)
 
-        max_cls_hidden = torch.max(hidden_states[-1] + (1 - mask).unsqueeze(1) * self.NEG_INF, dim=2)[0] # (batch_size, hidden_dim)
+        max_cls_hidden = torch.max(last_hidden_state + (1 - mask).unsqueeze(1) * self.NEG_INF, dim=2)[0] # (batch_size, hidden_dim)
         if self.fixed_classifier:
             max_cls_hidden = Variable(max_cls_hidden.data)
 

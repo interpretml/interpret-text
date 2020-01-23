@@ -6,6 +6,7 @@ from interpret_text.explanation.explanation import _create_local_explanation
 import os
 import numpy as np
 import pandas as pd
+from transformers import BertForSequenceClassification
 
 class ThreePlayerIntrospectiveExplainer:
     """
@@ -14,23 +15,49 @@ class ThreePlayerIntrospectiveExplainer:
     Based on the paper "Rethinking Cooperative Rationalization: Introspective 
     Extraction and Complement Control" by Yu et. al.
     """
-    def __init__(self, args, word_vocab, explainer=None, anti_explainer=None, generator=None, gen_classifier=None):
+    def __init__(self, args, preprocessor, use_bert = True, explainer=None, anti_explainer=None, generator=None, gen_classifier=None):
         """ 
         Initialize the ThreePlayerIntrospectiveExplainer
         """
-        explainer, anti_explainer, generator, and classifier: classes 
-        that will be initialized based on parameters listed in args
-        if not explainer:
-            explainer = ClassifierModule(args, word_vocab)
-        if not anti_explainer:
-            anti_explainer = ClassifierModule(args, word_vocab)
-        if not generator:
-            gen_classifier = ClassifierModule(args, word_vocab)
-            generator = IntrospectionGeneratorModule(args, gen_classifier)
+        self.explainer = explainer
+        self.anti_explainer = anti_explainer
+        self.generator = generator
+        self.gen_classifier = gen_classifier
+
+        self.BERT = use_bert
+        if not use_bert and word_vocab is None:
+            print("Must specify a word vocab to use RNN model.")
+        if self.BERT:
+            args.BERT = True
+            args.embedding_dim = 768
+            args.hidden_dim = 768
+            self.explainer = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = 2, output_hidden_states=False, output_attentions=False)
+            self.anti_explainer = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = 2, output_hidden_states=False, output_attentions=False)
+            self.gen_classifier = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels = 2, output_hidden_states=True, output_attentions=True)
+        else:
+            args.BERT = False
+
+        if self.explainer is None:
+            self.explainer = ClassifierModule(args, word_vocab)
+        if self.anti_explainer is None:
+            self.anti_explainer = ClassifierModule(args, word_vocab)
+        if self.gen_classifier is None:
+            self.gen_classifier = ClassifierModule(args, word_vocab)
+        if self.generator is None:
+            self.generator = IntrospectionGeneratorModule(args, self.gen_classifier)
         
-        self.model = ThreePlayerIntrospectiveModel(args, word_vocab, explainer, anti_explainer, generator, gen_classifier)
+        self.model = ThreePlayerIntrospectiveModel(args, preprocessor, self.explainer, self.anti_explainer, self.generator, self.gen_classifier)
         self.labels = args.labels
 
+    def freeze_bert_classifier(self, classifier, entire=False):
+        if entire:
+            for name, param in classifier.named_parameters():
+                param.requires_grad = False
+        else:
+            for name, param in classifier.named_parameters():
+                if "bert.embeddings" in name or ("bert.encoder" in name):
+                    param.requires_grad = False
+    
     def train(self, *args, **kwargs):
         return self.fit(*args, **kwargs)
 
@@ -40,6 +67,11 @@ class ThreePlayerIntrospectiveExplainer:
         y_train: list of labels (ex. 0 -- negative and 1 -- positive)
         '''
         # tokenize/otherwise process the lists of sentences
+        if self.BERT:
+            self.freeze_bert_classifier(self.explainer)
+            self.freeze_bert_classifier(self.anti_explainer)
+            self.freeze_bert_classifier(self.gen_classifier)
+
         if pretrain_cls:
             print('pre-training the classifier')
             self.model.pretrain_classifier(df_train, df_test, batch_size, pretrain_train_iters, pretrain_test_iters)

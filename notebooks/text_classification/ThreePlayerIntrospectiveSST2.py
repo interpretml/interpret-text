@@ -17,7 +17,8 @@ import torch
 import torch.nn as nn
 
 from interpret_text.three_player_introspective.three_player_introspective_explainer import ThreePlayerIntrospectiveExplainer
-from interpret_text.common.utils_three_player import load_pandas_df, GloveTokenizer, ModelArguments
+from interpret_text.common.dataset.utils_sst2 import load_pandas_df
+from interpret_text.common.utils_three_player import GlovePreprocessor, BertPreprocessor, ModelArguments
 from interpret_text.widget import ExplanationDashboard
 
 # %% [markdown]
@@ -40,7 +41,7 @@ pre_trained_model_prefix = 'pre_trained_cls.model'
 save_path = os.path.join("..", "models")
 model_prefix = "sst2rnpmodel"
 save_best_model = True
-pre_train_cls = False
+pre_train_cls = True
 
 # parameters used internally in the model
 args = ModelArguments() # intialize default model parameters
@@ -54,8 +55,8 @@ args.embedding_path = os.path.join(DATA_FOLDER, "glove.6B.100d.txt")
 
 # %%
 # TODO: load dataset to blob storage
-train_data = load_pandas_df('train', LABEL_COL, TEXT_COL)
-test_data = load_pandas_df('test', LABEL_COL, TEXT_COL)
+train_data = load_pandas_df('train')
+test_data = load_pandas_df('test')
 all_data = pd.concat([train_data, test_data])
 x_train = train_data[TEXT_COL]
 x_test = test_data[TEXT_COL]
@@ -72,11 +73,18 @@ args.num_labels = len(labels)
 # The data is then tokenized and embedded using glove embeddings.
 
 # %%
-tokenizer = GloveTokenizer(all_data[TEXT_COL], token_count_thresh, max_sentence_token_count)
+bert = True
+# if bert:
+
+print("CUDA avail:", torch.cuda.is_available())
+
+# else:
+# tokenizer = GloveTokenizer(all_data[TEXT_COL], token_count_thresh, max_sentence_token_count)
+preprocessor = BertPreprocessor()
 
 # append labels to tokenizer output
-df_train = pd.concat([train_data[LABEL_COL], tokenizer.tokenize(x_train)], axis=1)
-df_test = pd.concat([test_data[LABEL_COL], tokenizer.tokenize(x_test)], axis=1)
+df_train = pd.concat([train_data[LABEL_COL], preprocessor.tokenize(x_train)], axis=1)
+df_test = pd.concat([test_data[LABEL_COL], preprocessor.tokenize(x_test)], axis=1)
 
 print(df_train)
 
@@ -85,7 +93,7 @@ print(df_train)
 # Then, we create and train the explainer.
 
 # %%
-explainer = ThreePlayerIntrospectiveExplainer(args, tokenizer.word_vocab) # word vocab is needed to initialize the model's embedding layer
+explainer = ThreePlayerIntrospectiveExplainer(args, preprocessor) # word vocab is needed to initialize the model's embedding layer
 classifier = explainer.fit(df_train, df_test, args.batch_size, num_iteration=1, pretrain_cls=pre_train_cls)
 
 # %% [markdown]

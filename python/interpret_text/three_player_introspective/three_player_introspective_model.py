@@ -20,7 +20,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
     """flattening the HardIntrospectionRationale3PlayerClassificationModel -> HardRationale3PlayerClassificationModel -> 
        Rationale3PlayerClassificationModel dependency structure from original paper code"""
 
-    def __init__(self, args, word_vocab, explainer, anti_explainer, generator, classifier):
+    def __init__(self, args, preprocessor, explainer, anti_explainer, generator, classifier):
         """Initializes the model, including the explainer, anti-rationale explainer
         Args:
             args: 
@@ -57,7 +57,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.generator = generator
 
         # self.word_vocab = word_vocab
-        self.reverse_word_vocab = {v: k for k, v in word_vocab.items()}
+        self.preprocessor = preprocessor
                     
         # no internal code dependencies
         self.NEG_INF = -1.0e6
@@ -76,7 +76,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
     def init_rl_optimizers(self):
         self.opt_G_sup = torch.optim.Adam(filter(lambda x: x.requires_grad, self.generator.parameters()), lr=self.lr)
         self.opt_G_rl = torch.optim.Adam(filter(lambda x: x.requires_grad, self.generator.parameters()), lr=self.lr * 0.1)
-
+    
     def _generate_rationales(self, z_prob_):
         '''
         Input:
@@ -202,8 +202,12 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         z, neg_log_probs = self._generate_rationales(z_probs_) #(batch_size, length)
         
         # TODO this is also an if RNN -- if its BERT, we don't need z
-        predict = self.E_model(X_tokens, X_mask, z)[0] # the first output are the logits
-        anti_predict = self.E_anti_model(X_tokens, X_mask, (1-z))[0]
+        if not self.args.BERT:
+            predict = self.E_model(X_tokens, X_mask, z)[0] # the first output are the logits
+            anti_predict = self.E_anti_model(X_tokens, X_mask, (1-z))[0]
+        else:
+            predict = self.E_model(X_tokens, attention_mask=z)[0] # the first output are the logits
+            anti_predict = self.E_anti_model(X_tokens, attention_mask=(1-z))[0]
 
         return predict, anti_predict, cls_predict, z, neg_log_probs
         
@@ -358,7 +362,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
     def display_example(self, x, m, z):
         seq_len = int(m.sum().item())
         ids = x[:seq_len]
-        tokens = [self.reverse_word_vocab[i.item()] for i in ids]
+        tokens = self.preprocessor.decode_single(ids)
 
         final = ""
         for i in range(len(tokens)):

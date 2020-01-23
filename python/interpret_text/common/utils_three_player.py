@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from transformers import BertTokenizer
+
 # default parameters used to initialize the model
 class ModelArguments():
     def __init__(self, **kwargs):
@@ -24,8 +26,52 @@ class ModelArguments():
         self.lambda_acc_gap = 1.2
         self.lr=0.001
 
+class BertPreprocessor():
+
+    def __init__(self, tokenizer = None, model = None, max_length = 50, pad_to_max = True):
+        if tokenizer:
+            self.tokenizer = tokenizer
+        else:
+            self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        
+        self.max_length = max_length
+        self.pad_to_max = True
+
+    def tokenize(self, data):
+        """
+        Converts a list of text into a dataframe containing padded token ids,
+        masks distinguishing word tokens from pads, and word token counts for
+        each text in the list. 
+        Args:
+            data (list): a list of strings (e.g. sentences)
+        Returns:
+            tokens (pd.Dataframe): a dataframe containing
+            lists of word token ids, pad/word masks, and token counts 
+            for each string in the list
+        """
+        input_ids = []
+        attention_mask = []
+        counts = []
+        for text in data:
+            d = self.tokenizer.encode_plus(text, max_length = self.max_length, pad_to_max_length=self.pad_to_max)
+            input_ids.append(np.array(d['input_ids'], dtype=np.int64))
+            attention_mask.append(d['attention_mask'])
+            counts.append(sum(d['attention_mask']))
+        
+        tokens = pd.DataFrame({"tokens": input_ids, "mask": attention_mask, "counts": counts})
+
+        return tokens
+
+    def decode_single(self, id_list):
+        '''
+        id_list: a list of token ids
+        '''
+        return self.tokenizer.convert_ids_to_tokens(id_list)
+
+    
+
 # Splits words into tokens that are passed into glove embeddings
-class GloveTokenizer:
+class GlovePreprocessor:
     def __init__(self, text, count_thresh, token_cutoff):
         """
         text (list): a list of sentences (strings)
@@ -102,4 +148,9 @@ class GloveTokenizer:
             counts.append(np.sum(mask))
         tokens = pd.DataFrame({"tokens": token_lists, "mask": masks, "counts": counts})
         return tokens
-        
+
+    def decode_single(self, id_list):
+        '''
+        id_list: a list of token ids
+        '''
+        return [self.reverse_word_vocab[i.item()] for i in ids]
