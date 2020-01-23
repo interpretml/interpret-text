@@ -14,184 +14,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from tqdm import tqdm
 
-
-# classes needed for Rationale3Player
-class RnnModel(nn.Module):
-    def __init__(self, input_dim, hidden_dim, layer_num, dropout_rate):
-        """
-        input_dim -- dimension of input
-        hidden_dim -- dimension of filters
-        layer_num -- number of RNN layers   
-        """
-        super(RnnModel, self).__init__()
-        self.rnn_layer = nn.GRU(input_size=input_dim, 
-                                hidden_size=hidden_dim//2, 
-                                num_layers=layer_num,
-                                bidirectional=True, dropout=dropout_rate)
-    
-    def forward(self, embeddings, mask=None, h0=None, c0=None):
-        """
-        Inputs:
-            embeddings -- sequence of word embeddings, (batch_size, sequence_length, embedding_dim)
-            mask -- a float tensor of masks, (batch_size, length)
-            h0, c0 --  (num_layers * num_directions, batch, hidden_size)
-        Outputs:
-            hiddens -- sentence embedding tensor, (batch_size, hidden_dim, sequence_length)
-        """
-        embeddings_ = embeddings.transpose(0, 1) #(sequence_length, batch_size, embedding_dim)
-        
-        if mask is not None:
-            seq_lengths = list(torch.sum(mask, dim=1).cpu().data.numpy())
-            seq_lengths = list(map(int, seq_lengths))
-            inputs_ = torch.nn.utils.rnn.pack_padded_sequence(embeddings_, seq_lengths)
-        else:
-            inputs_ = embeddings_
-        
-        if h0 is not None:
-            hidden, _ = self.rnn_layer(inputs_, h0)
-        else:
-            hidden, _ = self.rnn_layer(inputs_) #(sequence_length, batch_size, hidden_dim (* 2 if bidirectional))
-
-        if mask is not None:
-            hidden, _ = torch.nn.utils.rnn.pad_packed_sequence(hidden) #(length, batch_size, hidden_dim)
-        
-        return hidden.permute(1, 2, 0) #(batch_size, hidden_dim, sequence_length)
-
-class ClassifierModule(nn.Module):
-    '''
-    classifier for both E and E_anti models provided with RNP paper code
-    '''
-    def __init__(self, args):
-        super(ClassifierModule, self).__init__()
-        self.args = args
-        self.encoder = RnnModel(self.args.embedding_dim, self.args.hidden_dim, self.args.layer_num, self.args.dropout_rate)
-        self.predictor = nn.Linear(self.args.hidden_dim, self.args.num_labels)
-        
-        self.NEG_INF = -1.0e6
-        
-
-    def forward(self, word_embeddings, z, mask):
-        """
-        Inputs:
-            word_embeddings -- torch Variable in shape of (batch_size, length, embed_dim)
-            z -- rationale (batch_size, length)
-            mask -- torch Variable in shape of (batch_size, length)
-        Outputs:
-            predict -- (batch_size, num_label)
-        """        
-
-        masked_input = word_embeddings * z.unsqueeze(-1)
-        hiddens = self.encoder(masked_input, mask)
-        
-        max_hidden = torch.max(hiddens + (1 - mask * z).unsqueeze(1) * self.NEG_INF, dim=2)[0]
-        
-        predict = self.predictor(max_hidden)
-        return predict
-
-# extra classes needed for introspective model 
-class DepGenerator(nn.Module):
-    
-    def __init__(self, input_dim, hidden_dim, layer_num, dropout_rate, z_dim):
-        """     
-        input_dim -- dimension of input   
-        hidden_dim -- dimension of filters
-        z_dim -- rationale or not, always 2    
-        layer_num -- number of RNN layers   
-        """
-        super(DepGenerator, self).__init__()
-        
-        self.generator_model = RnnModel(input_dim, hidden_dim, layer_num, dropout_rate)
-        self.output_layer = nn.Linear(hidden_dim, z_dim)
-        
-        
-    def forward(self, x, h0=None, c0=None, mask=None):
-        """
-        Given input x in shape of (batch_size, sequence_length) generate a 
-        "binary" mask as the rationale
-        Inputs:
-            x -- input sequence of word embeddings, (batch_size, sequence_length, embedding_dim)
-        Outputs:
-            z -- output rationale, "binary" mask, (batch_size, sequence_length)
-        """
-        #(batch_size, sequence_length, hidden_dim)
-        hiddens = self.generator_model(x, mask, h0, c0).transpose(1, 2).contiguous() 
-        scores = self.output_layer(hiddens) # (batch_size, sequence_length, 2)
-        return scores
-        
-class IntrospectionGeneratorModule(nn.Module):
-    '''
-    classifier for both E and E_anti models
-    RNN:
-        """
-        input_dim -- dimension of input
-        hidden_dim -- dimension of filters
-        layer_num -- number of RNN layers   
-        """
-    DepGenerator:
-        """        
-        input_dim -- dimension of input   
-        hidden_dim -- dimension of filters
-        z_dim -- rationale or not, always 2    
-        layer_num -- number of RNN layers   
-        """
-    '''
-    def __init__(self, args):
-        super(IntrospectionGeneratorModule, self).__init__()
-        self.args = args
-        
-        # for initializing RNN and DepGenerator
-        self.input_dim = args.embedding_dim
-        self.hidden_dim = args.hidden_dim
-        self.layer_num = args.layer_num
-        self.z_dim = args.z_dim
-        self.dropout_rate = args.dropout_rate
-        # for embedding labels
-        self.num_labels = args.num_labels
-        self.label_embedding_dim = args.label_embedding_dim
-        
-        # for training
-        self.fixed_classifier = args.fixed_classifier
-        
-        self.NEG_INF = -1.0e6
-        self.lab_embed_layer = self._create_label_embed_layer() # should be shared with the Classifier_pred weights
-        
-        # baseline classification model
-        self.Classifier_enc = RnnModel(self.input_dim, self.hidden_dim, self.layer_num, self.dropout_rate)
-        self.Classifier_pred = nn.Linear(self.hidden_dim, self.num_labels)
-        
-        self.Transformation = nn.Sequential()
-        self.Transformation.add_module('linear_layer', nn.Linear(self.hidden_dim + self.label_embedding_dim, self.hidden_dim // 2))
-        self.Transformation.add_module('tanh_layer', nn.Tanh())
-        self.Generator = DepGenerator(self.input_dim, self.hidden_dim, self.layer_num, self.dropout_rate, self.z_dim)
-        
-        
-    def _create_label_embed_layer(self):
-        embed_layer = nn.Embedding(self.num_labels, self.label_embedding_dim)
-        embed_layer.weight.data.normal_(mean=0, std=0.1)
-        embed_layer.weight.requires_grad = True
-        return embed_layer
-    
-    
-    def forward(self, word_embeddings, mask):
-        cls_hiddens = self.Classifier_enc(word_embeddings, mask) # (batch_size, hidden_dim, sequence_length)
-        max_cls_hidden = torch.max(cls_hiddens + (1 - mask).unsqueeze(1) * self.NEG_INF, dim=2)[0] # (batch_size, hidden_dim)
-        
-        if self.fixed_classifier:
-            max_cls_hidden = Variable(max_cls_hidden.data)
-        
-        cls_pred_logits = self.Classifier_pred(max_cls_hidden) # (batch_size, num_labels)
-        
-        _, cls_pred = torch.max(cls_pred_logits, dim=1) # (batch_size,)
-        
-        cls_lab_embeddings = self.lab_embed_layer(cls_pred) # (batch_size, lab_emb_dim)
-        
-        init_h0 = self.Transformation(torch.cat([max_cls_hidden, cls_lab_embeddings], dim=1)) # (batch_size, hidden_dim / 2)
-        init_h0 = init_h0.unsqueeze(0).expand(2, init_h0.size(0), init_h0.size(1)).contiguous() # (2, batch_size, hidden_dim / 2)
-        z_scores_ = self.Generator(word_embeddings, h0=init_h0, mask=mask) #(batch_size, length, 2)
-        z_scores_[:, :, 1] = z_scores_[:, :, 1] + (1 - mask) * self.NEG_INF
-        
-        return z_scores_, cls_pred_logits
-
+from interpret_text.three_player_introspective.three_player_introspective_components import RnnModel, ClassifierModule, IntrospectionGeneratorModule
 
 class ThreePlayerIntrospectiveModel(nn.Module):
     """flattening the HardIntrospectionRationale3PlayerClassificationModel -> HardRationale3PlayerClassificationModel -> 
@@ -228,12 +51,12 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.num_labels = args.num_labels 
 
         # initialize model components
-        self.E_model = explainer(args)
-        self.E_anti_model = anti_explainer(args)
-        self.C_model = classifier(args)
-        self.generator = generator(args)
-        self.init_embedding_layer(word_vocab)
-        self.word_vocab = word_vocab
+        self.E_model = explainer
+        self.E_anti_model = anti_explainer
+        self.gen_C_model = classifier
+        self.generator = generator
+
+        # self.word_vocab = word_vocab
         self.reverse_word_vocab = {v: k for k, v in word_vocab.items()}
                     
         # no internal code dependencies
@@ -351,16 +174,16 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         sparsity_loss = torch.abs(sparsity_ratio - percentage)
 
         return continuity_loss, sparsity_loss
-
-    def train_one_step(self, x, label, baseline, mask):
+    
+    def train_one_step(self, X_tokens, label, baseline, mask):
         # TODO: try to see whether removing the follows makes any differences
         self.opt_E_anti.zero_grad()
         self.opt_E.zero_grad()
         self.opt_G_sup.zero_grad()
         self.opt_G_rl.zero_grad()
+        # self.generator.classifier.zero_grad()
         
-        predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(x, mask)
-        
+        predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(X_tokens, mask)
         e_loss_anti = torch.mean(self.loss_func(anti_predict, label))
         
 #         e_loss = torch.mean(self.loss_func(predict, label))
@@ -377,11 +200,11 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         losses = {'e_loss':e_loss.cpu().data, 'e_loss_anti':e_loss_anti.cpu().data,
                  'g_sup_loss':g_sup_loss.cpu().data, 'g_rl_loss':g_rl_loss.cpu().data}
         
-        e_loss_anti.backward()
+        e_loss_anti.backward(retain_graph=True)
         self.opt_E_anti.step()
         self.opt_E_anti.zero_grad()
         
-        e_loss.backward()
+        e_loss.backward(retain_graph=True)
         self.opt_E.step()
         self.opt_E.zero_grad()
         
@@ -390,13 +213,13 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             self.opt_G_sup.step()
             self.opt_G_sup.zero_grad()
 
-        g_rl_loss.backward()
+        g_rl_loss.backward(retain_graph=True)
         self.opt_G_rl.step()
         self.opt_G_rl.zero_grad()
         
         return losses, predict, anti_predict, cls_predict, z, rewards, consistency_loss, continuity_loss, sparsity_loss
         
-    def forward(self, x, mask):
+    def forward(self, X_tokens, X_mask):
         """
         Inputs:
             x -- torch Variable in shape of (batch_size, length)
@@ -404,23 +227,29 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         Outputs:
             predict -- (batch_size, num_label)
             z -- rationale (batch_size, length)
-        """        
-        word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        """
+        # X_tokens, X_mask = self.preprocessor.encode(X_text)
+        # word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        # word_embeddings = self.preprocessor.embed(X_tokens, X_mask)
 
-        z_scores_, cls_predict = self.generator(word_embeddings, mask)
+        z_scores_, cls_predict, word_embeddings = self.generator(X_tokens, X_mask)
         
         z_probs_ = F.softmax(z_scores_, dim=-1)
         
-        z_probs_ = (mask.unsqueeze(-1) * ( (1 - self.exploration_rate) * z_probs_ + self.exploration_rate / z_probs_.size(-1) ) ) + ((1 - mask.unsqueeze(-1)) * z_probs_)
+        z_probs_ = (X_mask.unsqueeze(-1) * ( (1 - self.exploration_rate) * z_probs_ + self.exploration_rate / z_probs_.size(-1) ) ) + ((1 - X_mask.unsqueeze(-1)) * z_probs_)
         
         z, neg_log_probs = self._generate_rationales(z_probs_) #(batch_size, length)
         
-        predict = self.E_model(word_embeddings, z, mask)
-        
-        anti_predict = self.E_anti_model(word_embeddings, 1 - z, mask)
+        # masked_input = X_tokens * z.unsqueeze(-1)
+
+        # print("shapes:", masked_input.shape, X_mask.shape)
+
+        # TODO this is also an if RNN -- if its BERT, we don't need z
+        predict = self.E_model(X_tokens, X_mask, z)[0] # the first output are the logits
+        anti_predict = self.E_anti_model(X_tokens, X_mask, (1-z))[0]
 
         return predict, anti_predict, cls_predict, z, neg_log_probs
-    
+        
     def get_z_scores(self, df_test):
         """
         Inputs:
@@ -491,58 +320,100 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         
         return sup_loss, rl_loss, rewards, consistency_loss, continuity_loss, sparsity_loss
 
+    # def train_cls_one_step(self, x, label, mask):
+ 
+    #     self.opt_G_sup.zero_grad()
 
-    def train_cls_one_step(self, x, label, mask):
+    #     word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        
+    #     cls_hiddens = self.generator.Classifier_enc(word_embeddings, mask) # (batch_size, hidden_dim, sequence_length)
+    #     max_cls_hidden = torch.max(cls_hiddens + (1 - mask).unsqueeze(1) * self.NEG_INF, dim=2)[0] # (batch_size, hidden_dim)
+    #     cls_predict = self.generator.Classifier_pred(max_cls_hidden)
+        
+    #     sup_loss = torch.mean(self.loss_func(cls_predict, label))
+        
+    #     losses = {'g_sup_loss':sup_loss.cpu().data}
+        
+    #     sup_loss.backward()
+    #     self.opt_G_sup.step()
+        
+    #     return losses, cls_predict
+    
+    def train_cls_one_step(self, X_tokens, label, X_mask):
  
         self.opt_G_sup.zero_grad()
+        self.generator.classifier.zero_grad()
 
-        word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        # X_tokens, X_mask = self.preprocessor.encode(X_text)
+        # word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        # word_embeddings = self.preprocessor.embed(X_tokens, X_mask)
+        cls_predict_logits, _, _ = self.generator.classifier(X_tokens, attention_mask=X_mask) # (batch_size, hidden_dim, sequence_length)
+        # max_cls_hidden = torch.max(cls_hiddens + (1 - X_mask).unsqueeze(1) * self.NEG_INF, dim=2)[0] # (batch_size, hidden_dim)
+        # cls_predict = self.generator.Classifier_pred(max_cls_hidden)
         
-        cls_hiddens = self.generator.Classifier_enc(word_embeddings, mask) # (batch_size, hidden_dim, sequence_length)
-        max_cls_hidden = torch.max(cls_hiddens + (1 - mask).unsqueeze(1) * self.NEG_INF, dim=2)[0] # (batch_size, hidden_dim)
-        cls_predict = self.generator.Classifier_pred(max_cls_hidden)
-        
-        sup_loss = torch.mean(self.loss_func(cls_predict, label))
+        sup_loss = torch.mean(self.loss_func(cls_predict_logits, label))
         
         losses = {'g_sup_loss':sup_loss.cpu().data}
         
         sup_loss.backward()
+
+        # Clip the norm of the gradients to 1.0.
+        # This is to help prevent the "exploding gradients" problem.
+        torch.nn.utils.clip_grad_norm_(self.generator.parameters(), 1.0)
+
         self.opt_G_sup.step()
         
-        return losses, cls_predict
+        return losses, cls_predict_logits
 
-    def train_gen_one_step(self, x, label, mask):
-        z_baseline = Variable(torch.FloatTensor([float(np.mean(self.z_history_rewards))]))
-        if self.use_cuda:
-            z_baseline = z_baseline.cuda()
+#     def train_gen_one_step(self, x, label, mask):
+#         z_baseline = Variable(torch.FloatTensor([float(np.mean(self.z_history_rewards))]))
+#         if self.use_cuda:
+#             z_baseline = z_baseline.cuda()
         
-        self.opt_G_rl.zero_grad()
+#         self.opt_G_rl.zero_grad()
         
-        predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(x, mask)
+#         predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(x, mask)
         
-#         e_loss = torch.mean(self.loss_func(predict, label))
-        _, cls_pred = torch.max(cls_predict, dim=1) # (batch_size,)
-#         e_loss = torch.mean(self.loss_func(predict, cls_pred)) # e_loss comes from only consistency
-        e_loss = (torch.mean(self.loss_func(predict, label)) + torch.mean(self.loss_func(predict, cls_pred))) / 2
+# #         e_loss = torch.mean(self.loss_func(predict, label))
+#         _, cls_pred = torch.max(cls_predict, dim=1) # (batch_size,)
+# #         e_loss = torch.mean(self.loss_func(predict, cls_pred)) # e_loss comes from only consistency
+#         e_loss = (torch.mean(self.loss_func(predict, label)) + torch.mean(self.loss_func(predict, cls_pred))) / 2
         
-        # g_sup_loss comes from only cls pred loss
-        _, g_rl_loss, z_rewards, consistency_loss, continuity_loss, sparsity_loss = self.get_loss(predict, 
-                                                                         anti_predict, 
-                                                                         cls_predict, label, z, 
-                                                                         neg_log_probs, z_baseline, mask)
+#         # g_sup_loss comes from only cls pred loss
+#         _, g_rl_loss, z_rewards, consistency_loss, continuity_loss, sparsity_loss = self.get_loss(predict, 
+#                                                                          anti_predict, 
+#                                                                          cls_predict, label, z, 
+#                                                                          neg_log_probs, z_baseline, mask)
         
-        losses = {'g_rl_loss':g_rl_loss.cpu().data}
+#         losses = {'g_rl_loss':g_rl_loss.cpu().data}
 
-        g_rl_loss.backward()
-        self.opt_G_rl.step()
-        self.opt_G_rl.zero_grad()
+#         g_rl_loss.backward()
+#         self.opt_G_rl.step()
+#         self.opt_G_rl.zero_grad()
     
-        z_batch_reward = np.mean(z_rewards.cpu().data.numpy())
-        self.z_history_rewards.append(z_batch_reward)
+#         z_batch_reward = np.mean(z_rewards.cpu().data.numpy())
+#         self.z_history_rewards.append(z_batch_reward)
         
-        return losses, predict, anti_predict, cls_predict, z, z_rewards, consistency_loss, continuity_loss, sparsity_loss
+#         return losses, predict, anti_predict, cls_predict, z, z_rewards, consistency_loss, continuity_loss, sparsity_loss
     
-    def forward_cls(self, x, mask):
+    # def forward_cls(self, x, mask):
+    #     """
+    #     Inputs:
+    #         x -- torch Variable in shape of (batch_size, length)
+    #         mask -- torch Variable in shape of (batch_size, length)
+    #     Outputs:
+    #         predict -- (batch_size, num_label)
+    #         z -- rationale (batch_size, length)
+    #     """        
+    #     word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        
+    #     z = torch.ones_like(x).type(torch.cuda.FloatTensor)
+        
+    #     predict = self.E_model(word_embeddings, z, mask)
+
+    #     return predict
+
+    def forward_cls(self, X_tokens, mask):
         """
         Inputs:
             x -- torch Variable in shape of (batch_size, length)
@@ -551,11 +422,12 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             predict -- (batch_size, num_label)
             z -- rationale (batch_size, length)
         """        
-        word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
+        # word_embeddings = self.embed_layer(x) #(batch_size, length, embedding_dim)
         
-        z = torch.ones_like(x).type(torch.cuda.FloatTensor)
+        z = torch.ones_like(X_tokens).type(torch.cuda.FloatTensor)
+        # masked_input = word_embeddings * z.unsqueeze(-1)
         
-        predict = self.E_model(word_embeddings, z, mask)
+        predict = self.E_model(X_tokens, attention_mask=z)
 
         return predict
 
@@ -685,8 +557,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                 for test_iter in range(len(df_test)//batch_size):
                     test_batch = df_test.sample(batch_size) # TODO: originally used dev batch here?
                     batch_x_, batch_m_, batch_y_ = self.generate_data(test_batch)
-                    embeddings = self.embed_layer(batch_x_)
-                    _, predict = self.generator(embeddings, batch_m_)
+                    # embeddings = self.embed_layer(batch_x_)
+                    _, predict, _ = self.generator(batch_x_, batch_m_)
 
                     _, y_pred = torch.max(predict, dim=1)
 
