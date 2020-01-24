@@ -1,9 +1,9 @@
 from interpret_text.common.utils_classical import plot_local_imp
-from interpret_text.three_player_introspective.three_player_introspective_model import (
+from interpret_text.three_player_introspective.three_player_introspective_components import (
     ClassifierModule,
     IntrospectionGeneratorModule,
-    ThreePlayerIntrospectiveModel,
 )
+from interpret_text.three_player_introspective.three_player_introspective_model import ThreePlayerIntrospectiveModel
 from interpret_text.explanation.explanation import _create_local_explanation
 
 import numpy as np
@@ -23,7 +23,7 @@ class ThreePlayerIntrospectiveExplainer:
         self,
         args,
         preprocessor,
-        use_bert=True,
+        classifier_type="BERT",
         explainer=None,
         anti_explainer=None,
         generator=None,
@@ -31,14 +31,16 @@ class ThreePlayerIntrospectiveExplainer:
     ):
         """
         Initialize the ThreePlayerIntrospectiveExplainer
+        classifier type: {BERT, RNN, custom}
+        If BERT, explainer, anti explainer, and generator classifier will
+        be BERT modules
+        If RNN, explainer, anti explainer, and generator classifier will
+        be RNNs
+        If custom, provide modules for explainer, anti_explainer, generator,
+        and gen_classifier.
         """
-        self.explainer = explainer
-        self.anti_explainer = anti_explainer
-        self.generator = generator
-        self.gen_classifier = gen_classifier
-
-        self.BERT = use_bert
-        if self.BERT:
+        if classifier_type == "BERT":
+            self.BERT = True
             args.BERT = True
             args.embedding_dim = 768
             args.hidden_dim = 768
@@ -61,19 +63,27 @@ class ThreePlayerIntrospectiveExplainer:
                 output_attentions=True,
             )
         else:
+            self.BERT = False
             args.BERT = False
             word_vocab = preprocessor.word_vocab
-
-        if self.explainer is None:
-            self.explainer = ClassifierModule(args, word_vocab)
-        if self.anti_explainer is None:
-            self.anti_explainer = ClassifierModule(args, word_vocab)
-        if self.gen_classifier is None:
-            self.gen_classifier = ClassifierModule(args, word_vocab)
-        if self.generator is None:
-            self.generator = IntrospectionGeneratorModule(
-                args, self.gen_classifier
-            )
+            if classifier_type == "RNN":
+                self.explainer = ClassifierModule(args, word_vocab)
+                self.anti_explainer = ClassifierModule(args, word_vocab)
+                self.gen_classifier = ClassifierModule(args, word_vocab)
+                self.generator = IntrospectionGeneratorModule(
+                    args, self.gen_classifier
+                )
+            else:
+                assert explainer is not None\
+                       and anti_explainer is not None\
+                       and generator is not None\
+                       and gen_classifier is not None,\
+                       "Custom explainer, anti explainer, generator, and"\
+                       "generator classifier specifications are required."
+                self.explainer = explainer
+                self.anti_explainer = anti_explainer
+                self.generator = generator
+                self.gen_classifier = gen_classifier
 
         self.model = ThreePlayerIntrospectiveModel(
             args,
