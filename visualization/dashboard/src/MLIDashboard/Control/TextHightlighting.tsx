@@ -24,7 +24,7 @@ const normal = {
 } as React.CSSProperties
 
 export class TextHighlighting extends React.PureComponent<IChartProps> {
-  public render (): React.ReactNode[] {
+  public render(): React.ReactNode[] {
     const text = this.props.text
     const importances = this.props.localExplanations
     const k = this.props.topK

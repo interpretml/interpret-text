@@ -6,7 +6,7 @@ import { Slider } from 'office-ui-fabric-react/lib/Slider'
 import { BarChart } from './Control/BarChart'
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle'
 import { Text } from 'office-ui-fabric-react/lib/Text'
-import { Utils } from './CommonUtils'
+import { RadioKeys, Utils } from './CommonUtils'
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup'
 import { FontWeights } from 'office-ui-fabric-react/lib/Styling'
 
@@ -19,10 +19,11 @@ export interface IDashboardState {
   topK: number,
   radio: string
 }
+
 const options: IChoiceGroupOption[] = [
-  { key: 'all', text: localization.allButton },
-  { key: 'pos', text: localization.posButton },
-  { key: 'neg', text: localization.negButton }
+  { key: RadioKeys.all, text: localization.allButton },
+  { key: RadioKeys.pos, text: localization.posButton },
+  { key: RadioKeys.neg, text: localization.negButton }
 ]
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
@@ -31,12 +32,12 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     this.state = {
       maxK: Math.min(15, Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations))),
       topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2),
-      radio: 'all'
+      radio: RadioKeys.all
     }
     this.changeRadioButton = this.changeRadioButton.bind(this)
   }
 
-  public render () {
+  public render() {
     return (
       <div className='explainerDashboard'>
         <div className = 'sliderWithText' >
@@ -70,7 +71,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
               <div className = 'radio'>
                 <ChoiceGroup defaultSelectedKey='all' options={options} onChange={this.changeRadioButton} required={true} />
               </div>
-              <div className = 'legend'>
+              <div className = 'chartLegend'>
                 {localization.legendText}
               </div>
             </div>
@@ -101,11 +102,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
         </div>
     )
 }
-  private setTopK (newNumber: number): void {
+  private setTopK(newNumber: number): void {
     this.setState({ topK: newNumber })
   }
 
-  private countNonzeros (numArr: number[]): number {
+  private countNonzeros(numArr: number[]): number {
     let counter = 0
     for (const i in numArr) {
       if (numArr[i] !== 0) {
@@ -115,11 +116,11 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
     return counter
   }
 
-  public predictClass (classname, prediciton):string{
-    return classname[Utils.argsort(prediciton)[0]]
+  public predictClass(classname, prediction):string{
+    return classname[Utils.argsort(prediction)[0]]
   }
 
-  public changeRadioButton (ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
+  public changeRadioButton(ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
     this.setState({ radio: option.key })
   }
 }

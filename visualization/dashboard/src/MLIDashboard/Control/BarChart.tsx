@@ -5,7 +5,7 @@ import { Utils } from '../CommonUtils'
 import { localization } from '../../Localization/localization'
 
 export class BarChart extends React.PureComponent<IChartProps> {
-  public render (): React.ReactNode {
+  public render(): React.ReactNode {
     return (
       <AccessibleChart
         plotlyProps= {this.buildPlotlyProps(this.props)}
@@ -15,12 +15,11 @@ export class BarChart extends React.PureComponent<IChartProps> {
     )
   }
 
-  private buildPlotlyProps (props): IPlotlyProperty {
+  private buildPlotlyProps(props): IPlotlyProperty {
     const importances = props.localExplanations
-    let color: string[]
     const k = props.topK
     let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
-    color = sortedList.map(x => importances[x] < 0 ? '#FFFFFF':'#5A53FF')
+    const color = sortedList.map(x => importances[x] < 0 ? '#FFFFFF':'#5A53FF')
     const [data, x, y, ylabel, tooltip] = [[], [], [], [], []]
     sortedList.map((idx, i) => {
       let str = ''

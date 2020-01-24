@@ -2,7 +2,7 @@
     width: 100%;
     height: 100%;
     background-color: #f2f2f2;
-    font-family: 'Segoe UI';
+    font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
     display: flex;
     flex-direction: column;
     .sliderWithText {
@@ -47,7 +47,7 @@
                 font-weight: lighter;
                 font-size: 12px;
             }
-            .legend {
+            .chartLegend {
                 margin-top: 10px;
                 color: #666666;
                 font-size: 11px;
