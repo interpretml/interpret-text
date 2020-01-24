@@ -220,11 +220,10 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             cls_predict -- prediction of generator's classifier, (batch_size, num_label)
         """        
         x_tokens, mask, _ = self.generate_data(df_test)
-        z_scores, cls_predict, _ = self.generator(x_tokens, mask)
+        z_scores, _, _ = self.generator(x_tokens, mask)
         z_scores = F.softmax(z_scores, dim=-1)
 
-
-        return z_scores, cls_predict
+        return z_scores
 
     def get_advantages(self, pred_logits, anti_pred_logits, cls_pred_logits, label, z, neg_log_probs, baseline, mask):
         '''
@@ -371,7 +370,19 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             final += " "
         print(final)
 
-    def test(self, df_test, test_batch_size):
+    def test(self, df_test, test_batch_size, n_examples_displayed):
+        """Calculate and store as model attributes:
+        Average classification accuracy using rationales (self.avg_accuracy), 
+        Average classification accuracy rationale complements (self.anti_accuracy)
+        Average sparsity of rationales (self.avg_sparsity)
+        
+        :param df_test: dataframe containing test data labels, tokens, masks, and counts
+        :type df_test: pandas dataframe
+        :param n_examples_displayed: number of test examples (with rationale/prediction) to display
+        :type n_examples_displayed: int
+        :param test_batch_size: number of examples in each test batch
+        :type test_batch_size: int
+        """
         self.eval()
 
         accuracy = 0
@@ -381,7 +392,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         for i in range(len(df_test)//test_batch_size):
             test_batch = df_test.iloc[i*test_batch_size:(i+1)*test_batch_size]
             batch_x_, batch_m_, batch_y_ = self.generate_data(test_batch)
-            predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(batch_x_, batch_m_)
+            predict, anti_predict, _, z, _ = self.forward(batch_x_, batch_m_)
             
             # do a softmax on the predicted class probabilities
             _, y_pred = torch.max(predict, dim=1)
@@ -394,17 +405,15 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_ratios = self._get_sparsity(z, batch_m_)
             sparsity_total += sparsity_ratios.sum().item()
 
-        accuracy = accuracy / len(df_test)
-        anti_accuracy = anti_accuracy / len(df_test)
-        sparsity = sparsity_total / len(df_test)
+        self.avg_accuracy = accuracy / len(df_test)
+        self.avg_anti_accuracy = anti_accuracy / len(df_test)
+        self.avg_sparsity = sparsity_total / len(df_test)
 
-        for i in range(0, 5):
+        for i in range(n_examples_displayed+1):
             rand_idx = random.randint(0, test_batch_size-1)
             # display an example
             print("Gold Label: ", batch_y_[rand_idx].item(), " Pred label: ", y_pred[rand_idx].item())
             self.display_example(batch_x_[rand_idx], batch_m_[rand_idx], z[rand_idx])
-
-        return accuracy, anti_accuracy, sparsity
 
     def pretrain_classifier(self, df_train, df_test, batch_size, num_iteration, test_iteration):
         train_accs = []

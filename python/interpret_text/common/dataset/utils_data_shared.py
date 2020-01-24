@@ -25,14 +25,17 @@ log = logging.getLogger(__name__)
 
 def maybe_download(url, filename=None, work_directory=".", expected_bytes=None):
     """Download a file if it is not already downloaded.
-
-    Args:
-        filename (str): File name.
-        work_directory (str): Working directory.
-        url (str): URL of the file to download.
-        expected_bytes (int): Expected file size in bytes.
-    Returns:
-        str: File path of the file downloaded.
+    :param url: URL of the file to download
+    :type url: string
+    :param filename: what the downloaded file will be named
+    :type filename: string, optional
+    :param work_directory: where the file will be downloaded to
+    :type work_directory: string, optional
+    :param expected_bytes: expected file size in bytes
+    :type expected_btes: int
+    :raises IOError
+    :return: filepath to the downloaded file
+    :rtype: string
     """
     if filename is None:
         filename = url.split("/")[-1]
@@ -67,9 +70,11 @@ def maybe_download(url, filename=None, work_directory=".", expected_bytes=None):
 
 def extract_zip(file_path, dest_path="."):
     """Extracts all contents of a zip archive file.
-    Args:
-        file_path (str): Path of file to extract.
-        dest_path (str, optional): Destination directory. Defaults to ".".
+    :param file_path: path to the file to unizp
+    :type file_path: string
+    :param dest_path: path to directory to store unzipped file contents. Defaults to "."
+    :type dest_path: string, optional
+    :raises IOError
     """
     if not os.path.exists(file_path):
         raise IOError("File doesn't exist")
@@ -79,6 +84,16 @@ def extract_zip(file_path, dest_path="."):
         z.extractall(dest_path, filter(lambda f: not f.endswith("\r"), z.namelist()))
 
 def download_and_unzip(URL, file_name, local_cache_path="."):
+    """Download a file if it is not already downloaded.
+    :param URL: URL of the file to download
+    :type URL: string
+    :param file_name: what the downloaded file will be named
+    :type file_name: string
+    :param local_cache_path: where the file will be downloaded to and unzipped
+    :type local_cache_path: string, optional
+    :return: filepath to the downloaded file
+    :rtype: string
+    """
     zip_name = URL.split("/")[-1]
 
     if not os.path.exists(os.path.join(local_cache_path, file_name)):
@@ -87,5 +102,5 @@ def download_and_unzip(URL, file_name, local_cache_path="."):
                 zip_path = maybe_download(URL, zip_name, local_cache_path)
             except Exception as e:
                 raise e
-        extract_zip(zip_path, dest_path=".")
+        extract_zip(zip_path, dest_path=local_cache_path)
     return os.path.join(local_cache_path, file_name)

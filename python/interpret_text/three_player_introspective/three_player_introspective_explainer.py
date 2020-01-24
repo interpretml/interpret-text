@@ -86,29 +86,42 @@ class ThreePlayerIntrospectiveExplainer:
         self.model.eval()
         batch_x_, batch_m_, batch_y_ = self.model.generate_data(df_predict)
         predict, anti_predict, cls_predict, z, neg_log_prob = self.model.forward(batch_x_, batch_m_)
-        predicts = predict.detach()
+        predict = predict.detach()
         anti_predict = anti_predict.detach()
         cls_predict = cls_predict.detach()
         z = z.detach()
-        neg_log_prob = neg_log_prob.detach()
-        return predict, anti_predict, cls_predict, z, neg_log_prob
+        predict_dict = {"predict": predict, "anti_predict": anti_predict, "cls_predict": cls_predict, "rationale": z}
+        return pd.DataFrame.from_dict(predict_dict)
     
-    def score(self, df_test, test_batch_size=200):
-        accuracy, anti_accuracy, sparsity = self.model.test(df_test, test_batch_size)
-        return accuracy, anti_accuracy, sparsity
+    def score(self, df_test, test_batch_size=200, n_examples_displayed=1):
+        """Calculate and store as model attributes:
+        Average classification accuracy using rationales (self.avg_accuracy), 
+        Average classification accuracy rationale complements (self.anti_accuracy)
+        Average sparsity of rationales (self.avg_sparsity)
+        
+        :param df_test: dataframe containing test data labels, tokens, masks, and counts
+        :type df_test: pandas dataframe
+        :param n_examples_displayed: number of test examples (with rationale/prediction) to display, default 1
+        :type n_examples_displayed: int, optional
+        :param test_batch_size: number of examples in each test batch. Default 200.
+        :type test_batch_size: int, optional
+        """
+        self.model.test(df_test, test_batch_size, n_examples_displayed)
 
     def explain_local(self, sentence, label, preprocessor, hard_importances=True):
         df_label = pd.DataFrame.from_dict({"labels": [label]})
         df_sentence = pd.concat([df_label, preprocessor.preprocess([sentence.lower()])], axis=1)
 
         x, m, _ = self.model.generate_data(df_sentence)
-        predict, _, _, zs, _ = self.predict(df_sentence)
+        predict_df = self.predict(df_sentence)
+        predict = predict_df["predict"]
+        zs = predict_df["rationale"]
         if not hard_importances:
-            zs, _ = self.model.get_z_scores(df_sentence)
-            predict_class_idx = np.argmax(predict.detach())
-            zs = zs.detach()[:, :, predict_class_idx]
+            zs = self.model.get_z_scores(df_sentence)
+            predict_class_idx = np.argmax(predict)
+            zs = zs[:, :, predict_class_idx].detach()
 
-        zs = np.array(zs.tolist())
+        zs = np.array(zs)
 
         # generate human-readable tokens (individual words)
         seq_len = int(m.sum().item())
@@ -118,7 +131,7 @@ class ThreePlayerIntrospectiveExplainer:
         local_explanation = _create_local_explanation(
             classification=True,
             text_explanation=True,
-            local_importance_values=np.array(zs[0]),
+            local_importance_values=zs[0],
             method=str(type(self.model)),
             model_task="classification",
             features=tokens,

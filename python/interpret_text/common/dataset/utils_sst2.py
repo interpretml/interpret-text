@@ -17,13 +17,14 @@ DATA_URLS = {
 
 def load_sst2_pandas_df(file_split, local_cache_path="."):
     """Downloads and extracts dataset into a pandas dataframe
-    Args:
-        file_split (str): The subset to load.
-            One of: {"train", "dev", "split"}
-        local_cache_path (str, optional): Defaults to current working directory.
-    Returns:
-        pd.DataFrame: pandas DataFrame containing the specified
-            SST2 subset.
+    :param file_split: The subset to load.
+        One of: {"train", "dev", "split"}
+    :type X_tokens: string
+    :param local_cache_path: path to folder to store downloaded data files. Defaults to current working directory.
+    :type string, optional
+    :return: pd.DataFrame containing the specified
+        SST2 subset.
+    :rtype: pandas DataFrame
     """
     try:
         URL = DATA_URLS[file_split]
@@ -36,11 +37,11 @@ def load_sst2_pandas_df(file_split, local_cache_path="."):
 
 def load_data(fpath):
     """Loads data from a given file into pandas
-    Args:
-        fpath (str): The file to load data from.
-    Returns:
-        pd.DataFrame: pandas DataFrame containing data from the
+    :param fpath: Path to the file to load data from.
+    :type fpath: string
+    :return: pd.DataFrame containing data from the
             specified file.
+    :rtype: pandas DataFrame
     """
     label_col = 'labels'
     text_col = 'sentences'
