@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
+import os
 
 from transformers import BertTokenizer
+from interpret_text.common.dataset.utils_data_shared import download_and_unzip
 
 # default parameters used to initialize the model
 class ModelArguments():
@@ -37,7 +39,7 @@ class BertPreprocessor():
         self.max_length = max_length
         self.pad_to_max = True
 
-    def tokenize(self, data):
+    def preprocess(self, data):
         """
         Converts a list of text into a dataframe containing padded token ids,
         masks distinguishing word tokens from pads, and word token counts for
@@ -126,7 +128,7 @@ class GlovePreprocessor:
         
         return np.array(indexed_text), np.array(mask)
     
-    def tokenize(self, data):
+    def preprocess(self, data):
         """
         Converts a list of text into a dataframe containing padded token ids,
         masks distinguishing word tokens from pads, and word token counts for
@@ -154,3 +156,11 @@ class GlovePreprocessor:
         id_list: a list of token ids
         '''
         return [self.reverse_word_vocab[i.item()] for i in id_list]
+
+def load_glove_embeddings(local_cache_path="."):
+    URL="http://nlp.stanford.edu/data/glove.6B.zip"
+    file_name = "glove.6B.100d.txt"
+    # TODO: upload just the 6B.100d embedding to blob storage so 
+    # downloading the entire zip isn't necessary
+    file_path = download_and_unzip(URL, file_name)
+    return file_path

@@ -99,7 +99,7 @@ class ThreePlayerIntrospectiveExplainer:
 
     def explain_local(self, sentence, label, preprocessor, hard_importances=True):
         df_label = pd.DataFrame.from_dict({"labels": [label]})
-        df_sentence = pd.concat([df_label, preprocessor.tokenize([sentence.lower()])], axis=1)
+        df_sentence = pd.concat([df_label, preprocessor.preprocess([sentence.lower()])], axis=1)
 
         x, m, _ = self.model.generate_data(df_sentence)
         predict, _, _, zs, _ = self.predict(df_sentence)

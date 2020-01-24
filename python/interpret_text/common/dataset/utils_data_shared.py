@@ -78,16 +78,14 @@ def extract_zip(file_path, dest_path="."):
     with zipfile.ZipFile(file_path) as z:
         z.extractall(dest_path, filter(lambda f: not f.endswith("\r"), z.namelist()))
 
+def download_and_unzip(URL, file_name, local_cache_path="."):
+    zip_name = URL.split("/")[-1]
 
-@contextmanager
-def download_path(path):
-    tmp_dir = TemporaryDirectory()
-    if path is None:
-        path = tmp_dir.name
-    else:
-        path = os.path.realpath(path)
-
-    try:
-        yield path
-    finally:
-        tmp_dir.cleanup()
+    if not os.path.exists(os.path.join(local_cache_path, file_name)):
+        if not os.path.exists(os.path.join(local_cache_path, zip_name)):
+            try:
+                zip_path = maybe_download(URL, zip_name, local_cache_path)
+            except Exception as e:
+                raise e
+        extract_zip(zip_path, dest_path=".")
+    return os.path.join(local_cache_path, file_name)
