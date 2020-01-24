@@ -12,7 +12,10 @@
 """
 import os
 import pandas as pd
-from interpret_text.common.dataset.utils_data_shared import maybe_download, extract_zip
+from interpret_text.common.dataset.utils_data_shared import (
+    maybe_download,
+    extract_zip,
+)
 
 URL = "http://www.nyu.edu/projects/bowman/multinli/multinli_1.0.zip"
 DATA_FILES = {
@@ -21,13 +24,15 @@ DATA_FILES = {
     "dev_mismatched": "multinli_1.0/multinli_1.0_dev_mismatched.jsonl",
 }
 
+
 def download_file_and_extract(
     local_cache_path: str = ".", file_split: str = "train"
 ) -> None:
     """Download and extract the dataset files
 
     Args:
-        local_cache_path (str [optional]) -- Directory to cache files to. Defaults to current working
+        local_cache_path (str [optional]) -- Directory to cache files to.
+            Defaults to current working
         directory (default: {"."})
         file_split {str} -- [description] (default: {"train"})
 
@@ -37,13 +42,19 @@ def download_file_and_extract(
     file_name = URL.split("/")[-1]
     maybe_download(URL, file_name, local_cache_path)
 
-    if not os.path.exists(os.path.join(local_cache_path, DATA_FILES[file_split])):
-        extract_zip(os.path.join(local_cache_path, file_name), local_cache_path)
+    if not os.path.exists(
+        os.path.join(local_cache_path, DATA_FILES[file_split])
+    ):
+        extract_zip(
+            os.path.join(local_cache_path, file_name), local_cache_path
+        )
+
 
 def load_pandas_df(local_cache_path=".", file_split="train"):
     """Loads extracted dataset into pandas
     Args:
-        local_cache_path ([type], optional): [description]. Defaults to current working directory.
+        local_cache_path ([type], optional): [description].
+            Defaults to current working directory.
         file_split (str, optional): The subset to load.
             One of: {"train", "dev_matched", "dev_mismatched"}
             Defaults to "train".

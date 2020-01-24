@@ -17,13 +17,12 @@ import math
 import logging
 import zipfile
 
-from tempfile import TemporaryDirectory
-from contextlib import contextmanager
-
 log = logging.getLogger(__name__)
 
 
-def maybe_download(url, filename=None, work_directory=".", expected_bytes=None):
+def maybe_download(
+    url, filename=None, work_directory=".", expected_bytes=None
+):
     """Download a file if it is not already downloaded.
     :param url: URL of the file to download
     :type url: string
@@ -72,7 +71,8 @@ def extract_zip(file_path, dest_path="."):
     """Extracts all contents of a zip archive file.
     :param file_path: path to the file to unizp
     :type file_path: string
-    :param dest_path: path to directory to store unzipped file contents. Defaults to "."
+    :param dest_path: path to directory to store unzipped file contents.
+        Defaults to "."
     :type dest_path: string, optional
     :raises IOError
     """
@@ -81,7 +81,10 @@ def extract_zip(file_path, dest_path="."):
     if not os.path.exists(dest_path):
         raise IOError("Destination directory doesn't exist")
     with zipfile.ZipFile(file_path) as z:
-        z.extractall(dest_path, filter(lambda f: not f.endswith("\r"), z.namelist()))
+        z.extractall(
+            dest_path, filter(lambda f: not f.endswith("\r"), z.namelist())
+        )
+
 
 def download_and_unzip(URL, file_name, local_cache_path="."):
     """Download a file if it is not already downloaded.
