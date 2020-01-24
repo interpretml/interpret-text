@@ -69,7 +69,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             % (self.target_layer)
         )
 
-    def explain_local(self, text):
+    def explain_local(self, text, classes):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
@@ -101,13 +101,21 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             self.Phi = self._generate_Phi(self.target_layer, self.total_layers)
 
         # values below are arbitarily set for now
-        self._optimize(iteration=50, lr=0.01, show_progress=True)
+        self._optimize(iteration=20, lr=0.01, show_progress=True)
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        parsed_sentence = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
         return _create_local_explanation(
-            local_importance_values=np.array(local_importance_values),
+            classification=True,
+            text_explanation=True,
+            local_importance_values=np.array(local_importance_values)[1:-1],
             method="neural network",
             model_task="classification",
+            features=parsed_sentence[1:-1],
+            classes=np.asarray(classes),
+            predicted_label=1,
+            true_label=2,
         )
 
     def _calculate_regularization(self, sampled_x, model, reduced_axes=None):

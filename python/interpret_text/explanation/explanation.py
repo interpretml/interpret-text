@@ -20,11 +20,13 @@ from interpret_community.explanation.explanation import (
 class TextExplanation(LocalExplanation):
     """Defines the mixin for text explanations."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, predicted_label=None, true_label=None, **kwargs):
         """Create the text explanation."""
         super(TextExplanation, self).__init__(**kwargs)
         order = _order_imp(np.abs(self.local_importance_values))
         self._local_importance_rank = _sort_values(self._features, order)
+        self._predicted_label = predicted_label
+        self._true_label = true_label
         self._logger.debug("Initializing TextExplanation")
         if len(order.shape) == 3:
             i = np.arange(order.shape[0])[:, np.newaxis]
@@ -34,6 +36,15 @@ class TextExplanation(LocalExplanation):
             )[i, j, order]
         else:
             self._ordered_local_importance_values = self.local_importance_values
+
+    @property
+    def predicted_label(self):
+        """Get the task of the original model, i.e. classification or regression (others possibly in the future).
+
+        :return: The task of the original model.
+        :rtype: str
+        """
+        return self._predicted_label
 
     @property
     def local_importance_rank(self):
@@ -117,6 +128,7 @@ def _create_local_explanation(
         TextExplanation.
     :rtype: DynamicLocalExplanation
     """
+    print("RUNNING")
     exp_id = explanation_id or str(uuid.uuid4())
     if text_explanation:
         mixins = [TextExplanation]
@@ -128,5 +140,6 @@ def _create_local_explanation(
     if classification:
         mixins.append(ClassesMixin)
     DynamicLocalExplanation = type(Dynamic.LOCAL_EXPLANATION, tuple(mixins), {})
+    print("kwargs", kwargs)
     local_explanation = DynamicLocalExplanation(explanation_id=exp_id, **kwargs)
     return local_explanation
