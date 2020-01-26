@@ -20,11 +20,25 @@ export class Utils {
       sortedList = this.takeTopK(this.argsort(list), k)
       if (list[sortedList[sortedList.length -1]] >= 0){
         sortedList = []
+      } else {
+        for (var i = sortedList.length; i > 0; i--) {
+          if (list[sortedList[i]] >= 0){
+            sortedList = sortedList.slice(i+1, sortedList.length)
+            break
+          }
+        }
       }
     } else if (radio === RadioKeys.pos) {
       sortedList = this.takeTopK(this.argsort(list).reverse(), k)
       if (list[sortedList[sortedList.length -1]] <= 0){
         sortedList = []
+      } else {
+        for (var i = sortedList.length; i > 0; i--) {
+          if (list[sortedList[i]] <= 0){
+            sortedList = sortedList.slice(i+1, sortedList.length)
+            break
+          }
+        }
       }
     }
     return sortedList
