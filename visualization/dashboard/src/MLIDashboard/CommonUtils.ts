@@ -18,8 +18,14 @@ export class Utils {
       sortedList = this.takeTopK(this.argsort(list.map(Math.abs)).reverse(), k)
     } else if (radio === RadioKeys.neg) {
       sortedList = this.takeTopK(this.argsort(list), k)
+      if (list[sortedList[sortedList.length -1]] >= 0){
+        sortedList = []
+      }
     } else if (radio === RadioKeys.pos) {
       sortedList = this.takeTopK(this.argsort(list).reverse(), k)
+      if (list[sortedList[sortedList.length -1]] <= 0){
+        sortedList = []
+      }
     }
     return sortedList
   }
