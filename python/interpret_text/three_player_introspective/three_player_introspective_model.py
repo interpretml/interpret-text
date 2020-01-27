@@ -4,6 +4,7 @@ import random
 from collections import deque
 from datetime import datetime
 
+import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
@@ -161,7 +162,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         return continuity_loss, sparsity_loss
 
-    def train_one_step(self, X_tokens, label, baseline, mask):
+    def _train_one_step(self, X_tokens, label, baseline, mask):
         # TODO: try to see whether removing the follows makes any differences
         self.opt_E_anti.zero_grad()
         self.opt_E.zero_grad()
@@ -169,11 +170,16 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.opt_G_rl.zero_grad()
         # self.generator.classifier.zero_grad()
 
-        predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(
+        forward_dict = self.forward(
             X_tokens, mask
         )
-        e_loss_anti = torch.mean(self.loss_func(anti_predict, label))
+        predict = forward_dict["predict"]
+        anti_predict = forward_dict["anti_predict"]
+        cls_predict = forward_dict["cls_predict"]
+        z = forward_dict["z"]
+        neg_log_probs = forward_dict["neg_log_probs"]
 
+        e_loss_anti = torch.mean(self.loss_func(anti_predict, label))
         _, cls_pred = torch.max(cls_predict, dim=1)  # (batch_size,)
         e_loss = (
             torch.mean(self.loss_func(predict, label))
@@ -188,7 +194,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             consistency_loss,
             continuity_loss,
             sparsity_loss,
-        ) = self.get_loss(
+        ) = self._get_loss(
             predict,
             anti_predict,
             cls_predict,
@@ -275,8 +281,11 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             anti_predict = self.E_anti_model(X_tokens, attention_mask=(1 - z))[
                 0
             ]
-
-        return predict, anti_predict, cls_predict, z, neg_log_probs
+        return {"predict": predict,
+                "anti_predict": anti_predict,
+                "cls_predict": cls_predict,
+                "z": z,
+                "neg_log_probs": neg_log_probs}
 
     def get_z_scores(self, df_test):
         """
@@ -288,13 +297,15 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             cls_predict -- prediction of generator's classifier,
                 (batch_size, num_label)
         """
-        x_tokens, mask, _ = self.generate_data(df_test)
+        batch_dict = self.generate_data(df_test)
+        x_tokens = batch_dict["x"]
+        mask = batch_dict["m"]
         z_scores, _, _ = self.generator(x_tokens, mask)
         z_scores = F.softmax(z_scores, dim=-1)
 
         return z_scores
 
-    def get_advantages(
+    def _get_advantages(
         self,
         pred_logits,
         anti_pred_logits,
@@ -368,7 +379,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss,
         )
 
-    def get_loss(
+    def _get_loss(
         self,
         pred_logits,
         anti_pred_logits,
@@ -379,7 +390,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         baseline,
         mask,
     ):
-        reward_tuple = self.get_advantages(
+        reward_tuple = self._get_advantages(
             pred_logits,
             anti_pred_logits,
             cls_pred_logits,
@@ -411,7 +422,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss,
         )
 
-    def train_cls_one_step(self, X_tokens, label, X_mask):
+    def _train_cls_one_step(self, X_tokens, label, X_mask):
 
         self.opt_G_sup.zero_grad()
         self.generator.classifier.zero_grad()
@@ -472,7 +483,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             batch_m_ = batch_m_.cuda()
             batch_y_ = batch_y_.cuda()
 
-        return batch_x_, batch_m_, batch_y_
+        return {"x": batch_x_, "m": batch_m_, "y": batch_y_}
 
     def _get_sparsity(self, z, mask):
         mask_z = z * mask
@@ -535,8 +546,14 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             test_batch = df_test.iloc[
                 i * test_batch_size: (i + 1) * test_batch_size
             ]
-            batch_x_, batch_m_, batch_y_ = self.generate_data(test_batch)
-            predict, anti_predict, _, z, _ = self.forward(batch_x_, batch_m_)
+            batch_dict = self.generate_data(test_batch)
+            batch_x_ = batch_dict["x"]
+            batch_m_ = batch_dict["m"]
+            batch_y_ = batch_dict["y"]
+            forward_dict = self.forward(batch_x_, batch_m_)
+            predict = forward_dict["predict"]
+            anti_predict = forward_dict["anti_predict"]
+            z = forward_dict["z"]
 
             # do a softmax on the predicted class probabilities
             _, y_pred = torch.max(predict, dim=1)
@@ -581,9 +598,11 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
             # sample a batch of data
             batch = df_train.sample(batch_size, replace=True)
-            batch_x_, batch_m_, batch_y_ = self.generate_data(batch)
-
-            losses, predict = self.train_cls_one_step(
+            batch_dict = self.generate_data(batch)
+            batch_x_ = batch_dict["x"]
+            batch_m_ = batch_dict["m"]
+            batch_y_ = batch_dict["y"]
+            losses, predict = self._train_cls_one_step(
                 batch_x_, batch_y_, batch_m_
             )
 
@@ -609,9 +628,10 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                     test_batch = df_test.sample(
                         batch_size
                     )  # TODO: originally used dev batch here?
-                    batch_x_, batch_m_, batch_y_ = self.generate_data(
-                        test_batch
-                    )
+                    batch_dict = self.generate_data(test_batch)
+                    batch_x_ = batch_dict["x"]
+                    batch_m_ = batch_dict["m"]
+                    batch_y_ = batch_dict["y"]
                     # embeddings = self.embed_layer(batch_x_)
                     _, predict, _ = self.generator(batch_x_, batch_m_)
 
@@ -643,8 +663,10 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             self.train()
             # sample a batch of data
             batch = df_train.sample(batch_size, replace=True)
-            batch_x_, batch_m_, batch_y_ = self.generate_data(batch)
-
+            batch_dict = self.generate_data(batch)
+            batch_x_ = batch_dict["x"]
+            batch_m_ = batch_dict["m"]
+            batch_y_ = batch_dict["y"]
             z_baseline = Variable(
                 torch.FloatTensor([float(np.mean(self.z_history_rewards))])
             )
@@ -661,7 +683,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                 consistency_loss,
                 continuity_loss,
                 sparsity_loss,
-            ) = self.train_one_step(batch_x_, batch_y_, z_baseline, batch_m_)
+            ) = self._train_one_step(batch_x_, batch_y_, z_baseline, batch_m_)
 
             z_batch_reward = np.mean(z_rewards.cpu().data.numpy())
             self.z_history_rewards.append(z_batch_reward)
@@ -674,17 +696,16 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                 / self.batch_size
             )
             self.train_accs.append(acc)
-        return (
-            losses,
-            predict,
-            anti_predict,
-            cls_predict,
-            z,
-            z_rewards,
-            consistency_loss,
-            continuity_loss,
-            sparsity_loss,
-        )
+        return {
+            "predict": predict,
+            "anti_predict": anti_predict,
+            "cls_predict": cls_predict,
+            "z": z,
+            "z_rewards": z_rewards,
+            "consistency_loss": consistency_loss,
+            "continuity_loss": continuity_loss,
+            "sparsity_loss": sparsity_loss,
+        }
 
     def fit_test(
         self,
@@ -720,17 +741,10 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         best_test_acc = 0.0
         for _ in range(num_iteration // test_iteration):
-            (
-                losses,
-                predict,
-                anti_predict,
-                cls_predict,
-                z,
-                z_rewards,
-                consistency_loss,
-                continuity_loss,
-                sparsity_loss,
-            ) = self.fit(df_train, batch_size, test_iteration)
+            fit_dict = self.fit(df_train, batch_size, test_iteration)
+            losses = fit_dict["losses"]
+            continuity_loss = fit_dict["continuity_loss"]
+            sparsity_loss = fit_dict["sparsity_loss"]
             avg_train_acc = (
                 sum(
                     self.train_accs[

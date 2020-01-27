@@ -148,14 +148,14 @@ class ThreePlayerIntrospectiveExplainer:
 
     def predict(self, df_predict):
         self.model.eval()
-        batch_x_, batch_m_, batch_y_ = self.model.generate_data(df_predict)
-        (
-            predict,
-            anti_predict,
-            cls_predict,
-            z,
-            neg_log_prob,
-        ) = self.model.forward(batch_x_, batch_m_)
+        batch_dict = self.model.generate_data(df_predict)
+        batch_x_ = batch_dict["x"]
+        batch_m_ = batch_dict["m"]
+        forward_dict = self.model.forward(batch_x_, batch_m_)
+        predict = forward_dict["predict"]
+        anti_predict = forward_dict["anti_predict"]
+        cls_predict = forward_dict["cls_predict"]
+        z = forward_dict["z"]
         predict = predict.detach()
         anti_predict = anti_predict.detach()
         cls_predict = cls_predict.detach()
@@ -195,7 +195,9 @@ class ThreePlayerIntrospectiveExplainer:
             [df_label, preprocessor.preprocess([sentence.lower()])], axis=1
         )
 
-        x, m, _ = self.model.generate_data(df_sentence)
+        batch_dict = self.model.generate_data(df_sentence)
+        x = batch_dict["x"]
+        m = batch_dict["m"]
         predict_df = self.predict(df_sentence)
         predict = predict_df["predict"]
         zs = predict_df["rationale"]
@@ -214,7 +216,7 @@ class ThreePlayerIntrospectiveExplainer:
         local_explanation = _create_local_explanation(
             classification=True,
             text_explanation=True,
-            local_importance_values=zs[0],
+            local_importance_values=zs.flatten(),
             method=str(type(self.model)),
             model_task="classification",
             features=tokens,
