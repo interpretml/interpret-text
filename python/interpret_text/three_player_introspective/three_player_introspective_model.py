@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from tqdm import tqdm
 
+from interpret_text.common.utils_three_player import generate_data
 
 class ThreePlayerIntrospectiveModel(nn.Module):
     """flattening the HardIntrospectionRationale3PlayerClassificationModel ->
@@ -75,22 +76,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.train_accs = []
         self.test_accs = []
         self.test_losses = []
-
-        # for saving models and logging
         self.best_test_acc = 0
-        current_datetime = datetime.now().strftime(
-                           "%m_%d_%y_%H_%M_%S")
-        self.model_folder_path = os.path.join(
-            self.args.save_path,
-            self.args.model_prefix + "_training_"+current_datetime)
-        if not os.path.exists(self.model_folder_path):
-            os.makedirs(self.model_folder_path)
-        self.log_filepath = os.path.join(
-            self.model_folder_path, "training_stats.txt"
-        )
-        logging.basicConfig(
-            filename=self.log_filepath, filemode="a", level=logging.INFO
-        )
 
     def init_optimizers(self):
         self.opt_E = torch.optim.Adam(
@@ -315,7 +301,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             cls_predict -- prediction of generator's classifier,
                 (batch_size, num_label)
         """
-        batch_dict = self.generate_data(df_test)
+        batch_dict = generate_data(df_test, self.use_cuda)
         x_tokens = batch_dict["x"]
         mask = batch_dict["m"]
         z_scores, _, _ = self.generator(x_tokens, mask)
@@ -440,55 +426,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss,
         )
 
-    def _train_cls_one_step(self, X_tokens, label, X_mask):
-
-        self.opt_G_sup.zero_grad()
-        self.generator.classifier.zero_grad()
-
-        cls_predict_logits, _, _ = self.generator.classifier(
-            X_tokens, attention_mask=X_mask
-        )  # (batch_size, hidden_dim, sequence_length)
-
-        sup_loss = torch.mean(self.loss_func(cls_predict_logits, label))
-
-        losses = {"g_sup_loss": sup_loss.cpu().data}
-
-        sup_loss.backward()
-
-        # Clip the norm of the gradients to 1.0.
-        # This is to help prevent the "exploding gradients" problem.
-        torch.nn.utils.clip_grad_norm_(self.generator.parameters(), 1.0)
-
-        self.opt_G_sup.step()
-
-        return losses, cls_predict_logits
-
-    def generate_data(self, batch):
-        # sort for rnn happiness
-        batch.sort_values("counts", inplace=True, ascending=False)
-
-        x_mask = np.stack(batch["mask"], axis=0)
-        # drop all zero columns
-        zero_col_idxs = np.argwhere(np.all(x_mask[..., :] == 0, axis=0))
-        x_mask = np.delete(x_mask, zero_col_idxs, axis=1)
-
-        x_mat = np.stack(batch["tokens"], axis=0)
-        # drop all zero columns
-        x_mat = np.delete(x_mat, zero_col_idxs, axis=1)
-
-        y_vec = np.stack(batch["labels"], axis=0)
-
-        batch_x_ = Variable(torch.from_numpy(x_mat)).to(torch.int64)
-        batch_m_ = Variable(torch.from_numpy(x_mask)).type(torch.FloatTensor)
-        batch_y_ = Variable(torch.from_numpy(y_vec)).to(torch.int64)
-
-        if self.use_cuda:
-            batch_x_ = batch_x_.cuda()
-            batch_m_ = batch_m_.cuda()
-            batch_y_ = batch_y_.cuda()
-
-        return {"x": batch_x_, "m": batch_m_, "y": batch_y_}
-
     def _get_sparsity(self, z, mask):
         mask_z = z * mask
         seq_lengths = torch.sum(mask, dim=1)
@@ -553,7 +490,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             test_batch = df_test.iloc[
                 i * self.test_batch_size: (i + 1) * self.test_batch_size
             ]
-            batch_dict = self.generate_data(test_batch)
+            batch_dict = generate_data(test_batch, self.use_cuda)
             batch_x_ = batch_dict["x"]
             batch_m_ = batch_dict["m"]
             batch_y_ = batch_dict["y"]
@@ -592,8 +529,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             rand_idx = random.randint(0, self.test_batch_size - 1)
             # display a random example
             logging.info(
-                "Gold Label: ", batch_y_[rand_idx].item(),
-                " Pred label: ", y_pred[rand_idx].item())
+                "Gold Label: " + str(batch_y_[rand_idx].item()) +
+                " Pred label: " + str(y_pred[rand_idx].item()))
             logging.info(self.display_example(
                 batch_x_[rand_idx], batch_m_[rand_idx], z[rand_idx]
             ))
@@ -605,7 +542,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                 torch.save(
                     self.state_dict(),
                     os.path.join(
-                        self.model_folder_path,
+                        self.args.model_folder_path,
                         self.args.model_prefix + ".pth",
                     ),
                 )
@@ -635,7 +572,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                 start = i*self.train_batch_size
                 end = min((i+1)*self.train_batch_size, total_train)
                 batch = df_train.loc[indices[start:end]]
-                batch_dict = self.generate_data(batch)
+                batch_dict = generate_data(batch, self.use_cuda)
                 batch_x_ = batch_dict["x"]
                 batch_m_ = batch_dict["m"]
                 batch_y_ = batch_dict["y"]

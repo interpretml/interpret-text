@@ -1,10 +1,158 @@
 import os
+import logging
 
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+from tqdm import tqdm
 
+from interpret_text.common.utils_three_player import generate_data
+from datetime import datetime
+
+class ClassifierWrapper():
+
+    def __init__(self, args, model):
+        self.args = args
+        self.model = model
+        self.opt = None
+
+        # if more than training_stop_thresh epochs since improvement, stop training in fit
+        self.training_stop_thresh = 5
+        self.epochs_since_improv = 0
+
+        self.best_test_acc = 0
+        self.avg_accuracy = 0
+        self.test_accs = []
+        self.train_accs = []
+
+        self.loss_func = nn.CrossEntropyLoss(reduce=False)
+
+    def init_optimizer(self):
+        self.opt = torch.optim.Adam(list(self.model.parameters()), lr=self.args.lr)
+        for name, param in self.model.named_parameters():
+            print(name, param.requires_grad)
+
+    def test(self, df_test, batch_size, verbosity=2):
+        """Calculate and store as model attributes:
+        Average classification accuracy using rationales (self.avg_accuracy),
+        Average classification accuracy rationale complements
+            (self.anti_accuracy)
+        Average sparsity of rationales (self.avg_sparsity)
+
+        :param df_test: dataframe containing test data labels, tokens, masks,
+            and counts
+        :type df_test: pandas dataframe
+        :param n_examples_displayed: number of test examples (with rationale/
+            prediction) to display
+        :type n_examples_displayed: int
+        :param batch_size: number of examples in each test batch
+        :type batch_size: int
+        """
+        self.model.eval()
+        accuracy = 0
+        for i in range(len(df_test) // batch_size):
+            test_batch = df_test.iloc[
+                i * batch_size: (i + 1) * batch_size
+            ]
+            batch_dict = generate_data(test_batch, self.args.cuda)
+            batch_x_ = batch_dict["x"]
+            batch_m_ = batch_dict["m"]
+            batch_y_ = batch_dict["y"]
+            predict, _, _ = self.model(batch_x_, batch_m_)
+
+            # do a softmax on the predicted class probabilities
+            _, y_pred = torch.max(predict, dim=1)
+
+            accuracy += (y_pred == batch_y_).sum().item()
+
+        self.avg_accuracy = accuracy / len(df_test)
+        self.test_accs.append(self.avg_accuracy)
+
+        if verbosity > 0:
+            logging.info("train acc: %.4f, test acc: %.4f" %
+                (self.test_accs[-1], self.avg_accuracy))
+
+        if self.args.save_best_model:
+            if self.avg_accuracy > self.best_test_acc:
+                logging.info("saving best classifier model and model stats")
+                current_datetime = datetime.now().strftime(
+                    "%m_%d_%y_%H_%M_%S"
+                )
+                # save model
+                torch.save(
+                    self.model.state_dict(),
+                    os.path.join(
+                        self.args.model_folder_path,
+                        self.args.model_prefix + "gen_classifier.pth",
+                    ),
+                )
+        
+        if self.best_test_acc > self.avg_accuracy:
+            self.best_test_acc = self.avg_accuracy
+            self.epochs_since_improv = 0
+        else:
+            self.epochs_since_improv += 1
+
+    def train_one_step(self, X_tokens, label, X_mask):
+        self.opt.zero_grad()
+        self.model.zero_grad()
+
+        cls_predict_logits, _, _ = self.model(
+            X_tokens, attention_mask=X_mask
+        )  # (batch_size, hidden_dim, sequence_length)
+
+        sup_loss = torch.mean(self.loss_func(cls_predict_logits, label))
+        losses = {"g_sup_loss": sup_loss.cpu().data}
+        sup_loss.backward()
+
+        # Clip the norm of the gradients to 1.0.
+        # This is to help prevent the "exploding gradients" problem.
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+
+        self.opt.step()
+        return losses, cls_predict_logits
+    
+    def fit(self, df_train, df_test):
+        self.init_optimizer()
+        
+        total_train = len(df_train)
+        indices = np.array(list(range(0, total_train)))
+
+        for i in tqdm(range(self.args.num_epochs)):
+            self.model.train()  # pytorch fn; sets module to train mode
+            
+            # shuffle the epoch
+            np.random.shuffle(indices)
+
+            total_train_acc = 0
+            for i in range(total_train//self.args.train_batch_size):
+                # sample a batch of data
+                start = i*self.args.train_batch_size
+                end = min((i+1)*self.args.train_batch_size, total_train)
+                batch = df_train.loc[indices[start:end]]
+                batch_dict = generate_data(batch, self.args.cuda)
+                batch_x_ = batch_dict["x"]
+                batch_m_ = batch_dict["m"]
+                batch_y_ = batch_dict["y"]
+                
+                losses, predict = self.train_one_step(
+                    batch_x_, batch_y_, batch_m_
+                )
+
+                # calculate classification accuarcy
+                _, y_pred = torch.max(predict, dim=1)
+
+                acc = np.float((y_pred == batch_y_).sum().cpu().data.item())
+                total_train_acc += acc
+            
+            total_acc_percent = total_train_acc / total_train
+            self.train_accs.append(total_acc_percent)
+
+            self.test(df_test, self.args.train_batch_size)
+            # stop training if there have been no improvements
+            if self.epochs_since_improv > self.training_stop_thresh:
+                break
 
 # Modules that can be used in the three player introspective model
 class RnnModel(nn.Module):
@@ -156,10 +304,11 @@ class ClassifierModule(nn.Module):
         """
         word_embeddings = self.embed_layer(X_tokens)
         if z is None:
-            dtype = (
-                torch.cuda.float if torch.cuda.is_available() else torch.float
-            )
-            z = torch.ones_like(X_tokens).type(dtype)
+            # dtype = (
+            #     torch.cuda.float if torch.cuda.is_available() else torch.float
+            # )
+            z = torch.ones_like(X_tokens)
+            z = z.type(torch.cuda.FloatTensor)
 
         masked_input = word_embeddings * z.unsqueeze(-1)
         hiddens = self.encoder(masked_input, attention_mask)

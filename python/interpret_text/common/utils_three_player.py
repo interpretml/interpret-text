@@ -1,9 +1,40 @@
+import os
+import logging
+
 import numpy as np
 import pandas as pd
 
 from transformers import BertTokenizer
 from interpret_text.common.dataset.utils_data_shared import download_and_unzip
+import torch
 
+from torch.autograd import Variable
+
+def generate_data(batch, use_cuda):
+    # sort for rnn happiness
+    batch.sort_values("counts", inplace=True, ascending=False)
+
+    x_mask = np.stack(batch["mask"], axis=0)
+    # drop all zero columns
+    zero_col_idxs = np.argwhere(np.all(x_mask[..., :] == 0, axis=0))
+    x_mask = np.delete(x_mask, zero_col_idxs, axis=1)
+
+    x_mat = np.stack(batch["tokens"], axis=0)
+    # drop all zero columns
+    x_mat = np.delete(x_mat, zero_col_idxs, axis=1)
+
+    y_vec = np.stack(batch["labels"], axis=0)
+
+    batch_x_ = Variable(torch.from_numpy(x_mat)).to(torch.int64)
+    batch_m_ = Variable(torch.from_numpy(x_mask)).type(torch.FloatTensor)
+    batch_y_ = Variable(torch.from_numpy(y_vec)).to(torch.int64)
+
+    if use_cuda:
+        batch_x_ = batch_x_.cuda()
+        batch_m_ = batch_m_.cuda()
+        batch_y_ = batch_y_.cuda()
+
+    return {"x": batch_x_, "m": batch_m_, "y": batch_y_}
 
 class ModelArguments:
     """Default parameters used to initialize the model (independent of module
@@ -66,6 +97,20 @@ class ModelArguments:
                 "Please input a directory to save models in"
             self.model_prefix = model_prefix
             self.save_path = model_save_dir
+        
+        # for saving models and logging
+        self.model_folder_path = os.path.join(
+            self.save_path,
+            self.model_prefix + "_training_run",
+        )
+        if not os.path.exists(self.model_folder_path):
+            os.makedirs(self.model_folder_path)
+        self.log_filepath = os.path.join(
+            self.model_folder_path, "training_stats.txt"
+        )
+        logging.basicConfig(
+            filename=self.log_filepath, filemode="a", level=logging.INFO
+        )
 
 
 class BertPreprocessor:

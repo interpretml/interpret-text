@@ -2,9 +2,11 @@ from interpret_text.common.utils_classical import plot_local_imp
 from interpret_text.three_player_introspective.three_player_introspective_components import (
     ClassifierModule,
     IntrospectionGeneratorModule,
+    ClassifierWrapper,
 )
 from interpret_text.three_player_introspective.three_player_introspective_model import ThreePlayerIntrospectiveModel
 from interpret_text.explanation.explanation import _create_local_explanation
+from interpret_text.common.utils_three_player import generate_data
 
 import numpy as np
 import pandas as pd
@@ -39,6 +41,7 @@ class ThreePlayerIntrospectiveExplainer:
         If custom, provide modules for explainer, anti_explainer, generator,
         and gen_classifier.
         """
+        self.args = args
         if classifier_type == "BERT":
             self.BERT = True
             args.BERT = True
@@ -118,9 +121,13 @@ class ThreePlayerIntrospectiveExplainer:
             self.freeze_bert_classifier(self.explainer)
             self.freeze_bert_classifier(self.anti_explainer)
             self.freeze_bert_classifier(self.gen_classifier)
+        
+        if self.args.pre_train_cls:
+            cls_wrapper = ClassifierWrapper(self.args, self.gen_classifier)
+            cls_wrapper.fit(df_train, df_test)
 
         if self.BERT:
-            self.freeze_bert_classifier(self.gen_classifier, entire=True)
+            self.freeze_bert_classifier(self.gen_classifier, entire = True)
 
         # encode the list
         self.model.fit(df_train, df_test)
@@ -129,7 +136,7 @@ class ThreePlayerIntrospectiveExplainer:
 
     def predict(self, df_predict):
         self.model.eval()
-        batch_dict = self.model.generate_data(df_predict)
+        batch_dict = generate_data(df_predict, self.args.cuda)
         batch_x_ = batch_dict["x"]
         batch_m_ = batch_dict["m"]
         forward_dict = self.model.forward(batch_x_, batch_m_)
@@ -147,7 +154,7 @@ class ThreePlayerIntrospectiveExplainer:
             "cls_predict": cls_predict,
             "rationale": z,
         }
-        return pd.DataFrame.from_dict(predict_dict)
+        return predict_dict
 
     def score(self, df_test):
         """Calculate and store as model attributes:
@@ -170,18 +177,18 @@ class ThreePlayerIntrospectiveExplainer:
             [df_label, preprocessor.preprocess([sentence.lower()])], axis=1
         )
 
-        batch_dict = self.model.generate_data(df_sentence)
+        batch_dict = generate_data(df_sentence, self.args.cuda)
         x = batch_dict["x"]
         m = batch_dict["m"]
-        predict_df = self.predict(df_sentence)
-        predict = predict_df["predict"]
-        zs = predict_df["rationale"]
+        predict_dict = self.predict(df_sentence)
+        predict = predict_dict["predict"].cpu()
+        zs = predict_dict["rationale"]
         if not hard_importances:
             zs = self.model.get_z_scores(df_sentence)
             predict_class_idx = np.argmax(predict)
             zs = zs[:, :, predict_class_idx].detach()
 
-        zs = np.array(zs)
+        zs = np.array(zs.cpu())
 
         # generate human-readable tokens (individual words)
         seq_len = int(m.sum().item())
