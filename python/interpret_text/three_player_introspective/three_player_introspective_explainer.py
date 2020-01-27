@@ -112,31 +112,18 @@ class ThreePlayerIntrospectiveExplainer:
     def train(self, *args, **kwargs):
         return self.fit(*args, **kwargs)
 
-    def fit(
-        self,
-        df_train,
-        df_test,
-        batch_size,
-        num_epochs=5,
-        pretrain_cls=True,
-        pretrain_train_iters=1000,
-        pretrain_test_iters=200,
-    ):
-        """
-        x_train: list of sentences (strings)
-        y_train: list of labels (ex. 0 -- negative and 1 -- positive)
-        """
+    def fit(self, df_train, df_test):
         # tokenize/otherwise process the lists of sentences
         if self.BERT:
             self.freeze_bert_classifier(self.explainer)
             self.freeze_bert_classifier(self.anti_explainer)
             self.freeze_bert_classifier(self.gen_classifier)
-        
+
         if self.BERT:
-            self.freeze_bert_classifier(self.gen_classifier, entire = True)
-        
+            self.freeze_bert_classifier(self.gen_classifier, entire=True)
+
         # encode the list
-        self.model.fit(df_train, df_test, batch_size, num_epochs)
+        self.model.fit(df_train, df_test)
 
         return self.model
 
@@ -162,7 +149,7 @@ class ThreePlayerIntrospectiveExplainer:
         }
         return pd.DataFrame.from_dict(predict_dict)
 
-    def score(self, df_test, test_batch_size=200, n_examples_displayed=1):
+    def score(self, df_test):
         """Calculate and store as model attributes:
         Average classification accuracy using rationales (self.avg_accuracy),
         Average classification accuracy rationale complements
@@ -172,14 +159,8 @@ class ThreePlayerIntrospectiveExplainer:
         :param df_test: dataframe containing test data labels, tokens, masks,
             and counts
         :type df_test: pandas dataframe
-        :param n_examples_displayed: number of test examples (with rationale/
-            prediction) to display, default 1
-        :type n_examples_displayed: int, optional
-        :param test_batch_size: number of examples in each test batch.
-            Default 200.
-        :type test_batch_size: int, optional
         """
-        self.model.test(df_test, test_batch_size, n_examples_displayed)
+        self.model.test(df_test)
 
     def explain_local(
         self, sentence, label, preprocessor, hard_importances=True

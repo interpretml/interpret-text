@@ -10,7 +10,26 @@ class ModelArguments:
        component types).
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, cuda, pre_train_cls, batch_size, num_epochs,
+                 save_best_model, model_save_dir=None, model_prefix=None):
+        """Initialize model parameters
+
+        :param cuda: Whether or not to use cuda
+        :type cuda: bool
+        :param pre_train_cls: Whether to pretrain the introspective
+            generator's classifier
+        :type pre_train_cls: bool
+        :param batch_size: Batch size for training and testing
+        :type batch_size: int
+        :param num_epochs: Number of epochs to run in training
+        :type num_epochs: int
+        :param save_best_model: Whether to save the best model
+        :type save_best_model: bool
+        :param model_save_dir: Directory to save models and logs
+        :type model_save_dir: string
+        :param model_prefix: What to name saved models
+        :type model_prefix: string
+        """
         # to initialize model modules
         self.embedding_dim = 100
         self.hidden_dim = 200
@@ -32,11 +51,21 @@ class ModelArguments:
         self.lambda_acc_gap = 1.2
         self.lr = 0.001
 
-        self.save_best_model = True
-        # the accuracy above which to start saving the model
-        self.save_model_acc_thresh = .7
-        self.save_path = ""
-        self.model_prefix = "three_player_introspective_model"
+        # training parameters
+        self.cuda = cuda
+        self.pre_train_cls = pre_train_cls
+        self.train_batch_size = batch_size
+        self.test_batch_size = batch_size
+        self.num_epochs = num_epochs
+        self.save_best_model = save_best_model
+
+        if save_best_model:
+            assert model_prefix is not None,\
+                "Please input a model name (prefix for saved files)"
+            assert model_save_dir is not None,\
+                "Please input a directory to save models in"
+            self.model_prefix = model_prefix
+            self.save_path = model_save_dir
 
 
 class BertPreprocessor:
