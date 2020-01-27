@@ -107,9 +107,7 @@ class ThreePlayerIntrospectiveExplainer:
                 param.requires_grad = False
         else:
             for name, param in classifier.named_parameters():
-                if "bert.embeddings" in name or (
-                    "bert.encoder" in name and "layer.11" not in name
-                ):
+                if "bert.embeddings" in name or ("bert.encoder" in name and "layer.11" not in name):
                     param.requires_grad = False
 
     def train(self, *args, **kwargs):

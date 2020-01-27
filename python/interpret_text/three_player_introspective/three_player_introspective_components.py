@@ -29,9 +29,7 @@ class ClassifierWrapper():
         self.loss_func = nn.CrossEntropyLoss(reduce=False)
 
     def init_optimizer(self):
-        self.opt = torch.optim.Adam(list(self.model.parameters()), lr=self.args.lr)
-        for name, param in self.model.named_parameters():
-            print(name, param.requires_grad)
+        self.opt = torch.optim.Adam(filter(lambda x: x.requires_grad, self.model.parameters()), lr=self.args.lr)
 
     def test(self, df_test, batch_size, verbosity=2):
         """Calculate and store as model attributes:
@@ -71,7 +69,7 @@ class ClassifierWrapper():
 
         if verbosity > 0:
             logging.info("train acc: %.4f, test acc: %.4f" %
-                (self.test_accs[-1], self.avg_accuracy))
+                (self.train_accs[-1], self.avg_accuracy))
 
         if self.args.save_best_model:
             if self.avg_accuracy > self.best_test_acc:
@@ -108,7 +106,7 @@ class ClassifierWrapper():
 
         # Clip the norm of the gradients to 1.0.
         # This is to help prevent the "exploding gradients" problem.
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+        # torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
 
         self.opt.step()
         return losses, cls_predict_logits
@@ -304,9 +302,6 @@ class ClassifierModule(nn.Module):
         """
         word_embeddings = self.embed_layer(X_tokens)
         if z is None:
-            # dtype = (
-            #     torch.cuda.float if torch.cuda.is_available() else torch.float
-            # )
             z = torch.ones_like(X_tokens)
             z = z.type(torch.cuda.FloatTensor)
 

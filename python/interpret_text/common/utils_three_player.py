@@ -9,6 +9,7 @@ from interpret_text.common.dataset.utils_data_shared import download_and_unzip
 import torch
 
 from torch.autograd import Variable
+from datetime import datetime
 
 def generate_data(batch, use_cuda):
     # sort for rnn happiness
@@ -74,7 +75,7 @@ class ModelArguments:
         # to initialize model
         self.fine_tuning = False
         self.lambda_sparsity = 1.0
-        self.lambda_continuity = 1.0
+        self.lambda_continuity = 0
         self.lambda_anti = 1.0
         self.exploration_rate = 0.05
         self.count_tokens = 8
@@ -95,14 +96,16 @@ class ModelArguments:
                 "Please input a model name (prefix for saved files)"
             assert model_save_dir is not None,\
                 "Please input a directory to save models in"
-            self.model_prefix = model_prefix
-            self.save_path = model_save_dir
-        
+        self.model_prefix = model_prefix
+        self.save_path = model_save_dir
+    
         # for saving models and logging
+        current_datetime = datetime.now().strftime(
+                           "%m_%d_%y_%H_%M_%S")
         self.model_folder_path = os.path.join(
             self.save_path,
-            self.model_prefix + "_training_run",
-        )
+            self.model_prefix + "_training_")
+
         if not os.path.exists(self.model_folder_path):
             os.makedirs(self.model_folder_path)
         self.log_filepath = os.path.join(
@@ -159,7 +162,7 @@ class BertPreprocessor:
                 max_length=self.max_length,
                 pad_to_max_length=self.pad_to_max,
             )
-            input_ids.append(np.array(d["input_ids"], dtype=np.int64))
+            input_ids.append(d["input_ids"])
             attention_mask.append(d["attention_mask"])
             counts.append(sum(d["attention_mask"]))
 
