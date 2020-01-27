@@ -4,7 +4,6 @@ import random
 from collections import deque
 from datetime import datetime
 
-import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
@@ -70,6 +69,30 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         # initialize optimizers
         self.init_optimizers()
         self.init_rl_optimizers()
+
+        # if more than training_stop_thresh epochs since improvement, stop training in fit
+        self.training_stop_thresh = 5
+        self.epochs_since_improv = 0
+
+        self.train_accs = []
+        self.test_accs = []
+        self.test_losses = []
+
+        # for saving models and logging
+        self.best_test_acc = 0
+        self.model_folder_path = os.path.join(
+            self.args.save_path,
+            self.args.model_prefix + "_training_run",
+        )
+        if not os.path.exists(self.model_folder_path):
+            os.mkdir(self.model_folder_path)
+        self.log_filepath = os.path.join(
+            self.model_folder_path, "training_stats.txt"
+        )
+        logging.basicConfig(
+            filename=self.log_filepath, filemode="a", level=logging.INFO
+        )
+        
 
     def init_optimizers(self):
         self.opt_E = torch.optim.Adam(
@@ -162,7 +185,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         return continuity_loss, sparsity_loss
 
-    def _train_one_step(self, X_tokens, label, baseline, mask):
+    def train_one_step(self, X_tokens, label, baseline, mask):
         # TODO: try to see whether removing the follows makes any differences
         self.opt_E_anti.zero_grad()
         self.opt_E.zero_grad()
@@ -170,16 +193,11 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.opt_G_rl.zero_grad()
         # self.generator.classifier.zero_grad()
 
-        forward_dict = self.forward(
+        predict, anti_predict, cls_predict, z, neg_log_probs = self.forward(
             X_tokens, mask
         )
-        predict = forward_dict["predict"]
-        anti_predict = forward_dict["anti_predict"]
-        cls_predict = forward_dict["cls_predict"]
-        z = forward_dict["z"]
-        neg_log_probs = forward_dict["neg_log_probs"]
-
         e_loss_anti = torch.mean(self.loss_func(anti_predict, label))
+
         _, cls_pred = torch.max(cls_predict, dim=1)  # (batch_size,)
         e_loss = (
             torch.mean(self.loss_func(predict, label))
@@ -194,7 +212,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             consistency_loss,
             continuity_loss,
             sparsity_loss,
-        ) = self._get_loss(
+        ) = self.get_loss(
             predict,
             anti_predict,
             cls_predict,
@@ -210,6 +228,9 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             "e_loss_anti": e_loss_anti.cpu().data,
             "g_sup_loss": g_sup_loss.cpu().data,
             "g_rl_loss": g_rl_loss.cpu().data,
+            "consistency_loss": consistency_loss,
+            "continuity_loss": continuity_loss,
+            "sparsity_loss": sparsity_loss
         }
 
         e_loss_anti.backward(retain_graph=True)
@@ -235,10 +256,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             anti_predict,
             cls_predict,
             z,
-            rewards,
-            consistency_loss,
-            continuity_loss,
-            sparsity_loss,
+            rewards
         )
 
     def forward(self, X_tokens, X_mask):
@@ -281,11 +299,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             anti_predict = self.E_anti_model(X_tokens, attention_mask=(1 - z))[
                 0
             ]
-        return {"predict": predict,
-                "anti_predict": anti_predict,
-                "cls_predict": cls_predict,
-                "z": z,
-                "neg_log_probs": neg_log_probs}
+
+        return predict, anti_predict, cls_predict, z, neg_log_probs
 
     def get_z_scores(self, df_test):
         """
@@ -297,15 +312,13 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             cls_predict -- prediction of generator's classifier,
                 (batch_size, num_label)
         """
-        batch_dict = self.generate_data(df_test)
-        x_tokens = batch_dict["x"]
-        mask = batch_dict["m"]
+        x_tokens, mask, _ = self.generate_data(df_test)
         z_scores, _, _ = self.generator(x_tokens, mask)
         z_scores = F.softmax(z_scores, dim=-1)
 
         return z_scores
 
-    def _get_advantages(
+    def get_advantages(
         self,
         pred_logits,
         anti_pred_logits,
@@ -379,7 +392,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss,
         )
 
-    def _get_loss(
+    def get_loss(
         self,
         pred_logits,
         anti_pred_logits,
@@ -390,7 +403,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         baseline,
         mask,
     ):
-        reward_tuple = self._get_advantages(
+        reward_tuple = self.get_advantages(
             pred_logits,
             anti_pred_logits,
             cls_pred_logits,
@@ -422,7 +435,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss,
         )
 
-    def _train_cls_one_step(self, X_tokens, label, X_mask):
+    def train_cls_one_step(self, X_tokens, label, X_mask):
 
         self.opt_G_sup.zero_grad()
         self.generator.classifier.zero_grad()
@@ -444,20 +457,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.opt_G_sup.step()
 
         return losses, cls_predict_logits
-
-    def forward_cls(self, X_tokens, mask):
-        """
-        Inputs:
-            x -- torch Variable in shape of (batch_size, length)
-            mask -- torch Variable in shape of (batch_size, length)
-        Outputs:
-            predict -- (batch_size, num_label)
-            z -- rationale (batch_size, length)
-        """
-        z = torch.ones_like(X_tokens).type(torch.cuda.FloatTensor)
-        predict = self.E_model(X_tokens, attention_mask=z)
-
-        return predict
 
     def generate_data(self, batch):
         # sort for rnn happiness
@@ -483,7 +482,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             batch_m_ = batch_m_.cuda()
             batch_y_ = batch_y_.cuda()
 
-        return {"x": batch_x_, "m": batch_m_, "y": batch_y_}
+        return batch_x_, batch_m_, batch_y_
 
     def _get_sparsity(self, z, mask):
         mask_z = z * mask
@@ -518,9 +517,9 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             else:
                 final += tokens[i]
             final += " "
-        print(final)
+        return final
 
-    def test(self, df_test, test_batch_size, n_examples_displayed):
+    def test(self, df_test, batch_size, verbosity=2):
         """Calculate and store as model attributes:
         Average classification accuracy using rationales (self.avg_accuracy),
         Average classification accuracy rationale complements
@@ -533,27 +532,22 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         :param n_examples_displayed: number of test examples (with rationale/
             prediction) to display
         :type n_examples_displayed: int
-        :param test_batch_size: number of examples in each test batch
-        :type test_batch_size: int
+        :param batch_size: number of examples in each test batch
+        :type batch_size: int
         """
         self.eval()
 
         accuracy = 0
         anti_accuracy = 0
         sparsity_total = 0
+        cont_total = 0
 
-        for i in range(len(df_test) // test_batch_size):
+        for i in range(len(df_test) // batch_size):
             test_batch = df_test.iloc[
-                i * test_batch_size: (i + 1) * test_batch_size
+                i * batch_size: (i + 1) * batch_size
             ]
-            batch_dict = self.generate_data(test_batch)
-            batch_x_ = batch_dict["x"]
-            batch_m_ = batch_dict["m"]
-            batch_y_ = batch_dict["y"]
-            forward_dict = self.forward(batch_x_, batch_m_)
-            predict = forward_dict["predict"]
-            anti_predict = forward_dict["anti_predict"]
-            z = forward_dict["z"]
+            batch_x_, batch_m_, batch_y_ = self.generate_data(test_batch)
+            predict, anti_predict, _, z, _ = self.forward(batch_x_, batch_m_)
 
             # do a softmax on the predicted class probabilities
             _, y_pred = torch.max(predict, dim=1)
@@ -566,234 +560,94 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_ratios = self._get_sparsity(z, batch_m_)
             sparsity_total += sparsity_ratios.sum().item()
 
+            cont_ratios = self._get_continuity(z, batch_m_)
+            cont_total += cont_ratios.sum().item()
+
         self.avg_accuracy = accuracy / len(df_test)
+        self.test_accs.append(self.avg_accuracy)
         self.avg_anti_accuracy = anti_accuracy / len(df_test)
         self.avg_sparsity = sparsity_total / len(df_test)
+        self.avg_continuity = cont_total / len(df_test)
 
-        for i in range(n_examples_displayed + 1):
-            rand_idx = random.randint(0, test_batch_size - 1)
-            # display an example
-            print(
-                "Gold Label: ",
-                batch_y_[rand_idx].item(),
-                " Pred label: ",
-                y_pred[rand_idx].item(),
-            )
-            self.display_example(
+        if verbosity > 0:
+            logging.info("test acc: %.4f test anti acc: %.4f" %
+                (self.avg_accuracy, self.avg_anti_accuracy))
+            logging.info("test sparsity: %.4f test continuity: %.4f" %
+                (self.avg_sparsity, self.avg_continuity))
+
+        if verbosity > 1:
+            rand_idx = random.randint(0, batch_size - 1)
+            # display a random example
+            logging.info(
+                "Gold Label: ", batch_y_[rand_idx].item(),
+                " Pred label: ", y_pred[rand_idx].item())
+            logging.info(self.display_example(
                 batch_x_[rand_idx], batch_m_[rand_idx], z[rand_idx]
-            )
+            ))
 
-    def pretrain_classifier(
-        self, df_train, df_test, batch_size, num_iteration, test_iteration
-    ):
-        train_accs = []
-        test_accs = []
-        best_train_acc = 0.0
-        best_test_acc = 0.0
+        if self.args.save_best_model:
+            if (self.avg_accuracy > self.best_test_acc) and \
+                (self.avg_accuracy > self.args.save_model_acc_thresh):
+
+                logging.info("saving best model and model stats")
+                current_datetime = datetime.now().strftime(
+                    "%m_%d_%y_%H_%M_%S"
+                )
+                # save model
+                torch.save(
+                    self.state_dict(),
+                    os.path.join(
+                        self.model_folder_path,
+                        self.args.model_prefix + ".pth",
+                    ),
+                )
+        
+        if self.best_test_acc > self.avg_accuracy:
+            self.best_test_acc = self.avg_accuracy
+            self.epochs_since_improv = 0
+        else:
+            self.epochs_since_improv += 1
+
+    def fit(self, df_train, df_test, batch_size, num_epochs):
         self.init_optimizers()
         self.init_rl_optimizers()
+        
+        total_train = len(df_train)
+        indices = np.array(list(range(0, total_train)))
 
-        for i in tqdm(range(num_iteration)):
+        for i in tqdm(range(num_epochs)):
             self.train()  # pytorch fn; sets module to train mode
+            
+            # shuffle the epoch
+            np.random.shuffle(indices)
 
-            # sample a batch of data
-            batch = df_train.sample(batch_size, replace=True)
-            batch_dict = self.generate_data(batch)
-            batch_x_ = batch_dict["x"]
-            batch_m_ = batch_dict["m"]
-            batch_y_ = batch_dict["y"]
-            losses, predict = self._train_cls_one_step(
-                batch_x_, batch_y_, batch_m_
-            )
+            total_train_acc = 0
+            for i in range(total_train//batch_size):
+                # sample a batch of data
+                start = i*batch_size
+                end = min((i+1)*batch_size, total_train)
+                batch = df_train.loc[indices[start:end]]
+                batch_x_, batch_m_, batch_y_ = self.generate_data(batch)
 
-            # calculate classification accuarcy
-            _, y_pred = torch.max(predict, dim=1)
-
-            acc = (
-                np.float((y_pred == batch_y_).sum().cpu().data.item())
-                / batch_size
-            )
-            train_accs.append(acc)
-
-            if acc > best_train_acc:
-                best_train_acc = acc
-
-            if (i + 1) % test_iteration == 0:
-                self.eval()  # set module to eval mode
-                test_correct = 0.0
-                test_total = 0.0
-                test_count = 0
-
-                for test_iter in range(len(df_test) // batch_size):
-                    test_batch = df_test.sample(
-                        batch_size
-                    )  # TODO: originally used dev batch here?
-                    batch_dict = self.generate_data(test_batch)
-                    batch_x_ = batch_dict["x"]
-                    batch_m_ = batch_dict["m"]
-                    batch_y_ = batch_dict["y"]
-                    # embeddings = self.embed_layer(batch_x_)
-                    _, predict, _ = self.generator(batch_x_, batch_m_)
-
-                    _, y_pred = torch.max(predict, dim=1)
-
-                    test_correct += np.float(
-                        (y_pred == batch_y_).sum().cpu().data.item()
-                    )
-                    test_total += batch_size
-
-                    test_count += batch_size
-
-                    test_accs.append(test_correct / test_total)
-
-                if test_correct / test_total > best_test_acc:
-                    best_test_acc = test_correct / test_total
-
-                avg_train_accs = (
-                    sum(train_accs[len(train_accs) - 10: len(train_accs)])
-                    / 10
+                z_baseline = Variable(
+                    torch.FloatTensor([float(np.mean(self.z_history_rewards))])
                 )
-                print(
-                    "train:", avg_train_accs, "best train acc:", best_train_acc
-                )
-                print("test:", test_accs[-1], "best test:", best_test_acc)
+                if self.use_cuda:
+                    z_baseline = z_baseline.cuda()
 
-    def fit(self, df_train, batch_size, num_iteration):
-        for i in tqdm(range(num_iteration)):
-            self.train()
-            # sample a batch of data
-            batch = df_train.sample(batch_size, replace=True)
-            batch_dict = self.generate_data(batch)
-            batch_x_ = batch_dict["x"]
-            batch_m_ = batch_dict["m"]
-            batch_y_ = batch_dict["y"]
-            z_baseline = Variable(
-                torch.FloatTensor([float(np.mean(self.z_history_rewards))])
-            )
-            if self.use_cuda:
-                z_baseline = z_baseline.cuda()
+                losses, predict, anti_predict, cls_predict, z, z_rewards = self.train_one_step(batch_x_, batch_y_, z_baseline, batch_m_)
 
-            (
-                losses,
-                predict,
-                anti_predict,
-                cls_predict,
-                z,
-                z_rewards,
-                consistency_loss,
-                continuity_loss,
-                sparsity_loss,
-            ) = self._train_one_step(batch_x_, batch_y_, z_baseline, batch_m_)
+                z_batch_reward = np.mean(z_rewards.cpu().data.numpy())
+                self.z_history_rewards.append(z_batch_reward)
 
-            z_batch_reward = np.mean(z_rewards.cpu().data.numpy())
-            self.z_history_rewards.append(z_batch_reward)
+                # calculate classification accuarcy
+                _, y_pred = torch.max(predict, dim=1)
 
-            # calculate classification accuarcy
-            _, y_pred = torch.max(predict, dim=1)
+                acc = np.float((y_pred == batch_y_).sum().cpu().data.item())
+                total_train_acc += acc
+            
+            total_acc_percent = total_train_acc / total_train
+            self.train_accs.append(total_acc_percent)
 
-            acc = (
-                np.float((y_pred == batch_y_).sum().cpu().data.item())
-                / self.batch_size
-            )
-            self.train_accs.append(acc)
-        return {
-            "predict": predict,
-            "anti_predict": anti_predict,
-            "cls_predict": cls_predict,
-            "z": z,
-            "z_rewards": z_rewards,
-            "consistency_loss": consistency_loss,
-            "continuity_loss": continuity_loss,
-            "sparsity_loss": sparsity_loss,
-        }
+            self.test(df_test, batch_size)
 
-    def fit_test(
-        self,
-        df_train,
-        df_test,
-        batch_size,
-        pretrain_cls=True,
-        num_iteration=40000,
-        test_iteration=200,
-    ):
-        """
-            Training pipeline -- iteratively trains and tests the model,
-            saving "best models" as necessary
-        """
-        # configure folder for saving models and stats
-        current_datetime = datetime.now().strftime("%m_%d_%y_%H_%M_%S")
-        if self.args.save_best_model:
-            model_folder_path = os.path.join(
-                self.args.save_path,
-                self.args.model_prefix + current_datetime + "training_run",
-            )
-            os.mkdir(model_folder_path)
-            log_filepath = os.path.join(
-                model_folder_path, "training_stats.txt"
-            )
-            logging.basicConfig(
-                filename=log_filepath, filemode="a", level=logging.INFO
-            )
-
-        if pretrain_cls:
-            print("pre-training the classifier")
-            self.pretrain_classifier(df_train, df_test, batch_size)
-
-        best_test_acc = 0.0
-        for _ in range(num_iteration // test_iteration):
-            fit_dict = self.fit(df_train, batch_size, test_iteration)
-            losses = fit_dict["losses"]
-            continuity_loss = fit_dict["continuity_loss"]
-            sparsity_loss = fit_dict["sparsity_loss"]
-            avg_train_acc = (
-                sum(
-                    self.train_accs[
-                        len(self.train_accs) - 20: len(self.train_accs)
-                    ]
-                )
-                / 20
-            )
-            print("\nAvg. train accuracy: ", avg_train_acc)
-
-            test_acc, test_anti_acc, test_sparsity = self.test(
-                df_test, batch_size
-            )
-            if test_acc > best_test_acc:
-                if self.args.save_best_model:
-                    print("saving best model and model stats")
-                    current_datetime = datetime.now().strftime(
-                        "%m_%d_%y_%H_%M_%S"
-                    )
-                    # save model
-                    torch.save(
-                        self.state_dict(),
-                        os.path.join(
-                            model_folder_path,
-                            self.args.model_prefix + current_datetime + ".pth",
-                        ),
-                    )
-                    # save stats
-                    logging.info("best model at time " + current_datetime)
-                    logging.info(
-                        "sparsity lambda: %.4f" % (self.lambda_sparsity)
-                    )
-                    logging.info(
-                        "last train acc: %.4f, avg train acc: %.4f"
-                        % (self.train_accs[-1], avg_train_acc)
-                    )
-                    logging.info(
-                        "last test acc: %.4f, previous best test acc: %.4f, \
-                            last anti test acc: %.4f"
-                        % (test_acc, best_test_acc, test_anti_acc)
-                    )
-                    logging.info("last test sparsity: %.4f" % test_sparsity)
-                    logging.info(
-                        "supervised_loss: %.4f, sparsity_loss: %.4f, \
-                            continuity_loss: %.4f"
-                        % (
-                            losses["e_loss"],
-                            torch.mean(sparsity_loss).cpu().data,
-                            torch.mean(continuity_loss).cpu().data,
-                        )
-                    )
-                best_test_acc = test_acc

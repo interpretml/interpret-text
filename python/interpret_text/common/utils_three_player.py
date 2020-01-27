@@ -32,6 +32,12 @@ class ModelArguments:
         self.lambda_acc_gap = 1.2
         self.lr = 0.001
 
+        self.save_best_model = True
+        # the accuracy above which to start saving the model
+        self.save_model_acc_thresh = .7
+        self.save_path = ""
+        self.model_prefix = "three_player_introspective_model"
+
 
 class BertPreprocessor:
     """A class that tokenizes and otherwise processes text to be encoded

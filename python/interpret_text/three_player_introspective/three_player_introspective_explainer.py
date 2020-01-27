@@ -70,9 +70,6 @@ class ThreePlayerIntrospectiveExplainer:
                 self.explainer = ClassifierModule(args, word_vocab)
                 self.anti_explainer = ClassifierModule(args, word_vocab)
                 self.gen_classifier = ClassifierModule(args, word_vocab)
-                self.generator = IntrospectionGeneratorModule(
-                    args, self.gen_classifier
-                )
             else:
                 assert explainer is not None\
                        and anti_explainer is not None\
@@ -82,8 +79,11 @@ class ThreePlayerIntrospectiveExplainer:
                        "generator classifier specifications are required."
                 self.explainer = explainer
                 self.anti_explainer = anti_explainer
-                self.generator = generator
                 self.gen_classifier = gen_classifier
+
+        self.generator = IntrospectionGeneratorModule(
+            args, self.gen_classifier
+        )
 
         self.model = ThreePlayerIntrospectiveModel(
             args,
@@ -117,7 +117,7 @@ class ThreePlayerIntrospectiveExplainer:
         df_train,
         df_test,
         batch_size,
-        num_iteration=40000,
+        num_epochs=5,
         pretrain_cls=True,
         pretrain_train_iters=1000,
         pretrain_test_iters=200,
@@ -131,18 +131,12 @@ class ThreePlayerIntrospectiveExplainer:
             self.freeze_bert_classifier(self.explainer)
             self.freeze_bert_classifier(self.anti_explainer)
             self.freeze_bert_classifier(self.gen_classifier)
-
-        if pretrain_cls:
-            print("pre-training the classifier")
-            self.model.pretrain_classifier(
-                df_train,
-                df_test,
-                batch_size,
-                pretrain_train_iters,
-                pretrain_test_iters,
-            )
+        
+        if self.BERT:
+            self.freeze_bert_classifier(self.gen_classifier, entire = True)
+        
         # encode the list
-        self.model.fit(df_train, batch_size, num_iteration)
+        self.model.fit(df_train, df_test, batch_size, num_epochs)
 
         return self.model
 
