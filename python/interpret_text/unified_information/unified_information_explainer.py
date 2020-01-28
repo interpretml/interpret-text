@@ -2,12 +2,10 @@ import torch
 from torch import nn, optim
 from tqdm import tqdm
 import numpy as np
-import math
 import random
 import html
 import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
-from pytorch_pretrained_bert import BertTokenizer
 
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
@@ -32,14 +30,14 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :param target_layer: The target layer to explain. Default is 14, which is the classification layer.
         If set to -1, all layers will be explained
         :type target_layer: int
-        :param max_points: The fraction of the dataset to be used when calculating the regularization 
+        :param max_points: The fraction of the dataset to be used when calculating the regularization
         parameter. A max of 1000 is recommended. Higher numbers will lead to slower explanations and memory issues.
         :type max_points: int
         """
         super(UnifiedInformationExplainer, self).__init__()
         self.device = device
         # Constant paramters for now, will modify based on the model later
-        # Scale: The maximum size of sigma. A hyper-parameter in reparameterization trick. Larger scale will 
+        # Scale: The maximum size of sigma. A hyper-parameter in reparameterization trick. Larger scale will
         # give more salient result, Default: 0.5.
         self.scale = 0.5
         # Rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in
@@ -75,10 +73,10 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
-        :param num_iteration: The number of iterations through the optimize function. This is a parameter 
-        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function will not be 
+        :param num_iteration: The number of iterations through the optimize function. This is a parameter
+        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function will not be
         optimzed. If set to a very high number, all words will not be important as the loss will be be severly optimized.
-        The more the iterations, slower the explanations. 
+        The more the iterations, slower the explanations.
         :type num_iteration: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
@@ -97,7 +95,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         if self.regular is None:
             assert self.train_dataset is not None, "Training dataset is required"
 
-            # sample the training dataset 
+            # sample the training dataset
             if len(self.train_dataset) <= self.max_points:
                 sampled_train_dataset = self.train_dataset
             else:
