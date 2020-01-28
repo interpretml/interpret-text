@@ -13,10 +13,11 @@ from interpret_text.common.utils_three_player import generate_data
 
 
 class ThreePlayerIntrospectiveModel(nn.Module):
-    """flattening the HardIntrospectionRationale3PlayerClassificationModel ->
-       HardRationale3PlayerClassificationModel ->
-       Rationale3PlayerClassificationModel dependency structure
-       from original paper code"""
+    """An implementation for an explainable neural network for natural
+    language processing and generating rationales used by that network.
+    Based on the paper "Rethinking Cooperative Rationalization: Introspective
+    Extraction and Complement Control" by Yu et. al.
+    """
 
     def __init__(
         self,
@@ -27,7 +28,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         generator,
         classifier,
     ):
-        """Initializes the model, including the explainer, anti-rationale explainer
+        """Initializes the model parameters and components
         """
         super(ThreePlayerIntrospectiveModel, self).__init__()
         self.args = args
@@ -64,12 +65,12 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.train_accs = []
 
         # initialize optimizers
-        self.init_optimizers()
-        self.init_rl_optimizers()
+        self._init_optimizers()
+        self._init_rl_optimizers()
 
-        # training_stop_thresh epochs: max number of epochs
-        # allowed to train since improvement before fit() stops
-        self.training_stop_thresh = 30
+        # training_stop_thresh epochs: max number of epochs since last
+        # improvement that model is allowed to train before fit() stops
+        self.training_stop_thresh = 20
         self.epochs_since_improv = 0
 
         self.train_accs = []
@@ -77,7 +78,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.test_losses = []
         self.best_test_acc = 0
 
-    def init_optimizers(self):
+    def _init_optimizers(self):
         self.opt_E = torch.optim.Adam(
             filter(lambda x: x.requires_grad, self.E_model.parameters()),
             lr=self.lr,
@@ -87,7 +88,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             lr=self.lr,
         )
 
-    def init_rl_optimizers(self):
+    def _init_rl_optimizers(self):
         self.opt_G_sup = torch.optim.Adam(
             filter(lambda x: x.requires_grad, self.generator.parameters()),
             lr=self.lr,
@@ -100,9 +101,9 @@ class ThreePlayerIntrospectiveModel(nn.Module):
     def _generate_rationales(self, z_prob_):
         """
         Input:
-            z_prob_ -- (num_rows, length, 2)
+            z_prob_ with dimensions (num_rows, length, 2)
         Output:
-            z -- (num_rows, length)
+            z with dimensions (num_rows, length)
         """
         z_prob__ = z_prob_.view(-1, 2)  # (num_rows * length, 2)
 
@@ -248,11 +249,31 @@ class ThreePlayerIntrospectiveModel(nn.Module):
     def forward(self, X_tokens, X_mask):
         """
         Inputs:
-            x -- torch Variable in shape of (batch_size, length)
+            X_tokens -- torch Variable in shape of (batch_size, length)
             mask -- torch Variable in shape of (batch_size, length)
         Outputs:
             predict -- (batch_size, num_label)
             z -- rationale (batch_size, length)
+        """
+        """Forward pass in the model.
+
+        :param X_tokens: tokenized embedded examples with shape
+            (batch_size, length)
+        :type X_tokens: torch Variable
+        :param X_mask: mask differentiating word from padding tokens
+            with shape (batch_size, length)
+        :type X_mask: torch Variable
+
+        :return: dictionary with fields:
+            "predict": prediction using generated rationales,
+            "anti_predict": prediction using complements of generated
+                rationales,
+            "cls_predict": prediction by the introspective classifier in the
+                generator,
+            "z": generated rationale,
+            "neg_log_probs": negative log probabilities of sampling each
+                rationale
+        :rtype: dict
         """
         z_scores_, cls_predict, word_embeddings = self.generator(
             X_tokens, X_mask
@@ -291,14 +312,15 @@ class ThreePlayerIntrospectiveModel(nn.Module):
                 "neg_log_probs": neg_log_probs}
 
     def get_z_scores(self, df_test):
-        """
-        Inputs:
-            x -- torch Variable in shape of (batch_size, length)
-            mask -- torch Variable in shape of (batch_size, length)
-        Outputs:
-            z_scores -- non-softmaxed rationale, (batch_size, length)
-            cls_predict -- prediction of generator's classifier,
-                (batch_size, num_label)
+        """Get softmaxed rationale importances.
+
+        :param df_test: dataframe containing test data labels, tokens, masks,
+            and counts
+        :type df_test: pd.DataFrame
+        :return:
+            z_scores: softmaxed rationale scores with dimension
+                (batch_size, length)
+        :rtype: torch.FloatTensor
         """
         batch_dict = generate_data(df_test, self.use_cuda)
         x_tokens = batch_dict["x"]
@@ -319,11 +341,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         baseline,
         mask,
     ):
-        """
-        Input:
-            z -- (batch_size, length)
-        """
-
         # supervised loss
         prediction_loss = self.loss_func(
             cls_pred_logits, label
@@ -447,6 +464,20 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         return continuity_ratio
 
     def display_example(self, x, m, z):
+        """Display a given example with important/rationale words
+        displayed in brackets.
+
+        :param x: tokenized embedded example
+        :type x: torch tensor
+        :param m: mask differentiating word from padding tokens
+        :type m: torch tensor
+        :param z: tensor indicating whether a word is part of the
+            generated rationale
+        :type z: torch tensor
+        :return: (human-readable, word) tokens with words
+            selected as part of the rationale indicated by brackets
+        :rtype: string
+        """
         seq_len = int(m.sum().item())
         ids = x[:seq_len]
         tokens = self.preprocessor.decode_single(ids)
@@ -553,8 +584,18 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             self.epochs_since_improv += 1
 
     def fit(self, df_train, df_test):
-        self.init_optimizers()
-        self.init_rl_optimizers()
+        """Train the model on the training data, with testing
+        at the end of every epoch.
+
+        :param df_train: training data containing labels, lists of word token
+            ids, pad/word masks, and token counts for each training example
+        :type df_train: pd.DataFrame
+        :param df_test: testing data containing labels, lists of word token
+            ids, pad/word masks, and token counts for each testing example
+        :type df_test: pd.DataFrame
+        """
+        self._init_optimizers()
+        self._init_rl_optimizers()
 
         total_train = len(df_train)
         indices = np.array(list(range(0, total_train)))

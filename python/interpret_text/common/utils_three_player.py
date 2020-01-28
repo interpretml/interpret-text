@@ -12,6 +12,18 @@ from torch.autograd import Variable
 
 
 def generate_data(batch, use_cuda):
+    """Create a formatted and ordered data batch to use in the
+    three player model.
+
+    :param batch: A pandas dataframe containing the tokens, masks, counts, and
+        labels associated with a batch of data
+    :type batch: pd.DataFrame
+    :param use_cuda: whether to use CUDA
+    :type use_cuda: bool
+    :return: formatted and ordered tokens (x), masks (m), and
+        labels (y) associated with a batch of data
+    :rtype: dict
+    """
     # sort for rnn happiness
     batch.sort_values("counts", inplace=True, ascending=False)
 
@@ -44,7 +56,7 @@ class ModelArguments:
     """
 
     def __init__(self, cuda, pre_train_cls, batch_size, num_epochs,
-                 save_best_model, model_save_dir=None, model_prefix=None):
+                 save_best_model, model_save_dir, model_prefix):
         """Initialize model parameters
 
         :param cuda: Whether or not to use cuda
@@ -60,7 +72,7 @@ class ModelArguments:
         :type save_best_model: bool
         :param model_save_dir: Directory to save models and logs
         :type model_save_dir: string
-        :param model_prefix: What to name saved models
+        :param model_prefix: What to name saved models and logs
         :type model_prefix: string
         """
         # to initialize model modules
@@ -88,15 +100,12 @@ class ModelArguments:
         self.cuda = cuda
         self.pre_train_cls = pre_train_cls
         self.train_batch_size = batch_size
+        # if more than training_stop_thresh epochs since improvement,
+        # stop training in fit
+        self.training_stop_thresh = 5
         self.test_batch_size = batch_size
         self.num_epochs = num_epochs
         self.save_best_model = save_best_model
-
-        if save_best_model:
-            assert model_prefix is not None,\
-                "Please input a model name (prefix for saved files)"
-            assert model_save_dir is not None,\
-                "Please input a directory to save models in"
         self.model_prefix = model_prefix
         self.save_path = model_save_dir
 
@@ -120,7 +129,8 @@ class BertPreprocessor:
        by a BERT model.
     """
 
-    def __init__(self, build_word_dict=False, tokenizer=None, max_length=50, pad_to_max=True, text=None):
+    def __init__(self, build_word_dict=False, tokenizer=None, max_length=50,
+                 pad_to_max=True, text=None):
         """Initialize the BertPreprocessor.
 
         :param tokenizer: an initialized tokenizer with 'encode_plus' and
@@ -143,7 +153,8 @@ class BertPreprocessor:
 
         self.reverse_word_vocab = None
         if build_word_dict:
-            assert (text is not None), "must include document sentences to build word vocab"
+            assert (text is not None), "must include document sentences to\
+            build word vocab"
             (
                 self.word_vocab,
                 self.reverse_word_vocab,
@@ -168,7 +179,8 @@ class BertPreprocessor:
         counts = {}
 
         for special_token in self.tokenizer.all_special_tokens:
-            words_to_idxs[special_token] = self.tokenizer.convert_tokens_to_ids(special_token)
+            words_to_idxs[special_token] =\
+                self.tokenizer.convert_tokens_to_ids(special_token)
             counts[special_token] = 1000
         print(words_to_idxs)
         for sentence in text:

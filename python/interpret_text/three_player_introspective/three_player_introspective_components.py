@@ -11,17 +11,22 @@ from interpret_text.common.utils_three_player import generate_data
 
 
 class ClassifierWrapper():
+    """Wrapper to provide a common interfaces among different classifier modules
+    """
 
     def __init__(self, args, model):
+        """Initialize an instance of the wrapper
+
+        :param args: arguments containing training and structure parameters
+        :type args: ModelArguments
+        :param model: A classifier module, ex. BERT or RNN classifier module
+        :type model: BertForSequenceClassification or ClassifierModule
+        """
         self.args = args
         self.model = model
         self.opt = None
 
-        # if more than training_stop_thresh epochs since improvement,
-        # stop training in fit
-        self.training_stop_thresh = 5
         self.epochs_since_improv = 0
-
         self.best_test_acc = 0
         self.avg_accuracy = 0
         self.test_accs = []
@@ -30,11 +35,13 @@ class ClassifierWrapper():
         self.loss_func = nn.CrossEntropyLoss(reduce=False)
 
     def init_optimizer(self):
+        """Initialize the classifier's optimizer
+        """
         self.opt = torch.optim.Adam(filter(lambda x: x.requires_grad,
                                            self.model.parameters()),
                                     lr=self.args.lr)
 
-    def test(self, df_test, batch_size, verbosity=2):
+    def test(self, df_test, verbosity=2):
         """Calculate and store as model attributes:
         Average classification accuracy using rationales (self.avg_accuracy),
         Average classification accuracy rationale complements
@@ -44,17 +51,20 @@ class ClassifierWrapper():
         :param df_test: dataframe containing test data labels, tokens, masks,
             and counts
         :type df_test: pandas dataframe
-        :param n_examples_displayed: number of test examples (with rationale/
-            prediction) to display
-        :type n_examples_displayed: int
-        :param batch_size: number of examples in each test batch
-        :type batch_size: int
+        :param verbosity: {0, 1, 2}, default 2
+            If 0, does not log any output
+            If 1, logs accuracy, anti-rationale accuracy, sparsity, and
+            continuity scores
+            If 2, displays a random test example with rationale and
+            classification
+        :type verbosity: int, optional
         """
         self.model.eval()
         accuracy = 0
-        for i in range(len(df_test) // batch_size):
+        for i in range(len(df_test) // self.args.test_batch_size):
             test_batch = df_test.iloc[
-                i * batch_size: (i + 1) * batch_size
+                i * self.args.test_batch_size: (i + 1) *
+                self.args.test_batch_size
             ]
             batch_dict = generate_data(test_batch, self.args.cuda)
             batch_x_ = batch_dict["x"]
@@ -92,7 +102,18 @@ class ClassifierWrapper():
         else:
             self.epochs_since_improv += 1
 
-    def train_one_step(self, X_tokens, label, X_mask):
+    def _train_one_step(self, X_tokens, label, X_mask):
+        """Train the classifier for one optimization step.
+
+        :param X_tokens: Tokenized and embedded training example
+        :type X_tokens: torch.int64
+        :param label: Label of the training example
+        :type label: torch.int64
+        :param X_mask: Mask differentiating tokens vs not tokens
+        :type X_mask: torch.FloatTensor
+        :return: losses, classifier prediction logits
+        :rtype: tuple
+        """
         self.opt.zero_grad()
         self.model.zero_grad()
 
@@ -112,6 +133,16 @@ class ClassifierWrapper():
         return losses, cls_predict_logits
 
     def fit(self, df_train, df_test):
+        """Train the classifier on the training data, with testing
+        at the end of every epoch.
+
+        :param df_train: training data containing labels, lists of word token
+        ids, pad/word masks, and token counts for each training example
+        :type df_train: pd.DataFrame
+        :param df_test: testing data containing labels, lists of word token
+        ids, pad/word masks, and token counts for each testing example
+        :type df_test: pd.DataFrame
+        """
         self.init_optimizer()
 
         total_train = len(df_train)
@@ -134,7 +165,7 @@ class ClassifierWrapper():
                 batch_m_ = batch_dict["m"]
                 batch_y_ = batch_dict["y"]
 
-                losses, predict = self.train_one_step(
+                losses, predict = self._train_one_step(
                     batch_x_, batch_y_, batch_m_
                 )
 
@@ -147,9 +178,9 @@ class ClassifierWrapper():
             total_acc_percent = total_train_acc / total_train
             self.train_accs.append(total_acc_percent)
 
-            self.test(df_test, self.args.train_batch_size)
+            self.test(df_test)
             # stop training if there have been no improvements
-            if self.epochs_since_improv > self.training_stop_thresh:
+            if self.epochs_since_improv > self.args.training_stop_thresh:
                 break
 
 
@@ -163,9 +194,11 @@ class RnnModel(nn.Module):
         :param input_dim: dimension of input
         :type input_dim: int
         :param hidden_dim: dimension of filters
-        :type input_dim: int
+        :type hidden_dim: int
         :param layer_num: number of RNN layers
-        :type input_dim: int
+        :type layer_num: int
+        :param dropout_rate: dropout rate
+        :type dropout_rate: float
         """
         super(RnnModel, self).__init__()
         self.rnn_layer = nn.GRU(
@@ -457,7 +490,6 @@ class IntrospectionGeneratorModule(nn.Module):
         # hidden states must be in shape (batch_size, hidden_dim, length)
         # RNN returns (batch_size, hidden_dim, length)
         # BERT returns (batch_size, length, hidden_dim)
-        # #TODO replace with if BERT:
         last_hidden_state = hidden_states[-1]
         if last_hidden_state.shape[1] != self.hidden_dim:
             last_hidden_state = hidden_states[-1].transpose(1, 2)

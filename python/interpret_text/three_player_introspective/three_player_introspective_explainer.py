@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from transformers import BertForSequenceClassification
 
+
 class ThreePlayerIntrospectiveExplainer:
     """
     An explainer for training an explainable neural network for natural
@@ -32,11 +33,13 @@ class ThreePlayerIntrospectiveExplainer:
     ):
         """
         Initialize the ThreePlayerIntrospectiveExplainer
-        classifier type: {BERT, RNN, custom}
+        classifier type: {BERT, RNN, BERT-RNN, custom}
         If BERT, explainer, anti explainer, and generator classifier will
         be BERT modules
         If RNN, explainer, anti explainer, and generator classifier will
         be RNNs
+        If BERT-RNN, generator classifier will be BERT module;
+        explainer and anti explainer will be RNNs
         If custom, provide modules for explainer, anti_explainer, generator,
         and gen_classifier.
         """
@@ -46,7 +49,7 @@ class ThreePlayerIntrospectiveExplainer:
             args.gen_embedding_dim = 768
             args.bert_explainers = True
             args.embedding_dim = 768
-            args.hidden_dim = 768 # input dimension to use in the hidden generator RNN
+            args.hidden_dim = 768
             self.explainer = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
                 num_labels=2,
@@ -65,31 +68,34 @@ class ThreePlayerIntrospectiveExplainer:
                 output_hidden_states=True,
                 output_attentions=True,
             )
-            self.freeze_classifier(self.explainer)
-            self.freeze_classifier(self.anti_explainer)
-            self.freeze_classifier(self.gen_classifier)
+            self._freeze_classifier(self.explainer)
+            self._freeze_classifier(self.anti_explainer)
+            self._freeze_classifier(self.gen_classifier)
         elif classifier_type == "RNN":
             args.bert_explainers = False
             args.gen_embedding_dim = 100
             args.embedding_dim = 100
             args.hidden_dim = 100
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
-            self.anti_explainer = ClassifierModule(args, preprocessor.word_vocab)
-            self.gen_classifier = ClassifierModule(args, preprocessor.word_vocab)
+            self.anti_explainer = ClassifierModule(args,
+                                                   preprocessor.word_vocab)
+            self.gen_classifier = ClassifierModule(args,
+                                                   preprocessor.word_vocab)
         elif classifier_type == "BERT-RNN":
             args.bert_explainers = False
             args.gen_embedding_dim = 768
             args.embedding_dim = 100
             args.hidden_dim = 768
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
-            self.anti_explainer = ClassifierModule(args, preprocessor.word_vocab)
+            self.anti_explainer = ClassifierModule(args,
+                                                   preprocessor.word_vocab)
             self.gen_classifier = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
                 num_labels=2,
                 output_hidden_states=True,
                 output_attentions=True,
             )
-            self.freeze_classifier(self.gen_classifier)
+            self._freeze_classifier(self.gen_classifier)
         else:
             assert explainer is not None\
                     and anti_explainer is not None\
@@ -118,7 +124,9 @@ class ThreePlayerIntrospectiveExplainer:
         if args.cuda:
             self.model.cuda()
 
-    def freeze_classifier(self, classifier, entire=False):
+    def _freeze_classifier(self, classifier, entire=False):
+        """Freeze selected layers (or all of) a BERT classifier
+        """
         if entire:
             for name, param in classifier.named_parameters():
                 param.requires_grad = False
@@ -129,15 +137,34 @@ class ThreePlayerIntrospectiveExplainer:
                     param.requires_grad = False
 
     def train(self, *args, **kwargs):
+        """Optionally pretrain the generator's introspective classifier, then
+        train the explainer's model on the training data, with testing
+        at the end of every epoch.
+        """
         return self.fit(*args, **kwargs)
 
     def fit(self, df_train, df_test):
+        """Optionally pretrain the generator's introspective classifier, then
+        train the explainer's model on the training data, with testing
+        at the end of every epoch.
+
+        :param df_train: training data containing labels, lists of word token
+            ids, pad/word masks, and token counts for each training example
+        :type df_train: pd.DataFrame
+        :param df_test: testing data containing labels, lists of word token
+            ids, pad/word masks, and token counts for each testing example
+        :type df_test: pd.DataFrame
+        :return: the fitted model
+        :rtype: ThreePlayerIntrospectiveModel
+        """
+
         if self.args.pre_train_cls:
             cls_wrapper = ClassifierWrapper(self.args, self.gen_classifier)
             cls_wrapper.fit(df_train, df_test)
 
-            # freeze the generator's classifier entirely, only if the user wanted to pretrain
-            self.freeze_classifier(self.gen_classifier, entire=True)
+            # freeze the generator's classifier entirely
+            # (makes sense only if user wants to pretrain)
+            self._freeze_classifier(self.gen_classifier, entire=True)
 
         # train the three player model end-to-end
         self.model.fit(df_train, df_test)
@@ -145,6 +172,21 @@ class ThreePlayerIntrospectiveExplainer:
         return self.model
 
     def predict(self, df_predict):
+        """Generate rationales, predictions using rationales, predictions using
+        anti-rationales (complement of generated rationales), and introspective
+        generator classifier predictions for given examples.
+
+        :param df_predict: data containing labels, lists of word token
+            ids, pad/word masks, and token counts for each testing example
+        :type df_predict: pd.DataFrame
+        :return: Dictionary with fields:
+            "predict": predictions using generated rationales
+            "anti_predict": predictions using complements of generated
+                rationales
+            "cls_predict": predictions from introspective generator,
+            "rationale": mask indicating whether words were used in rationales,
+        :rtype: dict
+        """
         self.model.eval()
         batch_dict = generate_data(df_predict, self.args.cuda)
         batch_x_ = batch_dict["x"]
@@ -182,6 +224,22 @@ class ThreePlayerIntrospectiveExplainer:
     def explain_local(
         self, sentence, label, preprocessor, hard_importances=True
     ):
+        """Create a local explanation for a given sentence
+
+        :param sentence: A segment of text
+        :type sentence: string
+        :param label: The ground truth label for the text segment
+        :type label: int
+        :param preprocessor: an intialized preprocessor to tokenize the
+            given text with .preprocess() and .decode_single() methods
+        :type preprocessor: Ex. GlovePreprocessor or BertPreprocessor
+        :param hard_importances: whether to generate "hard" important/
+            non-important rationales or float rationale scores, defaults
+            to True
+        :type hard_importances: bool, optional
+        :return: local explanation object
+        :rtype: DynamicLocalExplanation
+        """
         df_label = pd.DataFrame.from_dict({"labels": [label]})
         df_sentence = pd.concat(
             [df_label, preprocessor.preprocess([sentence.lower()])], axis=1
@@ -217,4 +275,13 @@ class ThreePlayerIntrospectiveExplainer:
         return local_explanation
 
     def visualize(self, word_importances, parsed_sentence):
+        """Create a heatmap of a given parsed_sentence
+
+        :param word_importances: values [0, 1] indicating importance of
+            each token in the parsed sentence, with 1 being more important.
+        :type word_importances: numpy array
+        :param parsed_sentence: a sentence (or other fragement of text)
+            split into human-readable words/tokens.
+        :type parsed_sentence: list
+        """
         plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)
