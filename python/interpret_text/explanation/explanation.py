@@ -21,7 +21,12 @@ class TextExplanation(LocalExplanation):
     """Defines the mixin for text explanations."""
 
     def __init__(self, predicted_label=None, true_label=None, **kwargs):
-        """Create the text explanation."""
+        """Create the text explanation.
+        :param predicted_label: The label predicted by the classifier
+        :type predicted_label: string
+        :param true_label: The ground truth label for the sentense
+        :type true_label: string
+        """
         super(TextExplanation, self).__init__(**kwargs)
         order = _order_imp(np.abs(self.local_importance_values))
         self._local_importance_rank = _sort_values(self._features, order)
@@ -128,7 +133,6 @@ def _create_local_explanation(
         TextExplanation.
     :rtype: DynamicLocalExplanation
     """
-    print("RUNNING")
     exp_id = explanation_id or str(uuid.uuid4())
     if text_explanation:
         mixins = [TextExplanation]
@@ -140,6 +144,5 @@ def _create_local_explanation(
     if classification:
         mixins.append(ClassesMixin)
     DynamicLocalExplanation = type(Dynamic.LOCAL_EXPLANATION, tuple(mixins), {})
-    print("kwargs", kwargs)
     local_explanation = DynamicLocalExplanation(explanation_id=exp_id, **kwargs)
     return local_explanation

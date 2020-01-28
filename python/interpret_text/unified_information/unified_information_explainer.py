@@ -69,7 +69,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             % (self.target_layer)
         )
 
-    def explain_local(self, text, classes):
+    def explain_local(self, text, classes, predicted_label, true_label):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
@@ -113,9 +113,9 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             method="neural network",
             model_task="classification",
             features=parsed_sentence[1:-1],
-            classes=np.asarray(classes),
-            predicted_label=1,
-            true_label=2,
+            classes=classes,
+            predicted_label=predicted_label,
+            true_label=true_label,
         )
 
     def _calculate_regularization(self, sampled_x, model, reduced_axes=None):
