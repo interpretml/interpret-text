@@ -8,7 +8,7 @@ from torch.autograd import Variable
 from tqdm import tqdm
 
 from interpret_text.common.utils_three_player import generate_data
-from datetime import datetime
+
 
 class ClassifierWrapper():
 
@@ -17,7 +17,8 @@ class ClassifierWrapper():
         self.model = model
         self.opt = None
 
-        # if more than training_stop_thresh epochs since improvement, stop training in fit
+        # if more than training_stop_thresh epochs since improvement,
+        # stop training in fit
         self.training_stop_thresh = 5
         self.epochs_since_improv = 0
 
@@ -29,7 +30,9 @@ class ClassifierWrapper():
         self.loss_func = nn.CrossEntropyLoss(reduce=False)
 
     def init_optimizer(self):
-        self.opt = torch.optim.Adam(filter(lambda x: x.requires_grad, self.model.parameters()), lr=self.args.lr)
+        self.opt = torch.optim.Adam(filter(lambda x: x.requires_grad,
+                                           self.model.parameters()),
+                                    lr=self.args.lr)
 
     def test(self, df_test, batch_size, verbosity=2):
         """Calculate and store as model attributes:
@@ -69,14 +72,11 @@ class ClassifierWrapper():
 
         if verbosity > 0:
             logging.info("train acc: %.4f, test acc: %.4f" %
-                (self.train_accs[-1], self.avg_accuracy))
+                         (self.train_accs[-1], self.avg_accuracy))
 
         if self.args.save_best_model:
             if self.avg_accuracy > self.best_test_acc:
                 logging.info("saving best classifier model and model stats")
-                current_datetime = datetime.now().strftime(
-                    "%m_%d_%y_%H_%M_%S"
-                )
                 # save model
                 torch.save(
                     self.model.state_dict(),
@@ -85,7 +85,7 @@ class ClassifierWrapper():
                         self.args.model_prefix + "gen_classifier.pth",
                     ),
                 )
-        
+
         if self.best_test_acc > self.avg_accuracy:
             self.best_test_acc = self.avg_accuracy
             self.epochs_since_improv = 0
@@ -110,16 +110,16 @@ class ClassifierWrapper():
 
         self.opt.step()
         return losses, cls_predict_logits
-    
+
     def fit(self, df_train, df_test):
         self.init_optimizer()
-        
+
         total_train = len(df_train)
         indices = np.array(list(range(0, total_train)))
 
         for i in tqdm(range(self.args.num_epochs)):
             self.model.train()  # pytorch fn; sets module to train mode
-            
+
             # shuffle the epoch
             np.random.shuffle(indices)
 
@@ -133,7 +133,7 @@ class ClassifierWrapper():
                 batch_x_ = batch_dict["x"]
                 batch_m_ = batch_dict["m"]
                 batch_y_ = batch_dict["y"]
-                
+
                 losses, predict = self.train_one_step(
                     batch_x_, batch_y_, batch_m_
                 )
@@ -143,7 +143,7 @@ class ClassifierWrapper():
 
                 acc = np.float((y_pred == batch_y_).sum().cpu().data.item())
                 total_train_acc += acc
-            
+
             total_acc_percent = total_train_acc / total_train
             self.train_accs.append(total_acc_percent)
 
@@ -151,6 +151,7 @@ class ClassifierWrapper():
             # stop training if there have been no improvements
             if self.epochs_since_improv > self.training_stop_thresh:
                 break
+
 
 # Modules that can be used in the three player introspective model
 class RnnModel(nn.Module):
@@ -275,9 +276,9 @@ class ClassifierModule(nn.Module):
                     embeddings[word_vocab[word], :] = embedding
                     counter += 1
             f.close()
-            print("%d words have been switched." % counter)
+            logging.info("%d words have been switched." % counter)
         else:
-            print("embedding is initialized fully randomly.")
+            logging.info("embedding is initialized fully randomly.")
 
         # initialize embedding layer
         self.embed_layer = nn.Embedding(vocab_size, self.input_dim)
@@ -303,7 +304,10 @@ class ClassifierModule(nn.Module):
         word_embeddings = self.embed_layer(X_tokens)
         if z is None:
             z = torch.ones_like(X_tokens)
-            z = z.type(torch.cuda.FloatTensor)
+            if torch.cuda.is_available():
+                z = z.type(torch.cuda.FloatTensor)
+            else:
+                z = z.type(torch.FloatTensor)
 
         masked_input = word_embeddings * z.unsqueeze(-1)
         hiddens = self.encoder(masked_input, attention_mask)

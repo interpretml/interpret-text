@@ -2,8 +2,6 @@ import logging
 import os
 import random
 from collections import deque
-from datetime import datetime
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -12,6 +10,7 @@ from torch.autograd import Variable
 from tqdm import tqdm
 
 from interpret_text.common.utils_three_player import generate_data
+
 
 class ThreePlayerIntrospectiveModel(nn.Module):
     """flattening the HardIntrospectionRationale3PlayerClassificationModel ->
@@ -70,7 +69,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         # training_stop_thresh epochs: max number of epochs
         # allowed to train since improvement before fit() stops
-        self.training_stop_thresh = 5
+        self.training_stop_thresh = 10
         self.epochs_since_improv = 0
 
         self.train_accs = []
@@ -602,3 +601,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             self.train_accs.append(total_acc_percent)
 
             self.test(df_test)
+
+            if self.epochs_since_improv > self.training_stop_thresh:
+                break

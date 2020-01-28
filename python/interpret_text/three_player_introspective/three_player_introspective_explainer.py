@@ -107,7 +107,8 @@ class ThreePlayerIntrospectiveExplainer:
                 param.requires_grad = False
         else:
             for name, param in classifier.named_parameters():
-                if "bert.embeddings" in name or ("bert.encoder" in name and "layer.11" not in name):
+                if "bert.embeddings" in name or ("bert.encoder" in name and
+                                                 "layer.11" not in name):
                     param.requires_grad = False
 
     def train(self, *args, **kwargs):
@@ -119,13 +120,13 @@ class ThreePlayerIntrospectiveExplainer:
             self.freeze_bert_classifier(self.explainer)
             self.freeze_bert_classifier(self.anti_explainer)
             self.freeze_bert_classifier(self.gen_classifier)
-        
+
         if self.args.pre_train_cls:
             cls_wrapper = ClassifierWrapper(self.args, self.gen_classifier)
             cls_wrapper.fit(df_train, df_test)
 
         if self.BERT:
-            self.freeze_bert_classifier(self.gen_classifier, entire = True)
+            self.freeze_bert_classifier(self.gen_classifier, entire=True)
 
         # encode the list
         self.model.fit(df_train, df_test)

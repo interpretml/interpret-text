@@ -9,7 +9,7 @@ from interpret_text.common.dataset.utils_data_shared import download_and_unzip
 import torch
 
 from torch.autograd import Variable
-from datetime import datetime
+
 
 def generate_data(batch, use_cuda):
     # sort for rnn happiness
@@ -36,6 +36,7 @@ def generate_data(batch, use_cuda):
         batch_y_ = batch_y_.cuda()
 
     return {"x": batch_x_, "m": batch_m_, "y": batch_y_}
+
 
 class ModelArguments:
     """Default parameters used to initialize the model (independent of module
@@ -98,10 +99,8 @@ class ModelArguments:
                 "Please input a directory to save models in"
         self.model_prefix = model_prefix
         self.save_path = model_save_dir
-    
+
         # for saving models and logging
-        current_datetime = datetime.now().strftime(
-                           "%m_%d_%y_%H_%M_%S")
         self.model_folder_path = os.path.join(
             self.save_path,
             self.model_prefix + "_training_")
