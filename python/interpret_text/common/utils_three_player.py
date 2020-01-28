@@ -244,7 +244,8 @@ class GlovePreprocessor:
         """
         indexed_text = [
             self.word_vocab[word]
-            if (self.counts[word] > self.count_thresh)
+            if word in self.counts and
+            self.counts[word] > self.count_thresh
             else self.word_vocab["<UNK>"]
             for word in text.split()
         ]

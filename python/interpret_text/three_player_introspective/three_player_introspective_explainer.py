@@ -188,11 +188,10 @@ class ThreePlayerIntrospectiveExplainer:
             zs = zs[:, :, predict_class_idx].detach()
 
         zs = np.array(zs.cpu())
-
         # generate human-readable tokens (individual words)
         seq_len = int(m.sum().item())
         ids = x[:seq_len][0]
-        tokens = [preprocessor.reverse_word_vocab[i.item()] for i in ids]
+        tokens = preprocessor.decode_single(ids)
 
         local_explanation = _create_local_explanation(
             classification=True,
