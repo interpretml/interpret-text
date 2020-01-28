@@ -12,7 +12,7 @@ from pytorch_pretrained_bert import BertTokenizer
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
 from interpret_text.common.utils_unified import (
-    get_single_embedding,
+    _get_single_embedding,
     make_bert_embeddings,
 )
 
@@ -21,7 +21,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
     """The UnifiedInformationExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, model, train_dataset, device, target_layer=14, sampling_fraction=1000):
+    def __init__(self, model, train_dataset, device, target_layer=14, max_points=1000):
         """ Initialize the UnifiedInformationExplainer
         :param model: a pytorch model
         :type: torch.nn
@@ -32,15 +32,14 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :param target_layer: The target layer to explain. Default is 14, which is the classification layer.
         If set to -1, all layers will be explained
         :type target_layer: int
-        :param sampling_fraction: the fraction of the dataset to be used when calculating the regularization 
-        parameter.A max of 1000 is recommended. Higher umbers will lead to lengthier times and memore issues.
-        :type sampling_fraction: int
+        :param max_points: The fraction of the dataset to be used when calculating the regularization 
+        parameter. A max of 1000 is recommended. Higher numbers will lead to slower explanations and memory issues.
+        :type max_points: int
         """
         super(UnifiedInformationExplainer, self).__init__()
         self.device = device
         # Constant paramters for now, will modify based on the model later
-        # Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where
-        # word_embedding_weight is the word embedding weight of the model to be explained. Larger scale will 
+        # Scale: The maximum size of sigma. A hyper-parameter in reparameterization trick. Larger scale will 
         # give more salient result, Default: 0.5.
         self.scale = 0.5
         # Rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in
@@ -50,7 +49,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         # ``torch.FloatTensor``, of any shape
         self.Phi = None
         self.regular = None
-        self.sampling_fraction = sampling_fraction
+        self.max_points = max_points
         self.target_layer = target_layer
         self.model = model
         self.train_dataset = train_dataset
@@ -83,7 +82,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         """
         assert text is not None, "input text is required to generate explanation"
 
-        embedded_input, parsed_sentence = get_single_embedding(self.model, text, self.device)
+        embedded_input, parsed_sentence = _get_single_embedding(self.model, text, self.device)
         self.input_embeddings = embedded_input
         self.parsed_sentence = parsed_sentence
 
@@ -96,10 +95,10 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             assert self.train_dataset is not None, "Training dataset is required"
 
             # sample the training dataset 
-            if len(self.train_dataset) <= self.sampling_fraction:
+            if len(self.train_dataset) <= self.max_points:
                 sampled_train_dataset = self.train_dataset
             else:
-                sampled_train_dataset = random.sample(self.train_dataset, k=sampling_fraction)
+                sampled_train_dataset = random.sample(self.train_dataset, k=self.max_points)
 
             training_embeddings = make_bert_embeddings(
                 sampled_train_dataset, self.model, self.device
@@ -313,10 +312,10 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
 
     def _plot_global_imp(self, top_words, top_importances, label_name):
         """ Function to plot the global importances
-        :param top words: The tokenized words
-        :type max_alpha: str
+        :param top_words: The tokenized words
+        :type top_words: str[]
         :param top_importances: The associated feature importances
-        :type top_importances: float
+        :type top_importances: float[]
         :param label_name: The label predicted
         :type label_name: str
         """

@@ -150,7 +150,7 @@ def download_path(path):
         tmp_dir.cleanup()
 
 
-def get_single_embedding(model, text, device):
+def _get_single_embedding(model, text, device):
     """Get the bert embedding for a single sentence
     :param text: The current sentence
     :type text: str
