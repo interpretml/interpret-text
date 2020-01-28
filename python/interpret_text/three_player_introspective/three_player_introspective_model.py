@@ -69,7 +69,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         # training_stop_thresh epochs: max number of epochs
         # allowed to train since improvement before fit() stops
-        self.training_stop_thresh = 10
+        self.training_stop_thresh = 30
         self.epochs_since_improv = 0
 
         self.train_accs = []
@@ -272,7 +272,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             z_probs_
         )  # (batch_size, length)
 
-        if not self.args.BERT:
+        if not self.args.bert_explainers:
             predict = self.E_model(X_tokens, X_mask, z)[
                 0
             ]  # the first output are the logits

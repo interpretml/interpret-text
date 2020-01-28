@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 from transformers import BertForSequenceClassification
 
-
 class ThreePlayerIntrospectiveExplainer:
     """
     An explainer for training an explainable neural network for natural
@@ -42,11 +41,12 @@ class ThreePlayerIntrospectiveExplainer:
         and gen_classifier.
         """
         self.args = args
+
         if classifier_type == "BERT":
-            self.BERT = True
-            args.BERT = True
+            args.gen_embedding_dim = 768
+            args.bert_explainers = True
             args.embedding_dim = 768
-            args.hidden_dim = 768
+            args.hidden_dim = 768 # input dimension to use in the hidden generator RNN
             self.explainer = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
                 num_labels=2,
@@ -65,24 +65,41 @@ class ThreePlayerIntrospectiveExplainer:
                 output_hidden_states=True,
                 output_attentions=True,
             )
+            self.freeze_classifier(self.explainer)
+            self.freeze_classifier(self.anti_explainer)
+            self.freeze_classifier(self.gen_classifier)
+        elif classifier_type == "RNN":
+            args.bert_explainers = False
+            args.gen_embedding_dim = 100
+            args.embedding_dim = 100
+            args.hidden_dim = 100
+            self.explainer = ClassifierModule(args, preprocessor.word_vocab)
+            self.anti_explainer = ClassifierModule(args, preprocessor.word_vocab)
+            self.gen_classifier = ClassifierModule(args, preprocessor.word_vocab)
+        elif classifier_type == "BERT-RNN":
+            args.bert_explainers = False
+            args.gen_embedding_dim = 768
+            args.embedding_dim = 100
+            args.hidden_dim = 768
+            self.explainer = ClassifierModule(args, preprocessor.word_vocab)
+            self.anti_explainer = ClassifierModule(args, preprocessor.word_vocab)
+            self.gen_classifier = BertForSequenceClassification.from_pretrained(
+                "bert-base-uncased",
+                num_labels=2,
+                output_hidden_states=True,
+                output_attentions=True,
+            )
+            self.freeze_classifier(self.gen_classifier)
         else:
-            self.BERT = False
-            args.BERT = False
-            word_vocab = preprocessor.word_vocab
-            if classifier_type == "RNN":
-                self.explainer = ClassifierModule(args, word_vocab)
-                self.anti_explainer = ClassifierModule(args, word_vocab)
-                self.gen_classifier = ClassifierModule(args, word_vocab)
-            else:
-                assert explainer is not None\
-                       and anti_explainer is not None\
-                       and generator is not None\
-                       and gen_classifier is not None,\
-                       "Custom explainer, anti explainer, generator, and"\
-                       "generator classifier specifications are required."
-                self.explainer = explainer
-                self.anti_explainer = anti_explainer
-                self.gen_classifier = gen_classifier
+            assert explainer is not None\
+                    and anti_explainer is not None\
+                    and generator is not None\
+                    and gen_classifier is not None,\
+                    "Custom explainer, anti explainer, generator, and"\
+                    "generator classifier specifications are required."
+            self.explainer = explainer
+            self.anti_explainer = anti_explainer
+            self.gen_classifier = gen_classifier
 
         self.generator = IntrospectionGeneratorModule(
             args, self.gen_classifier
@@ -101,7 +118,7 @@ class ThreePlayerIntrospectiveExplainer:
         if args.cuda:
             self.model.cuda()
 
-    def freeze_bert_classifier(self, classifier, entire=False):
+    def freeze_classifier(self, classifier, entire=False):
         if entire:
             for name, param in classifier.named_parameters():
                 param.requires_grad = False
@@ -115,20 +132,14 @@ class ThreePlayerIntrospectiveExplainer:
         return self.fit(*args, **kwargs)
 
     def fit(self, df_train, df_test):
-        # tokenize/otherwise process the lists of sentences
-        if self.BERT:
-            self.freeze_bert_classifier(self.explainer)
-            self.freeze_bert_classifier(self.anti_explainer)
-            self.freeze_bert_classifier(self.gen_classifier)
-
         if self.args.pre_train_cls:
             cls_wrapper = ClassifierWrapper(self.args, self.gen_classifier)
             cls_wrapper.fit(df_train, df_test)
 
-        if self.BERT:
-            self.freeze_bert_classifier(self.gen_classifier, entire=True)
+            # freeze the generator's classifier entirely, only if the user wanted to pretrain
+            self.freeze_classifier(self.gen_classifier, entire=True)
 
-        # encode the list
+        # train the three player model end-to-end
         self.model.fit(df_train, df_test)
 
         return self.model

@@ -120,7 +120,7 @@ class BertPreprocessor:
        by a BERT model.
     """
 
-    def __init__(self, tokenizer=None, max_length=50, pad_to_max=True):
+    def __init__(self, build_word_dict=False, tokenizer=None, max_length=50, pad_to_max=True, text=None):
         """Initialize the BertPreprocessor.
 
         :param tokenizer: an initialized tokenizer with 'encode_plus' and
@@ -140,6 +140,58 @@ class BertPreprocessor:
 
         self.max_length = max_length
         self.pad_to_max = True
+
+        self.reverse_word_vocab = None
+        if build_word_dict:
+            assert (text is not None), "must include document sentences to build word vocab"
+            (
+                self.word_vocab,
+                self.reverse_word_vocab,
+                self.counts,
+            ) = self.build_vocab(text)
+
+    def build_vocab(self, text):
+        """Build the vocabulary (all words that appear at least once in text)
+        :param text: a list of sentences (strings)
+        :type text: list
+        :return:
+            words_to_idxs (dict): a mapping of the set of unique words (keys)
+                found in text (appearing more times than count_thresh) to
+                unique indices (values)
+            idxs_to_words (dict): a mapping from vocabulary indices (keys)
+                to words (values)
+            counts (dict): a mapping of the a word (key) to the number of
+                times it appears in text (value)
+        :rtype: tuple of dictionaries
+        """
+        words_to_idxs = {}
+        counts = {}
+
+        for special_token in self.tokenizer.all_special_tokens:
+            words_to_idxs[special_token] = self.tokenizer.convert_tokens_to_ids(special_token)
+            counts[special_token] = 1000
+        print(words_to_idxs)
+        for sentence in text:
+            tokens = self.tokenizer.tokenize(sentence)
+            ids = self.tokenizer.encode(sentence, add_special_tokens=False)
+            for (token, token_id) in zip(tokens, ids):
+                if token not in words_to_idxs:
+                    words_to_idxs[token] = token_id
+                    counts[token] = 1
+                else:
+                    counts[token] += 1
+        idxs_to_words = {v: k for k, v in words_to_idxs.items()}
+
+        max_num = max(words_to_idxs.values())
+        for i in range(max_num):
+            if i not in idxs_to_words:
+                token = self.tokenizer.convert_ids_to_tokens(i)
+                idxs_to_words[i] = token
+                words_to_idxs[token] = i
+                counts[token] = 0
+        print('max num:', max_num)
+        print("vocab size:", len(words_to_idxs))
+        return words_to_idxs, idxs_to_words, counts
 
     def preprocess(self, data):
         """Converts a list of text into a dataframe containing padded token ids,
@@ -179,7 +231,10 @@ class BertPreprocessor:
         :return: a list of tokens
         :rtype: list
         """
-        return self.tokenizer.convert_ids_to_tokens(id_list)
+        if self.reverse_word_vocab is None:
+            return self.tokenizer.convert_ids_to_tokens(id_list)
+        else:
+            return [self.reverse_word_vocab[i.item()] for i in id_list]
 
 
 class GlovePreprocessor:

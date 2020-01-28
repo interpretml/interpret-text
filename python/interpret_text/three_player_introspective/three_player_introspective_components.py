@@ -86,7 +86,7 @@ class ClassifierWrapper():
                     ),
                 )
 
-        if self.best_test_acc > self.avg_accuracy:
+        if self.avg_accuracy > self.best_test_acc:
             self.best_test_acc = self.avg_accuracy
             self.epochs_since_improv = 0
         else:
@@ -394,7 +394,7 @@ class IntrospectionGeneratorModule(nn.Module):
         self.args = args
 
         # for initializing RNN and DepGenerator
-        self.input_dim = args.embedding_dim
+        self.input_dim = args.gen_embedding_dim
         self.hidden_dim = args.hidden_dim
         self.layer_num = args.layer_num
         self.z_dim = args.z_dim
