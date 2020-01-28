@@ -13,6 +13,7 @@ from interpret_text.common.utils_unified import (
     get_single_embedding,
     make_bert_embeddings,
 )
+from interpret_community.common.constants import Tokens
 
 
 class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
@@ -101,11 +102,11 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             self.Phi = self._generate_Phi(self.target_layer, self.total_layers)
 
         # values below are arbitarily set for now
-        self._optimize(iteration=20, lr=0.01, show_progress=True)
+        self._optimize(iteration=150, lr=0.01, show_progress=True)
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        parsed_sentence = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
+        parsed_sentence = [Tokens.CLS] + tokenizer.tokenize(text) + [Tokens.SEP]
         return _create_local_explanation(
             classification=True,
             text_explanation=True,

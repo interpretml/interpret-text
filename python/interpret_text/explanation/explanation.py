@@ -8,8 +8,7 @@ import numpy as np
 import uuid
 
 from interpret_community.common.explanation_utils import _sort_values, _order_imp
-from interpret_community.common.constants import Dynamic, ExplanationParams
-from interpret_community.common.constants import ExplainParams
+from interpret_community.common.constants import Dynamic, ExplanationParams, ExplainParams
 from interpret_community.explanation.explanation import (
     LocalExplanation,
     ExpectedValuesMixin,
@@ -23,9 +22,9 @@ class TextExplanation(LocalExplanation):
     def __init__(self, predicted_label=None, true_label=None, **kwargs):
         """Create the text explanation.
         :param predicted_label: The label predicted by the classifier
-        :type predicted_label: string
-        :param true_label: The ground truth label for the sentense
-        :type true_label: string
+        :type predicted_label: any
+        :param true_label: The ground truth label for the sentence
+        :type true_label: any
         """
         super(TextExplanation, self).__init__(**kwargs)
         order = _order_imp(np.abs(self.local_importance_values))
@@ -44,10 +43,10 @@ class TextExplanation(LocalExplanation):
 
     @property
     def predicted_label(self):
-        """Get the task of the original model, i.e. classification or regression (others possibly in the future).
+        """Get the predicted label of the document from original model.
 
-        :return: The task of the original model.
-        :rtype: str
+        :return: The predicted label of the document.
+        :rtype: any
         """
         return self._predicted_label
 
