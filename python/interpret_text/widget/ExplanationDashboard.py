@@ -15,7 +15,7 @@ class ExplanationDashboard(object):
         """Initialize the Explanation Dashboard for a single sentence."""
         local_importance_values = list(explanation._local_importance_values)
         classNames = list(explanation._classes)
-        text = explanation._features
+        text = list(explanation._features)
         prediction = [
             0 if name == explanation._predicted_label else 1 for name in classNames
         ]
