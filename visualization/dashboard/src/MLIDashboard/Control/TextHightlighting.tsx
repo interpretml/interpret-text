@@ -24,6 +24,7 @@ const normal = {
 } as React.CSSProperties
 
 export class TextHighlighting extends React.PureComponent<IChartProps> {
+  /* presents the document in an accessible manner with text highlighting */
   public render(): React.ReactNode[] {
     const text = this.props.text
     const importances = this.props.localExplanations

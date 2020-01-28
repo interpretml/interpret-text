@@ -12,15 +12,19 @@ import { FontWeights } from 'office-ui-fabric-react/lib/Styling'
 
 const s = require('./ExplanationDashboard.css')
 
-export interface IDashboardContext {}
-
 export interface IDashboardState {
+  /*
+  holds the state of the dashboard
+  */
   maxK: number,
   topK: number,
   radio: string
 }
 
 const options: IChoiceGroupOption[] = [
+  /*
+  creates the choices for the radio button
+   */
   { key: RadioKeys.all, text: localization.allButton },
   { key: RadioKeys.pos, text: localization.posButton },
   { key: RadioKeys.neg, text: localization.negButton }
@@ -28,10 +32,13 @@ const options: IChoiceGroupOption[] = [
 
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   constructor(props: IExplanationDashboardProps, IDashboardState) {
+    /*
+    initializes the dashboard with it's state
+     */
     super(props)
     this.state = {
-      maxK: Math.min(15, Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations))),
-      topK: Math.ceil(this.countNonzeros(this.props.dataSummary.localExplanations) / 2),
+      maxK: Math.min(15, Math.ceil(Utils.countNonzeros(this.props.dataSummary.localExplanations))),
+      topK: Math.ceil(Utils.countNonzeros(this.props.dataSummary.localExplanations) / 2),
       radio: RadioKeys.all
     }
     this.changeRadioButton = this.changeRadioButton.bind(this)
@@ -66,7 +73,7 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
           </div>
             <div className = 'chartRight'>
               <div className = 'labelPrediction' >
-                {localization.label + localization.colon + this.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}
+                {localization.label + localization.colon + Utils.predictClass(this.props.dataSummary.classNames, this.props.dataSummary.prediction)}
               </div>
               <div className = 'radio'>
                 <ChoiceGroup defaultSelectedKey='all' options={options} onChange={this.changeRadioButton} required={true} />
@@ -102,25 +109,14 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
         </div>
     )
 }
+
   private setTopK(newNumber: number): void {
+    /* changes the state of K */
     this.setState({ topK: newNumber })
   }
 
-  private countNonzeros(numArr: number[]): number {
-    let counter = 0
-    for (const i in numArr) {
-      if (numArr[i] !== 0) {
-        counter++
-      }
-    }
-    return counter
-  }
-
-  public predictClass(classname, prediction):string{
-    return classname[Utils.argsort(prediction)[0]]
-  }
-
   public changeRadioButton(ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
+    /* changes the state of the radio button */
     this.setState({ radio: option.key })
   }
 }
