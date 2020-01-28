@@ -71,11 +71,14 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             % (self.target_layer)
         )
 
-    def explain_local(self, text, num_iteration=50):
+    def explain_local(self, text, num_iteration=100):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
-        :param num_iteration: The number of iterations through the optimizer function
+        :param num_iteration: The number of iterations through the optimize function. This is a parameter 
+        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function will not be 
+        optimzed. If set to a very high number, all words will not be important as the loss will be be severly optimized.
+        The more the iterations, slower the explanations. 
         :type num_iteration: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
