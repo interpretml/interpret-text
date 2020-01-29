@@ -69,14 +69,20 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             % (self.target_layer)
         )
 
-    def explain_local(self, text, num_iteration=100):
+    def explain_local(self, text, classes=None, predicted_label=None, true_label=None, num_iteration=150):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
+        :param classes: An iterable array containing the label classes
+        :type classes: string[]
+        :param predicted_label: The label predicted by the classifier
+        :type predicted_label: string
+        :param true_label: The ground truth label for the sentense
+        :type true_label: string
         :param num_iteration: The number of iterations through the optimize function. This is a parameter
-        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function will not be
-        optimzed. If set to a very high number, all words will not be important as the loss will be be severly optimized.
-        The more the iterations, slower the explanations.
+        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function
+        will not be optimzed. If set to a very high number, all words will not be important as the loss will
+        be severly optimized. The more the iterations, slower the explanations.
         :type num_iteration: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
@@ -118,9 +124,15 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
         return _create_local_explanation(
-            local_importance_values=np.array(local_importance_values),
+            classification=True,
+            text_explanation=True,
+            local_importance_values=np.array(local_importance_values)[1:-1],
             method="neural network",
             model_task="classification",
+            features=self.parsed_sentence[1:-1],
+            classes=classes,
+            predicted_label=predicted_label,
+            true_label=true_label,
         )
 
     def _calculate_regularization(self, sampled_x, model, reduced_axes=None):
@@ -284,7 +296,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         max_alpha = 0.5
         highlighted_text = []
         for i, word in enumerate(self.parsed_sentence):
-            # since this is a placeholder function, ignore the magic numbers below
+            # since this is a placeholder function, ignore the numbers below
             weight = 0.55 - (self.local_importance_values[i] * 2)
 
             # make it blue if weight positive
