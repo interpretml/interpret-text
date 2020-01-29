@@ -69,7 +69,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             % (self.target_layer)
         )
 
-    def explain_local(self, text, classes, predicted_label=None, true_label=None, num_iteration=150):
+    def explain_local(self, text, classes=None, predicted_label=None, true_label=None, num_iteration=150):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
