@@ -81,8 +81,8 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :type true_label: string
         :param num_iteration: The number of iterations through the optimize function. This is a parameter
         that should be tuned to your dataset. If set to 0, all words will be important as the Loss function
-        will not benoptimzed. If set to a very high number, all words will not be important as the loss will
-        be be severly optimized. The more the iterations, slower the explanations.
+        will not be optimzed. If set to a very high number, all words will not be important as the loss will
+        be severly optimized. The more the iterations, slower the explanations.
         :type num_iteration: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
