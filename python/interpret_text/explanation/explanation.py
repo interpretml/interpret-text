@@ -22,9 +22,9 @@ class TextExplanation(LocalExplanation):
     def __init__(self, predicted_label=None, true_label=None, **kwargs):
         """Create the text explanation.
         :param predicted_label: The label predicted by the classifier
-        :type predicted_label: any
+        :type predicted_label: string
         :param true_label: The ground truth label for the sentence
-        :type true_label: any
+        :type true_label: string
         """
         super(TextExplanation, self).__init__(**kwargs)
         order = _order_imp(np.abs(self.local_importance_values))
@@ -46,7 +46,7 @@ class TextExplanation(LocalExplanation):
         """Get the predicted label of the document from original model.
 
         :return: The predicted label of the document.
-        :rtype: any
+        :rtype: string
         """
         return self._predicted_label
 

@@ -2,25 +2,24 @@ import torch
 from torch import nn, optim
 from tqdm import tqdm
 import numpy as np
+import random
 import html
 import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
-from pytorch_pretrained_bert import BertTokenizer
 
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
 from interpret_text.common.utils_unified import (
-    get_single_embedding,
+    _get_single_embedding,
     make_bert_embeddings,
 )
-from interpret_community.common.constants import Tokens
 
 
 class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
     """The UnifiedInformationExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, model, train_dataset, device, target_layer=14, total_layers=12):
+    def __init__(self, model, train_dataset, device, target_layer=14, max_points=1000):
         """ Initialize the UnifiedInformationExplainer
         :param model: a pytorch model
         :type: torch.nn
@@ -31,15 +30,15 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :param target_layer: The target layer to explain. Default is 14, which is the classification layer.
         If set to -1, all layers will be explained
         :type target_layer: int
-        :param total_layer: The total number of bert hidden layers
-        :type total_layer: int
+        :param max_points: The fraction of the dataset to be used when calculating the regularization
+        parameter. A max of 1000 is recommended. Higher numbers will lead to slower explanations and memory issues.
+        :type max_points: int
         """
         super(UnifiedInformationExplainer, self).__init__()
         self.device = device
         # Constant paramters for now, will modify based on the model later
-        # Scale: The maximum size of sigma. The recommended value is 10 * Std[word_embedding_weight], where
-        # word_embedding_weight is the word embedding weight in the model interpreted. Larger scale will give
-        # more salient result, Default: 0.5.
+        # Scale: The maximum size of sigma. A hyper-parameter in reparameterization trick. Larger scale will
+        # give more salient result, Default: 0.5.
         self.scale = 0.5
         # Rate: A hyper-parameter that balance the MLE Loss and Maximum Entropy Loss. Larger rate will result in
         # larger information loss. Default: 0.1.
@@ -48,8 +47,8 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         # ``torch.FloatTensor``, of any shape
         self.Phi = None
         self.regular = None
+        self.max_points = max_points
         self.target_layer = target_layer
-        self.total_layers = total_layers
         self.model = model
         self.train_dataset = train_dataset
 
@@ -61,26 +60,38 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         assert self.scale >= 0, "The value for scale cannot be less than zero"
         assert 1 >= self.rate >= 0, "The value for rate has to be between 0 and 1"
         assert type(self.target_layer) == int and (
-            self.target_layer == -1 or 1 <= self.target_layer <= 14
+            1 <= self.target_layer <= 14
         ), (
-            "the\
-            value of the target layer has to be an interger and either -1 (all bert layers), or 1 to 12 (specific bert\
+            """the\
+            value of the target layer has to be an interger between 1 to 12 (specific bert\
             layer) or 13 (pooler layer), or 14 (final classification layer).\
-            You want to access layer %d"
+            You want to access layer %d"""
             % (self.target_layer)
         )
 
-    def explain_local(self, text, classes, predicted_label=None, true_label=None):
+    def explain_local(self, text, classes=None, predicted_label=None, true_label=None, num_iteration=150):
         """Explain the model by using MSRA's interpretor
         :param text: The text
         :type text: string
+        :param classes: An iterable array containing the label classes
+        :type classes: string[]
+        :param predicted_label: The label predicted by the classifier
+        :type predicted_label: string
+        :param true_label: The ground truth label for the sentense
+        :type true_label: string
+        :param num_iteration: The number of iterations through the optimize function. This is a parameter
+        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function
+        will not be optimzed. If set to a very high number, all words will not be important as the loss will
+        be severly optimized. The more the iterations, slower the explanations.
+        :type num_iteration: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
         """
         assert text is not None, "input text is required to generate explanation"
 
-        embedded_input = get_single_embedding(self.model, text, self.device)
+        embedded_input, parsed_sentence = _get_single_embedding(self.model, text, self.device)
         self.input_embeddings = embedded_input
+        self.parsed_sentence = parsed_sentence
 
         self.input_size = self.input_embeddings.size(0)
         self.input_dimension = self.input_embeddings.size(1)
@@ -89,8 +100,15 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
 
         if self.regular is None:
             assert self.train_dataset is not None, "Training dataset is required"
+
+            # sample the training dataset
+            if len(self.train_dataset) <= self.max_points:
+                sampled_train_dataset = self.train_dataset
+            else:
+                sampled_train_dataset = random.sample(self.train_dataset, k=self.max_points)
+
             training_embeddings = make_bert_embeddings(
-                self.train_dataset, self.model, self.device
+                sampled_train_dataset, self.model, self.device
             )
             regularization = self._calculate_regularization(
                 training_embeddings, self.model
@@ -99,21 +117,19 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
                 torch.tensor(regularization).to(self.input_embeddings),
                 requires_grad=False,
             )
-            self.Phi = self._generate_Phi(self.target_layer, self.total_layers)
+            self.Phi = self._generate_Phi(layer=self.target_layer)
 
         # values below are arbitarily set for now
-        self._optimize(iteration=150, lr=0.01, show_progress=True)
+        self._optimize(num_iteration, lr=0.01, show_progress=True)
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
-        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        parsed_sentence = [Tokens.CLS] + tokenizer.tokenize(text) + [Tokens.SEP]
         return _create_local_explanation(
             classification=True,
             text_explanation=True,
             local_importance_values=np.array(local_importance_values)[1:-1],
             method="neural network",
             model_task="classification",
-            features=parsed_sentence[1:-1],
+            features=self.parsed_sentence[1:-1],
             classes=classes,
             predicted_label=predicted_label,
             true_label=true_label,
@@ -142,9 +158,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         """
         sample_num = len(sampled_x)
         sample_s = []
-        self.Phi = self._generate_Phi(
-            layer=self.target_layer, total_layers=self.total_layers
-        )
+        self.Phi = self._generate_Phi(layer=self.target_layer)
         for n in range(sample_num):
             x = sampled_x[n]
             if self.device is not None:
@@ -224,7 +238,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         ratios = torch.sigmoid(self.ratio)  # S * 1
         return ratios.detach().cpu().numpy()[:, 0] * self.scale
 
-    def _generate_Phi(self, layer, total_layers):
+    def _generate_Phi(self, layer):
         """Generate the Phi/hidden state that needs to be interpreted
         /Generates a function that returns the new hidden state given a new perturbed input is passed
         :param model: a pytorch model
@@ -243,15 +257,18 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             extended_attention_mask = extended_attention_mask.to(dtype=torch.float)
             extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
             hidden_states = x
-            if layer == 14:
-                # explain the classification layer
+            if layer == 14 or layer == 13:
                 encoder = self.model.bert.encoder
                 pooler = self.model.bert.pooler
-                classifier = self.model.classifier
-                return classifier(
-                    pooler(encoder(hidden_states, attention_mask, False)[-1])
-                )[0]
-
+                if layer == 13:
+                    # explain pooler layer
+                    return pooler(encoder(hidden_states, attention_mask, False)[-1])[0]
+                else:
+                    # explain the classification layer
+                    classifier = self.model.classifier
+                    return classifier(
+                        pooler(encoder(hidden_states, attention_mask, False)[-1])
+                    )[0]
             else:
                 # extract one of the bert layers
                 model_list = self.model.bert.encoder.layer[:layer]
@@ -261,33 +278,25 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
 
         return Phi
 
-    def visualize(self, text, max_alpha=0.5):
+    def _visualize(self, max_alpha=0.5):
         """ Currently a placeholder visualize function until python widget is in a working state
-        :param text: sample text
-        :type text: str
         :param max_alpha: max alpha value
         :type max_alpha: float
         """
 
-        CLS_TOKEN = ["[CLS]"]
-        SEP_TOKEN = ["[SEP]"]
-
         def html_escape(text):
             return html.escape(text)
 
-        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        parsed_sentence = CLS_TOKEN + tokenizer.tokenize(text) + SEP_TOKEN
-
         self._plot_global_imp(
-            parsed_sentence[1:-2],
+            self.parsed_sentence[1:-2],
             [0.4 - i for i in self.local_importance_values[1:-2]],
             "positive",
         )
 
         max_alpha = 0.5
         highlighted_text = []
-        for i, word in enumerate(parsed_sentence):
-            # since this is a placeholder function, ignore the magic numbers below
+        for i, word in enumerate(self.parsed_sentence):
+            # since this is a placeholder function, ignore the numbers below
             weight = 0.55 - (self.local_importance_values[i] * 2)
 
             # make it blue if weight positive
@@ -315,6 +324,15 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         display(HTML(highlighted_text))
 
     def _plot_global_imp(self, top_words, top_importances, label_name):
+        """ Function to plot the global importances
+        :param top_words: The tokenized words
+        :type top_words: str[]
+        :param top_importances: The associated feature importances
+        :type top_importances: float[]
+        :param label_name: The label predicted
+        :type label_name: str
+        """
+
         plt.figure(figsize=(8, 4))
         plt.title(
             "most important words for class label: " + str(label_name), fontsize=18
