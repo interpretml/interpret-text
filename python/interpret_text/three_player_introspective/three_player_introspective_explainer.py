@@ -77,6 +77,8 @@ class ThreePlayerIntrospectiveExplainer:
             args.gen_embedding_dim = 100
             args.embedding_dim = 100
             args.hidden_dim = 100
+            args.layer_num = 1
+            args.dropout_rate = 0.5
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
             self.anti_explainer = ClassifierModule(args,
                                                    preprocessor.word_vocab)
@@ -87,6 +89,8 @@ class ThreePlayerIntrospectiveExplainer:
             args.gen_embedding_dim = 768
             args.embedding_dim = 100
             args.hidden_dim = 768
+            args.layer_num = 1
+            args.dropout_rate = 0.5
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
             self.anti_explainer = ClassifierModule(args,
                                                    preprocessor.word_vocab)
@@ -98,6 +102,9 @@ class ThreePlayerIntrospectiveExplainer:
             )
             self._freeze_classifier(self.gen_classifier)
         else:
+            assert args.hidden_dim is not None \
+                and args.embedding_dim is not None,
+                "Hidden dim and embedding dim must be specified in args."
             assert explainer is not None\
                 and anti_explainer is not None\
                 and generator is not None\
@@ -177,13 +184,14 @@ class ThreePlayerIntrospectiveExplainer:
         :rtype: ThreePlayerIntrospectiveModel
         """
 
-        if self.args.pre_train_cls:
+        if self.args.pretrain_cls:
             cls_wrapper = ClassifierWrapper(self.args, self.gen_classifier)
             cls_wrapper.fit(df_train, df_test)
 
             # freeze the generator's classifier entirely
             # (makes sense only if user wants to pretrain)
-            self._freeze_classifier(self.gen_classifier, entire=True)
+            if self.args.fixed_classifier:
+                self._freeze_classifier(self.gen_classifier, entire=True)
 
         # train the three player model end-to-end
         self.model.fit(df_train, df_test)

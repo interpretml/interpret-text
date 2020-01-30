@@ -55,8 +55,8 @@ class ModelArguments:
        component types).
     """
 
-    def __init__(self, cuda=True, pre_train_cls=True, batch_size=64,
-                 num_epochs=200, save_best_model=True, model_save_dir=".",
+    def __init__(self, cuda=True, pretrain_cls=True, batch_size=32,
+                 num_epochs=200, num_pretrain_epochs = 10, save_best_model=False, model_save_dir=".",
                  model_prefix="3PlayerModel"):
         """Initialize model parameters
 
@@ -76,42 +76,68 @@ class ModelArguments:
         :param model_prefix: What to name saved models and logs
         :type model_prefix: string
         """
-        # to initialize model modules
-        self.embedding_dim = 100
-        self.hidden_dim = 200
-        self.layer_num = 1
-        # z indicates whether something is a rationale, dimension always 2
-        self.z_dim = 2
-        self.dropout_rate = 0.5
-        self.label_embedding_dim = 400
-        self.fixed_classifier = True
+        # dimension of a token's embedding
+        # ex: for glove 100d, embedding_dim is 100
+        self.embedding_dim = None
 
-        # to initialize model
-        self.fine_tuning = False
+        # dimension of the gen. classifier's last layer
+        # ex: In BERT gen. classifier, hidden_dim is 768
+        self.hidden_dim = None
+
+        # dropout rate must be specified if RNN classifier modules are used
+        # dropout rate only matters if an RNN with > 1 layer is provided
+        self.dropout_rate = None
+
+        # number of layers to use if the RNN module is used
+        self.layer_num = None
+
+        # not necessary to change, this dimension deals with encodes the labels 
+        self.label_embedding_dim = 400
+
+        # freezes entire gen. classifier if set to True
+        self.fixed_classifier = False
+
+        # lambas for loss function
         self.lambda_sparsity = 1.0
         self.lambda_continuity = 0
         self.lambda_anti = 1.0
-        self.exploration_rate = 0.05
-        self.count_tokens = 8
+
+        # target_sparsity is the desired sparsity ratio
+        self.target_sparsity = 0.3
+
+        # this is the target number of target continuous pieces
+        # it has no effect now, because lambda_continuity is 0
         self.count_pieces = 4
+
+        # rate at which the generator explores different rationales
+        self.exploration_rate = 0.05
+
+        # multiplier to reward/penalize an accuracy gap between the classifier and anti-classifier 
         self.lambda_acc_gap = 1.2
-        self.lr = 0.001
+
+        # learning rate
+        self.lr = 2e-4
 
         # training parameters
         self.cuda = cuda
-        self.pre_train_cls = pre_train_cls
-        self.train_batch_size = batch_size
-        # if more than training_stop_thresh epochs since improvement,
-        # stop training in fit
-        self.training_stop_thresh = 5
-        self.test_batch_size = batch_size
+        self.pretrain_cls = pretrain_cls
+        self.num_pretrain_epochs = num_pretrain_epochs
         self.num_epochs = num_epochs
-        self.save_best_model = save_best_model
-        self.model_prefix = model_prefix
-        self.save_path = model_save_dir
+        self.train_batch_size = batch_size
+        self.test_batch_size = batch_size
+
+        # stop training if validation acc does not improve for more than
+        # training_stop thresh
+        self.training_stop_thresh = 5
+
+        # the numerical labels for classification. ex: MNLI needs [0, 1, 2, 3, 4]
         self.labels = [0, 1]
 
         # for saving models and logging
+        self.save_best_model = save_best_model
+        self.model_prefix = model_prefix
+        self.save_path = model_save_dir
+        
         self.model_folder_path = os.path.join(
             self.save_path,
             self.model_prefix + "_training_")

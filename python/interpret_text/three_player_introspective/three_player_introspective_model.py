@@ -38,12 +38,11 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.hidden_dim = args.hidden_dim
         self.input_dim = args.embedding_dim
         self.embedding_path = args.embedding_path
-        self.fine_tuning = args.fine_tuning
         self.exploration_rate = args.exploration_rate
         self.lambda_acc_gap = args.lambda_acc_gap
         self.fixed_classifier = args.fixed_classifier
-        self.count_tokens = args.count_tokens  # used to calc sparsity loss
-        self.count_pieces = args.count_pieces  # used to calc sparsity loss
+        self.target_sparsity = args.target_sparsity
+        self.count_pieces = args.count_pieces
         self.use_cuda = args.cuda
         self.train_batch_size = args.train_batch_size
         self.test_batch_size = args.test_batch_size
@@ -130,7 +129,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         return z, neg_log_probs
 
     def _count_regularization_baos_for_both(
-        self, z, count_tokens, count_pieces, mask=None
+        self, z, target_sparsity, count_pieces, mask=None
     ):
         """
         Compute regularization loss, based on a given rationale sequence
@@ -164,7 +163,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         sparsity_ratio = (
             torch.sum(mask_z, dim=-1) / seq_lengths
         )  # dimensions: (batch_size,)
-        percentage = count_tokens / seq_lengths  # dimensions: (batch_size,)
+        percentage = target_sparsity  # dimensions: (batch_size,)
         sparsity_loss = torch.abs(sparsity_ratio - percentage)
 
         return continuity_loss, sparsity_loss
@@ -371,7 +370,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             continuity_loss,
             sparsity_loss,
         ) = self._count_regularization_baos_for_both(
-            z, self.count_tokens, self.count_pieces, mask
+            z, self.target_sparsity, self.count_pieces, mask
         )
 
         continuity_loss = continuity_loss * self.lambda_continuity

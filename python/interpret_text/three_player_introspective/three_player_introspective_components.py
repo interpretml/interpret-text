@@ -26,6 +26,7 @@ class ClassifierWrapper():
         self.model = model
         self.opt = None
 
+        self.num_epochs = args.num_pretrain_epochs
         self.epochs_since_improv = 0
         self.best_test_acc = 0
         self.avg_accuracy = 0
@@ -148,7 +149,7 @@ class ClassifierWrapper():
         total_train = len(df_train)
         indices = np.array(list(range(0, total_train)))
 
-        for i in tqdm(range(self.args.num_epochs)):
+        for i in tqdm(range(self.num_epochs)):
             self.model.train()  # pytorch fn; sets module to train mode
 
             # shuffle the epoch
