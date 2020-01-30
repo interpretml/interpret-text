@@ -273,7 +273,6 @@ class ClassifierModule(nn.Module):
             self.args.layer_num,
             self.args.dropout_rate,
         )
-        print(self.args.num_labels)
         self.predictor = nn.Linear(self.args.hidden_dim, self.args.num_labels)
 
         self.input_dim = args.embedding_dim

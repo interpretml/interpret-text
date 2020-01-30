@@ -56,8 +56,8 @@ class ModelArguments:
     """
 
     def __init__(self, cuda=True, pretrain_cls=True, batch_size=32,
-                 num_epochs=200, num_pretrain_epochs = 10, save_best_model=False, model_save_dir=".",
-                 model_prefix="3PlayerModel"):
+                 num_epochs=200, num_pretrain_epochs=10, save_best_model=False,
+                 model_save_dir=".", model_prefix="3PlayerModel"):
         """Initialize model parameters
 
         :param cuda: Whether or not to use cuda
@@ -94,7 +94,8 @@ class ModelArguments:
         # only used if an RNN module is used
         self.embedding_path = None
 
-        # not necessary to change, this dimension deals with encodes the labels 
+        # not necessary to change
+        # this dimension deals with how many dimensions the encoded labels have
         self.label_embedding_dim = 400
 
         # freezes entire gen. classifier if set to True
@@ -115,7 +116,8 @@ class ModelArguments:
         # rate at which the generator explores different rationales
         self.exploration_rate = 0.05
 
-        # multiplier to reward/penalize an accuracy gap between the classifier and anti-classifier 
+        # multiplier to reward/penalize an accuracy gap between the classifier
+        # and anti-classifier
         self.lambda_acc_gap = 1.2
 
         # learning rate
@@ -136,7 +138,8 @@ class ModelArguments:
         # training_stop thresh
         self.training_stop_thresh = 5
 
-        # the numerical labels for classification. ex: MNLI needs [0, 1, 2, 3, 4]
+        # the numerical labels for classification
+        # ex: MNLI needs [0, 1, 2, 3, 4]
         self.labels = [0, 1]
 
         # for saving models and logging
@@ -279,6 +282,7 @@ class BertPreprocessor:
         """
         return self.tokenizer.convert_ids_to_tokens(id_list)
 
+
 class GlovePreprocessor:
     """Splits words into tokens that can be passed into glove embeddings
     """
@@ -287,7 +291,7 @@ class GlovePreprocessor:
         """Initialize the preprocessor.
         :param text: a list of sentences (strings)
         :type text: list
-        :param count_thresh: the minimum number of times a word has to appear 
+        :param count_thresh: the minimum number of times a word has to appear
             in a sentence to be counted as part of the vocabulary
         :type count_thresh: int
         :param token_cutoff: the maximum number of tokens a sentence can have
@@ -341,14 +345,17 @@ class GlovePreprocessor:
         """
         indexed_text = [
             self.word_vocab[word]
-            if ((word in self.counts) and (self.counts[word] > self.count_thresh))
+            if ((word in self.counts) and (self.counts[word]
+                                           > self.count_thresh))
             else self.word_vocab["<UNK>"]
             for word in text.split()
         ]
         pad_length = max((self.token_cutoff - len(indexed_text)), 0)
-        mask = [1] * min(len(indexed_text), self.token_cutoff) + [0] * pad_length
+        mask = [1] * min(len(indexed_text), self.token_cutoff) + [0]\
+            * pad_length
 
-        indexed_text = indexed_text[0:self.token_cutoff] + [self.word_vocab["<PAD>"]] * pad_length
+        indexed_text = indexed_text[0:self.token_cutoff]\
+            + [self.word_vocab["<PAD>"]] * pad_length
 
         return np.array(indexed_text), np.array(mask)
 
@@ -391,6 +398,7 @@ class GlovePreprocessor:
             else:
                 tokens.append("<UNK>")
         return tokens
+
 
 def load_glove_embeddings(local_cache_path="."):
     """Download premade glove embeddings (if not already downloaded)

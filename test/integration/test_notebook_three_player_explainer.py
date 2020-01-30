@@ -4,7 +4,7 @@ import pytest
 import papermill as pm
 import scrapbook as sb
 
-ABS_TOL = 0.1
+ABS_TOL = 0.2
 KERNEL_NAME = "python3"
 OUTPUT_NOTEBOOK = "output.ipynb"
 
@@ -25,7 +25,6 @@ def test_text_classification_three_player_explainer(notebooks, tmp):
     )
     result = sb.read_notebook(OUTPUT_NOTEBOOK).scraps.data_dict
     print(result)
-    assert pytest.approx(result["accuracy"], 0.93, abs=ABS_TOL)
-    assert pytest.approx(result["precision"], 0.93, abs=ABS_TOL)
-    assert pytest.approx(result["recall"], 0.93, abs=ABS_TOL)
-    assert pytest.approx(result["f1"], 0.93, abs=ABS_TOL)
+    assert pytest.approx(result["accuracy"], 0.72, abs=ABS_TOL)
+    assert pytest.approx(result["anti_accuracy"], 0.69, abs=ABS_TOL)
+    assert pytest.approx(result["sparsity"], 0.17, abs=ABS_TOL)
