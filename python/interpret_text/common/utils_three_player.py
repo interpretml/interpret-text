@@ -121,6 +121,9 @@ class ModelArguments:
         # learning rate
         self.lr = 2e-4
 
+        # whether to tune the weights of the embedding layer
+        self.fine_tuning = False
+
         # training parameters
         self.cuda = cuda
         self.pretrain_cls = pretrain_cls
@@ -140,7 +143,7 @@ class ModelArguments:
         self.save_best_model = save_best_model
         self.model_prefix = model_prefix
         self.save_path = model_save_dir
-        
+
         self.model_folder_path = os.path.join(
             self.save_path,
             self.model_prefix + "_training_")

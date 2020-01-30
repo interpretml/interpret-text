@@ -363,7 +363,7 @@ class DepGenerator(nn.Module):
     """Rationale generator module
     """
 
-    def __init__(self, input_dim, hidden_dim, layer_num, dropout_rate, z_dim):
+    def __init__(self, input_dim, hidden_dim, layer_num, dropout_rate):
         """
         :param input_dim: dimension of input
         :type input_dim: int
@@ -373,16 +373,14 @@ class DepGenerator(nn.Module):
         :type layer_num: int
         :param dropout_rate: dropout rate of RNN
         :type dropout_rate: float
-        :param z_dim: z indicates whether something is a rationale,
-            dimension always 2
-        :type z_dim: int
         """
         super(DepGenerator, self).__init__()
 
         self.generator_model = RnnModel(
             input_dim, hidden_dim, layer_num, dropout_rate
         )
-        self.output_layer = nn.Linear(hidden_dim, z_dim)
+        # rationale has dimension (num_tokens, 2)
+        self.output_layer = nn.Linear(hidden_dim, 2)
 
     def forward(self, X_embeddings, h0=None, mask=None):
         """Forward pass in the DepGenerator
@@ -433,7 +431,6 @@ class IntrospectionGeneratorModule(nn.Module):
         self.input_dim = args.gen_embedding_dim
         self.hidden_dim = args.hidden_dim
         self.layer_num = args.layer_num
-        self.z_dim = args.z_dim
         self.dropout_rate = args.dropout_rate
         # for embedding labels
         self.num_labels = args.num_labels
@@ -463,7 +460,6 @@ class IntrospectionGeneratorModule(nn.Module):
             self.hidden_dim,
             self.layer_num,
             self.dropout_rate,
-            self.z_dim,
         )
 
     def _create_label_embed_layer(self):

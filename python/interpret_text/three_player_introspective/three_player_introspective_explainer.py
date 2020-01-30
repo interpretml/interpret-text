@@ -107,7 +107,7 @@ class ThreePlayerIntrospectiveExplainer:
             self._freeze_classifier(self.gen_classifier)
         else:
             assert args.hidden_dim is not None \
-                and args.embedding_dim is not None,
+                and args.embedding_dim is not None,\
                 "Hidden dim and embedding dim must be specified in args."
             assert explainer is not None\
                 and anti_explainer is not None\

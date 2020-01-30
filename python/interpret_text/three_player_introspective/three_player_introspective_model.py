@@ -48,6 +48,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.num_epochs = args.num_epochs
         self.lr = args.lr
         self.num_labels = args.num_labels
+        self.fine_tuning = args.fine_tuning
 
         # initialize model components
         self.E_model = explainer
