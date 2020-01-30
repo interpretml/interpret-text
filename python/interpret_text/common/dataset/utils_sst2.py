@@ -3,8 +3,8 @@
 
 """
     Utility functions for downloading, extracting, and reading the
-    Multi-Genre NLI (MultiNLI) Corpus.
-    https://www.nyu.edu/projects/bowman/multinli/
+    Stanford Sentiment Treebank corpus for binary classification (SST-2)
+    https://nlp.stanford.edu/sentiment/index.html  
 """
 import pandas as pd
 from interpret_text.common.dataset.utils_data_shared import maybe_download

@@ -63,8 +63,8 @@ class ClassifierWrapper():
         accuracy = 0
         for i in range(len(df_test) // self.args.test_batch_size):
             test_batch = df_test.iloc[
-                i * self.args.test_batch_size: (i + 1) *
-                self.args.test_batch_size
+                i * self.args.test_batch_size: (i + 1)
+                * self.args.test_batch_size
             ]
             batch_dict = generate_data(test_batch, self.args.cuda)
             batch_x_ = batch_dict["x"]
@@ -119,7 +119,7 @@ class ClassifierWrapper():
 
         cls_predict_logits, _, _ = self.model(
             X_tokens, attention_mask=X_mask
-        )  # (batch_size, hidden_dim, sequence_length)
+        )  # dimensions: (batch_size, hidden_dim, sequence_length)
 
         sup_loss = torch.mean(self.loss_func(cls_predict_logits, label))
         losses = {"g_sup_loss": sup_loss.cpu().data}
@@ -155,10 +155,10 @@ class ClassifierWrapper():
             np.random.shuffle(indices)
 
             total_train_acc = 0
-            for i in range(total_train//self.args.train_batch_size):
+            for i in range(total_train // self.args.train_batch_size):
                 # sample a batch of data
-                start = i*self.args.train_batch_size
-                end = min((i+1)*self.args.train_batch_size, total_train)
+                start = i * self.args.train_batch_size
+                end = min((i + 1) * self.args.train_batch_size, total_train)
                 batch = df_train.loc[indices[start:end]]
                 batch_dict = generate_data(batch, self.args.cuda)
                 batch_x_ = batch_dict["x"]
@@ -224,7 +224,7 @@ class RnnModel(nn.Module):
             (batch_size, hidden_dim, sequence_length)
         :rtype: torch.FloatTensor
         """
-        # (sequence_length, batch_size, embedding_dim)
+        # dimensions: (sequence_length, batch_size, embedding_dim)
         embeddings_ = embeddings.transpose(0, 1)
 
         if mask is not None:
@@ -239,14 +239,15 @@ class RnnModel(nn.Module):
         if h0 is not None:
             hidden, _ = self.rnn_layer(inputs_, h0)
         else:
+            # hidden's dimensions:
             # (sequence_length, batch_size, hidden_dim (* 2 if bidirectional))
             hidden, _ = self.rnn_layer(inputs_)
 
         if mask is not None:
-            # (length, batch_size, hidden_dim)
+            # hidden's dimensions: (length, batch_size, hidden_dim)
             hidden, _ = torch.nn.utils.rnn.pad_packed_sequence(hidden)
 
-        # (batch_size, hidden_dim, sequence_length)
+        # output dimensions: (batch_size, hidden_dim, sequence_length)
         return hidden.permute(1, 2, 0)
 
 
@@ -398,13 +399,13 @@ class DepGenerator(nn.Module):
         Outputs:
             z -- output rationale, "binary" mask, (batch_size, sequence_length)
         """
-        # (batch_size, sequence_length, hidden_dim)
+        # hiddens' dimensions: (batch_size, sequence_length, hidden_dim)
         hiddens = (
             self.generator_model(X_embeddings, mask, h0)
             .transpose(1, 2)
             .contiguous()
         )
-        # (batch_size, sequence_length, 2)
+        # scores' dimensions: (batch_size, sequence_length, 2)
         scores = self.output_layer(hiddens)
         return scores
 
@@ -494,7 +495,7 @@ class IntrospectionGeneratorModule(nn.Module):
         if last_hidden_state.shape[1] != self.hidden_dim:
             last_hidden_state = hidden_states[-1].transpose(1, 2)
 
-        # (batch_size, hidden_dim)
+        # max_cls_hidden dimensions: (batch_size, hidden_dim)
         max_cls_hidden = torch.max(
             last_hidden_state + (1 - mask).unsqueeze(1) * self.NEG_INF, dim=2
         )[0]
@@ -505,21 +506,21 @@ class IntrospectionGeneratorModule(nn.Module):
 
         _, cls_pred = torch.max(cls_pred_logits, dim=1)
 
-        # (batch_size, lab_emb_dim)
+        # classifier label embedding dimensions: (batch_size, lab_emb_dim)
         cls_lab_embeddings = self.lab_embed_layer(cls_pred)
 
-        # (batch_size, hidden_dim / 2)
+        # initial h0 dimensions: (batch_size, hidden_dim / 2)
         init_h0 = self.Transformation(
             torch.cat([max_cls_hidden, cls_lab_embeddings], dim=1)
         )
-        # (2, batch_size, hidden_dim / 2)
+        # initial h0 dimensions: (2, batch_size, hidden_dim / 2)
         init_h0 = (
             init_h0.unsqueeze(0)
             .expand(2, init_h0.size(0), init_h0.size(1))
             .contiguous()
         )
 
-        # (batch_size, length, 2)
+        # z_scores' dimensions: (batch_size, length, 2)
         z_scores_ = self.Generator(word_embeddings, mask=mask, h0=init_h0)
         z_scores_[:, :, 1] = z_scores_[:, :, 1] + (1 - mask) * self.NEG_INF
 

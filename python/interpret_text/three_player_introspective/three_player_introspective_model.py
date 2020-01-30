@@ -105,16 +105,16 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         Output:
             z with dimensions (num_rows, length)
         """
-        z_prob__ = z_prob_.view(-1, 2)  # (num_rows * length, 2)
+        z_prob__ = z_prob_.view(-1, 2)  # dimensions (num_rows * length, 2)
 
         # sample actions
         sampler = torch.distributions.Categorical(z_prob__)
         if self.training:
-            z_ = sampler.sample()  # (num_rows * p_length,)
+            z_ = sampler.sample()  # dimensions (num_rows * p_length,)
         else:
             z_ = torch.max(z_prob__, dim=-1)[1]
 
-        # (num_rows, length)
+        # z's dimensions: (num_rows, length)
         z = z_.view(z_prob_.size(0), z_prob_.size(1))
 
         if self.use_cuda:
@@ -122,9 +122,9 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         else:
             z = z.type(torch.FloatTensor)
 
-        # (num_rows * length,)
+        # neg log probs' dimensions: (num_rows * length,)
         neg_log_probs_ = -sampler.log_prob(z_)
-        # (num_rows, length)
+        # new neg log prob dimensions (num_rows, length)
         neg_log_probs = neg_log_probs_.view(z_prob_.size(0), z_prob_.size(1))
 
         return z, neg_log_probs
@@ -145,7 +145,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss -- |mean(z_{i}) - percent|
         """
 
-        # (batch_size,)
+        # mask_z dimensions: (batch_size,)
         if mask is not None:
             mask_z = z * mask
             seq_lengths = torch.sum(mask, dim=1)
@@ -157,14 +157,14 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         continuity_ratio = (
             torch.sum(torch.abs(mask_z - mask_z_), dim=-1) / seq_lengths
-        )  # (batch_size,)
+        )  # dimensions: (batch_size,)
         percentage = count_pieces * 2 / seq_lengths
         continuity_loss = torch.abs(continuity_ratio - percentage)
 
         sparsity_ratio = (
             torch.sum(mask_z, dim=-1) / seq_lengths
-        )  # (batch_size,)
-        percentage = count_tokens / seq_lengths  # (batch_size,)
+        )  # dimensions: (batch_size,)
+        percentage = count_tokens / seq_lengths  # dimensions: (batch_size,)
         sparsity_loss = torch.abs(sparsity_ratio - percentage)
 
         return continuity_loss, sparsity_loss
@@ -185,7 +185,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         neg_log_probs = forward_dict["neg_log_probs"]
 
         e_loss_anti = torch.mean(self.loss_func(anti_predict, label))
-        _, cls_pred = torch.max(cls_predict, dim=1)  # (batch_size,)
+        # cls_pred dimensions: (batch_size,)
+        _, cls_pred = torch.max(cls_predict, dim=1)
         e_loss = (
             torch.mean(self.loss_func(predict, label))
             + torch.mean(self.loss_func(predict, cls_pred))
@@ -291,7 +292,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         z, neg_log_probs = self._generate_rationales(
             z_probs_
-        )  # (batch_size, length)
+        )  # dimensions (batch_size, length)
 
         if not self.args.bert_explainers:
             predict = self.E_model(X_tokens, X_mask, z)[
@@ -344,12 +345,13 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         # supervised loss
         prediction_loss = self.loss_func(
             cls_pred_logits, label
-        )  # (batch_size, )
+        )  # dimensions (batch_size, )
         sup_loss = torch.mean(prediction_loss)
 
         # total loss of accuracy (not batchwise)
-        _, cls_pred = torch.max(cls_pred_logits, dim=1)  # (batch_size,)
-        _, ver_pred = torch.max(pred_logits, dim=1)  # (batch_size,)
+        # cls_pred and ver_pred dimensions: (batch_size,)
+        _, cls_pred = torch.max(cls_pred_logits, dim=1)
+        _, ver_pred = torch.max(pred_logits, dim=1)
 
         prediction = (ver_pred == label).type(torch.FloatTensor)
         pred_consistency = (ver_pred == cls_pred).type(torch.FloatTensor)
@@ -360,8 +362,9 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         ) * self.lambda_anti
 
         if self.use_cuda:
-            prediction = prediction.cuda()  # (batch_size,)
-            pred_consistency = pred_consistency.cuda()  # (batch_size,)
+            # prediction, pred_consistency dimensions: (batch_size,)
+            prediction = prediction.cuda()
+            pred_consistency = pred_consistency.cuda()
             prediction_anti = prediction_anti.cuda()
 
         (
@@ -385,7 +388,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             - continuity_loss
         )
 
-        advantages = rewards - baseline  # (batch_size,)
+        advantages = rewards - baseline  # dimensions (batch_size,)
         advantages = Variable(advantages.data, requires_grad=False)
         if self.use_cuda:
             advantages = advantages.cuda()
@@ -429,7 +432,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             sparsity_loss,
         ) = reward_tuple
 
-        # (batch_size, q_length)
         advantages_expand_ = advantages.unsqueeze(-1).expand_as(neg_log_probs)
         rl_loss = torch.sum(neg_log_probs * advantages_expand_ * mask)
 
@@ -448,7 +450,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         sparsity_ratio = (
             torch.sum(mask_z, dim=-1) / seq_lengths
-        )  # (batch_size,)
+        )  # dimensions (batch_size,)
         return sparsity_ratio
 
     def _get_continuity(self, z, mask):
@@ -459,7 +461,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
 
         continuity_ratio = (
             torch.sum(torch.abs(mask_z - mask_z_), dim=-1) / seq_lengths
-        )  # (batch_size,)
+        )  # dimensions (batch_size,)
 
         return continuity_ratio
 
@@ -559,8 +561,8 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             rand_idx = random.randint(0, self.test_batch_size - 1)
             # display a random example
             logging.info(
-                "Gold Label: " + str(batch_y_[rand_idx].item()) +
-                " Pred label: " + str(y_pred[rand_idx].item()))
+                "Gold Label: " + str(batch_y_[rand_idx].item())
+                + " Pred label: " + str(y_pred[rand_idx].item()))
             logging.info(self.display_example(
                 batch_x_[rand_idx], batch_m_[rand_idx], z[rand_idx]
             ))
@@ -607,10 +609,10 @@ class ThreePlayerIntrospectiveModel(nn.Module):
             np.random.shuffle(indices)
 
             total_train_acc = 0
-            for i in range(total_train//self.train_batch_size):
+            for i in range(total_train // self.train_batch_size):
                 # sample a batch of data
-                start = i*self.train_batch_size
-                end = min((i+1)*self.train_batch_size, total_train)
+                start = i * self.train_batch_size
+                end = min((i + 1) * self.train_batch_size, total_train)
                 batch = df_train.loc[indices[start:end]]
                 batch_dict = generate_data(batch, self.use_cuda)
                 batch_x_ = batch_dict["x"]

@@ -8,6 +8,7 @@ from interpret_text.three_player_introspective.three_player_introspective_model 
 from interpret_text.explanation.explanation import _create_local_explanation
 from interpret_text.common.utils_three_player import generate_data
 
+import torch
 import numpy as np
 import pandas as pd
 from transformers import BertForSequenceClassification
@@ -98,11 +99,11 @@ class ThreePlayerIntrospectiveExplainer:
             self._freeze_classifier(self.gen_classifier)
         else:
             assert explainer is not None\
-                    and anti_explainer is not None\
-                    and generator is not None\
-                    and gen_classifier is not None,\
-                    "Custom explainer, anti explainer, generator, and"\
-                    "generator classifier specifications are required."
+                and anti_explainer is not None\
+                and generator is not None\
+                and gen_classifier is not None,\
+                "Custom explainer, anti explainer, generator, and"\
+                "generator classifier specifications are required."
             self.explainer = explainer
             self.anti_explainer = anti_explainer
             self.gen_classifier = gen_classifier
@@ -120,8 +121,8 @@ class ThreePlayerIntrospectiveExplainer:
             self.gen_classifier,
         )
         self.labels = args.labels
-
-        if args.cuda:
+        self.cuda = args.cuda
+        if self.cuda:
             self.model.cuda()
 
     def _freeze_classifier(self, classifier, entire=False):
@@ -132,9 +133,27 @@ class ThreePlayerIntrospectiveExplainer:
                 param.requires_grad = False
         else:
             for name, param in classifier.named_parameters():
-                if "bert.embeddings" in name or ("bert.encoder" in name and
-                                                 "layer.11" not in name):
+                if "bert.embeddings" in name or ("bert.encoder" in name
+                                                 and "layer.11" not in name):
                     param.requires_grad = False
+
+    def load_pretrained_model(self, pretrained_model_path):
+        """Load a pretrained model in the explainer
+
+        :param pretrained_model_path: a path to a saved torch state dictionary
+        :type pretrained_model_path: string
+        :return: the pretrained model
+        :rtype: ThreePlayerIntrospectiveModel
+        """
+        if self.cuda:
+            self.model.load_state_dict(torch.load(pretrained_model_path))
+
+        else:
+            self.model.load_state_dict(torch.load(pretrained_model_path,
+                                                  map_location='cpu'))
+        self.model.eval()
+
+        return self.model
 
     def train(self, *args, **kwargs):
         """Optionally pretrain the generator's introspective classifier, then
@@ -188,6 +207,7 @@ class ThreePlayerIntrospectiveExplainer:
         :rtype: dict
         """
         self.model.eval()
+        self.model.training = False
         batch_dict = generate_data(df_predict, self.args.cuda)
         batch_x_ = batch_dict["x"]
         batch_m_ = batch_dict["m"]
@@ -206,6 +226,7 @@ class ThreePlayerIntrospectiveExplainer:
             "cls_predict": cls_predict,
             "rationale": z,
         }
+        self.model.training = True
         return predict_dict
 
     def score(self, df_test):
@@ -222,14 +243,12 @@ class ThreePlayerIntrospectiveExplainer:
         self.model.test(df_test)
 
     def explain_local(
-        self, sentence, label, preprocessor, hard_importances=True
+        self, sentence, preprocessor, hard_importances=False
     ):
         """Create a local explanation for a given sentence
 
         :param sentence: A segment of text
         :type sentence: string
-        :param label: The ground truth label for the text segment
-        :type label: int
         :param preprocessor: an intialized preprocessor to tokenize the
             given text with .preprocess() and .decode_single() methods
         :type preprocessor: Ex. GlovePreprocessor or BertPreprocessor
@@ -240,23 +259,30 @@ class ThreePlayerIntrospectiveExplainer:
         :return: local explanation object
         :rtype: DynamicLocalExplanation
         """
-        df_label = pd.DataFrame.from_dict({"labels": [label]})
+        # Pass in dummy ground truth label of 0 to run generate_data
+        df_dummy_label = pd.DataFrame.from_dict({"labels": [0]})
         df_sentence = pd.concat(
-            [df_label, preprocessor.preprocess([sentence.lower()])], axis=1
+            [df_dummy_label, preprocessor.preprocess([sentence.lower()])],
+            axis=1
         )
 
         batch_dict = generate_data(df_sentence, self.args.cuda)
         x = batch_dict["x"]
         m = batch_dict["m"]
         predict_dict = self.predict(df_sentence)
-        predict = predict_dict["predict"].cpu()
         zs = predict_dict["rationale"]
-        if not hard_importances:
-            zs = self.model.get_z_scores(df_sentence)
-            predict_class_idx = np.argmax(predict)
-            zs = zs[:, :, predict_class_idx].detach()
-
+        prediction = predict_dict["predict"]
+        prediction_idx = prediction[0].max(0)[1]
+        prediction = self.labels[prediction_idx]
         zs = np.array(zs.cpu())
+        if not hard_importances:
+            float_zs = self.model.get_z_scores(df_sentence)
+            float_zs = float_zs[:, :, 1].detach()
+            float_zs = np.array(float_zs.cpu())
+            # set importances all words not selected as part of the rationale
+            # to zero
+            zs = zs * float_zs
+
         # generate human-readable tokens (individual words)
         seq_len = int(m.sum().item())
         ids = x[:seq_len][0]
@@ -270,18 +296,19 @@ class ThreePlayerIntrospectiveExplainer:
             model_task="classification",
             features=tokens,
             classes=self.labels,
+            predicted_label=prediction,
         )
-
         return local_explanation
 
-    def visualize(self, word_importances, parsed_sentence):
-        """Create a heatmap of a given parsed_sentence
+    def visualize(self, local_explanation):
+        """Create a heatmap of words important in a text given a
+        local explanation
 
-        :param word_importances: values [0, 1] indicating importance of
-            each token in the parsed sentence, with 1 being more important.
-        :type word_importances: numpy array
-        :param parsed_sentence: a sentence (or other fragement of text)
-            split into human-readable words/tokens.
-        :type parsed_sentence: list
+        :param local_explanation: local explanation object with
+        "features" and "local importance values" attributes
+        :type local_explanation: DynamicLocalExplanation
         """
-        plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)
+        plot_local_imp(
+            local_explanation._features,
+            local_explanation._local_importance_values,
+            max_alpha=0.5)

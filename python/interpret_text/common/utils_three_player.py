@@ -55,8 +55,9 @@ class ModelArguments:
        component types).
     """
 
-    def __init__(self, cuda, pre_train_cls, batch_size, num_epochs,
-                 save_best_model, model_save_dir, model_prefix):
+    def __init__(self, cuda=True, pre_train_cls=True, batch_size=64,
+                 num_epochs=200, save_best_model=True, model_save_dir=".",
+                 model_prefix="3PlayerModel"):
         """Initialize model parameters
 
         :param cuda: Whether or not to use cuda
@@ -108,6 +109,7 @@ class ModelArguments:
         self.save_best_model = save_best_model
         self.model_prefix = model_prefix
         self.save_path = model_save_dir
+        self.labels = [0, 1]
 
         # for saving models and logging
         self.model_folder_path = os.path.join(
@@ -257,8 +259,8 @@ class GlovePreprocessor:
         """Initialize the preprocessor.
         :param text: a list of sentences (strings)
         :type text: list
-        :param count_thresh: the number of times a word has to appear in a
-            sentence to be counted as part of the vocabulary
+        :param count_thresh: the minimum number of times a word has to appear 
+            in a sentence to be counted as part of the vocabulary
         :type count_thresh: int
         :param token_cutoff: the maximum number of tokens a sentence can have
         :type token_cutoff: int
@@ -369,7 +371,5 @@ def load_glove_embeddings(local_cache_path="."):
     """
     URL = "http://nlp.stanford.edu/data/glove.6B.zip"
     file_name = "glove.6B.100d.txt"
-    # TODO: upload just the 6B.100d embedding to blob storage so
-    # downloading the entire zip isn't necessary
     file_path = download_and_unzip(URL, file_name)
     return file_path
