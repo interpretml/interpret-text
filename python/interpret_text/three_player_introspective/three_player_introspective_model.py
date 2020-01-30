@@ -37,7 +37,6 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.lambda_anti = args.lambda_anti
         self.hidden_dim = args.hidden_dim
         self.input_dim = args.embedding_dim
-        self.embedding_path = args.embedding_path
         self.exploration_rate = args.exploration_rate
         self.lambda_acc_gap = args.lambda_acc_gap
         self.fixed_classifier = args.fixed_classifier

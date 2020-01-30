@@ -73,6 +73,8 @@ class ThreePlayerIntrospectiveExplainer:
             self._freeze_classifier(self.anti_explainer)
             self._freeze_classifier(self.gen_classifier)
         elif classifier_type == "RNN":
+            assert args.embedding_path is not None, \
+                "embedding path must be specified if using RNN modules"
             args.bert_explainers = False
             args.gen_embedding_dim = 100
             args.embedding_dim = 100
@@ -85,6 +87,8 @@ class ThreePlayerIntrospectiveExplainer:
             self.gen_classifier = ClassifierModule(args,
                                                    preprocessor.word_vocab)
         elif classifier_type == "BERT-RNN":
+            assert args.embedding_path is not None, \
+                "embedding path must be specified if using RNN modules"
             args.bert_explainers = False
             args.gen_embedding_dim = 768
             args.embedding_dim = 100

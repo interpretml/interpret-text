@@ -91,6 +91,9 @@ class ModelArguments:
         # number of layers to use if the RNN module is used
         self.layer_num = None
 
+        # only used if an RNN module is used
+        self.embedding_path = None
+
         # not necessary to change, this dimension deals with encodes the labels 
         self.label_embedding_dim = 400
 
