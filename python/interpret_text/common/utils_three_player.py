@@ -245,11 +245,7 @@ class BertPreprocessor:
         :return: a list of tokens
         :rtype: list
         """
-        if self.reverse_word_vocab is None:
-            return self.tokenizer.convert_ids_to_tokens(id_list)
-        else:
-            return [self.reverse_word_vocab[i.item()] for i in id_list]
-
+        return self.tokenizer.convert_ids_to_tokens(id_list)
 
 class GlovePreprocessor:
     """Splits words into tokens that can be passed into glove embeddings
@@ -313,15 +309,14 @@ class GlovePreprocessor:
         """
         indexed_text = [
             self.word_vocab[word]
-            if word in self.counts and
-            self.counts[word] > self.count_thresh
+            if ((word in self.counts) and (self.counts[word] > self.count_thresh))
             else self.word_vocab["<UNK>"]
             for word in text.split()
         ]
-        pad_length = self.token_cutoff - len(indexed_text)
-        mask = [1] * len(indexed_text) + [0] * pad_length
+        pad_length = max((self.token_cutoff - len(indexed_text)), 0)
+        mask = [1] * min(len(indexed_text), self.token_cutoff) + [0] * pad_length
 
-        indexed_text = indexed_text + [self.word_vocab["<PAD>"]] * pad_length
+        indexed_text = indexed_text[0:self.token_cutoff] + [self.word_vocab["<PAD>"]] * pad_length
 
         return np.array(indexed_text), np.array(mask)
 
@@ -357,8 +352,13 @@ class GlovePreprocessor:
         :return: a list of tokens
         :rtype: list
         """
-        return [self.reverse_word_vocab[i.item()] for i in id_list]
-
+        tokens = []
+        for i in id_list:
+            if i.item() in self.reverse_word_vocab:
+                tokens.append(self.reverse_word_vocab[i.item()])
+            else:
+                tokens.append("<UNK>")
+        return tokens
 
 def load_glove_embeddings(local_cache_path="."):
     """Download premade glove embeddings (if not already downloaded)

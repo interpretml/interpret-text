@@ -60,7 +60,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
         self.preprocessor = preprocessor
 
         self.NEG_INF = -1.0e6
-        self.loss_func = nn.CrossEntropyLoss(reduce=False)
+        self.loss_func = nn.CrossEntropyLoss(reduction="none")
         self.z_history_rewards = deque([0], maxlen=200)
         self.train_accs = []
 

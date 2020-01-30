@@ -47,25 +47,25 @@ class ThreePlayerIntrospectiveExplainer:
         self.args = args
 
         if classifier_type == "BERT":
-            args.gen_embedding_dim = 768
+            args.gen_embedding_dim = 768 # input dimention to use in the generator classifier
             args.bert_explainers = True
-            args.embedding_dim = 768
-            args.hidden_dim = 768
+            args.embedding_dim = 768 # input dimension to use in the estimator/anti-estimator classifiers
+            args.hidden_dim = 768 # input dimension to use in the hidden generator RNN
             self.explainer = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
-                num_labels=2,
+                num_labels=args.num_labels,
                 output_hidden_states=False,
                 output_attentions=False,
             )
             self.anti_explainer = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
-                num_labels=2,
+                num_labels=args.num_labels,
                 output_hidden_states=False,
                 output_attentions=False,
             )
             self.gen_classifier = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
-                num_labels=2,
+                num_labels=args.num_labels,
                 output_hidden_states=True,
                 output_attentions=True,
             )
@@ -92,7 +92,7 @@ class ThreePlayerIntrospectiveExplainer:
                                                    preprocessor.word_vocab)
             self.gen_classifier = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
-                num_labels=2,
+                num_labels=args.num_labels,
                 output_hidden_states=True,
                 output_attentions=True,
             )

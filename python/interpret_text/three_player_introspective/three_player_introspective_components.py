@@ -32,7 +32,7 @@ class ClassifierWrapper():
         self.test_accs = []
         self.train_accs = []
 
-        self.loss_func = nn.CrossEntropyLoss(reduce=False)
+        self.loss_func = nn.CrossEntropyLoss(reduction="none")
 
     def init_optimizer(self):
         """Initialize the classifier's optimizer
@@ -272,6 +272,7 @@ class ClassifierModule(nn.Module):
             self.args.layer_num,
             self.args.dropout_rate,
         )
+        print(self.args.num_labels)
         self.predictor = nn.Linear(self.args.hidden_dim, self.args.num_labels)
 
         self.input_dim = args.embedding_dim
