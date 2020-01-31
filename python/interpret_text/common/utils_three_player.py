@@ -84,12 +84,14 @@ class ModelArguments:
         # ex: In BERT gen. classifier, hidden_dim is 768
         self.hidden_dim = None
 
-        # dropout rate must be specified if RNN classifier modules are used
-        # dropout rate only matters if an RNN with > 1 layer is provided
-        self.dropout_rate = None
+        # dropout rate is used in RNN classifier modules, and in the RNN
+        # within the generator, it only applies if layer_num > 1
+        self.dropout_rate = 0.3
 
         # number of layers to use if the RNN module is used
-        self.layer_num = None
+        # currently affects RNN layers in generator rationale production, and
+        # num layers inside any RNN classifier modules
+        self.layer_num = 1
 
         # only used if an RNN module is used
         self.embedding_path = None
@@ -110,7 +112,7 @@ class ModelArguments:
         self.target_sparsity = 0.3
 
         # this is the target number of target continuous pieces
-        # it has no effect now, because lambda_continuity is 0
+        # it has no effect now, because lambda_continuity is 0.
         self.count_pieces = 4
 
         # rate at which the generator explores different rationales
@@ -123,8 +125,10 @@ class ModelArguments:
         # learning rate
         self.lr = 2e-4
 
-        # whether to tune the weights of the embedding layer
-        self.fine_tuning = False
+        # whether to tune the weights of the embedding layer in the RNN classifier module
+        # many of these weights are from passed in glove embeddings, but
+        # it could be useful to fine tune those weights that did not inherit glove vector values
+        self.fine_tuning = True
 
         # training parameters
         self.cuda = cuda

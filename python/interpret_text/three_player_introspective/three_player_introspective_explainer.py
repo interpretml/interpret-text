@@ -79,8 +79,6 @@ class ThreePlayerIntrospectiveExplainer:
             args.gen_embedding_dim = 100
             args.embedding_dim = 100
             args.hidden_dim = 100
-            args.layer_num = 1
-            args.dropout_rate = 0.5
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
             self.anti_explainer = ClassifierModule(args,
                                                    preprocessor.word_vocab)
@@ -93,8 +91,6 @@ class ThreePlayerIntrospectiveExplainer:
             args.gen_embedding_dim = 768
             args.embedding_dim = 100
             args.hidden_dim = 768
-            args.layer_num = 1
-            args.dropout_rate = 0.5
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
             self.anti_explainer = ClassifierModule(args,
                                                    preprocessor.word_vocab)
