@@ -42,6 +42,13 @@ jobs:
       pip install -e .
       pip install git+https://github.com/microsoft/nlp.git
     displayName: 'Install setup.py files'
+  
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/integration/test_notebook_three_player_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run three player explainer'
 
   - bash: |
       cd /usr/share/miniconda/bin
@@ -56,13 +63,6 @@ jobs:
       cd /home/vsts/work/1/s
       pytest test/integration/test_notebook_linear_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run Linear explainer'
-
-  - bash: |
-      cd /usr/share/miniconda/bin
-      source activate interpret_cpu
-      cd /home/vsts/work/1/s
-      pytest test/integration/test_notebook_three_player_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run three player explainer'
 
   # Uncomment if needed
   - bash: |

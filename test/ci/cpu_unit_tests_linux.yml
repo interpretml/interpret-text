@@ -37,6 +37,14 @@ jobs:
       python tools/generate_conda_files.py
       conda env create -n interpret_cpu --file=interpret_cpu.yaml
     displayName: 'Creating Conda Environment with dependencies'
+  
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/unit/test_three_player_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run three player explainer tests'
+
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
@@ -50,13 +58,6 @@ jobs:
       cd /home/vsts/work/1/s
       pytest test/unit/test_unified_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run MSR Asia tests'
-  
-  - bash: |
-      cd /usr/share/miniconda/bin
-      source activate interpret_cpu
-      cd /home/vsts/work/1/s
-      pytest test/unit/test_three_player_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run three player explainer tests'
 
   - bash: |
       cd /usr/share/miniconda/bin
