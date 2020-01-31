@@ -62,6 +62,7 @@ PIP_BASE = {
     "interpret-community": "interpret-community>=0.1.0.2",
     "pre-commit": "pre-commit>=1.20.0",
     "spacy": "spacy>=2.2.3",
+    "transformers": "transformers==2.4.1",
 }
 PIP_GPU = {}
 
