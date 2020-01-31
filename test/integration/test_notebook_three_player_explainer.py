@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 import pytest
+import torch
 import papermill as pm
 import scrapbook as sb
 
@@ -18,7 +19,7 @@ def test_text_classification_three_player_explainer(notebooks, tmp):
         kernel_name=KERNEL_NAME,
         parameters=dict(
             DATA_FOLDER=tmp,
-            CUDA=True,
+            CUDA=torch.cuda.is_available(),
             QUICK_RUN=False,
             MODEL_SAVE_DIR=tmp
         ),
