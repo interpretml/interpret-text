@@ -84,7 +84,7 @@ export class Utils {
     /*
       * returns the predicted class 
       * param className: the list of possible classes
-      * param prediction: a vector encoding of the probabilities (or one-hot vector) representing the predictiosns for each class
+      * param prediction: a vector encoding of the probabilities (or one-hot vector) representing the predictions for each class
     */
     return className[this.argsort(prediction)[0]]
   }

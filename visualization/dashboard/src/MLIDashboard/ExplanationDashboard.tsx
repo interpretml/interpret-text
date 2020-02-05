@@ -14,8 +14,8 @@ const s = require('./ExplanationDashboard.css')
 
 export interface IDashboardState {
   /*
-    * holds the state of the dashboard
-  */
+   * holds the state of the dashboard
+   */
   maxK: number,
   topK: number,
   radio: string
@@ -23,8 +23,8 @@ export interface IDashboardState {
 
 const options: IChoiceGroupOption[] = [
   /*
-    * creates the choices for the radio button
-  */
+   * creates the choices for the radio button
+   */
   { key: RadioKeys.all, text: localization.allButton },
   { key: RadioKeys.pos, text: localization.posButton },
   { key: RadioKeys.neg, text: localization.negButton }
@@ -33,8 +33,8 @@ const options: IChoiceGroupOption[] = [
 export class ExplanationDashboard extends React.PureComponent<IExplanationDashboardProps, IDashboardState> {
   constructor(props: IExplanationDashboardProps, IDashboardState) {
     /*
-      * initializes the dashboard with it's state
-    */
+     * initializes the dashboard with its state
+     */
     super(props)
     this.state = {
       maxK: Math.min(15, Math.ceil(Utils.countNonzeros(this.props.dataSummary.localExplanations))),
@@ -112,15 +112,15 @@ export class ExplanationDashboard extends React.PureComponent<IExplanationDashbo
 
   private setTopK(newNumber: number): void {
     /*
-      * changes the state of K
-    */
+     * changes the state of K
+     */
     this.setState({ topK: newNumber })
   }
 
   public changeRadioButton(ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
     /*
-      * changes the state of the radio button
-    */
+     * changes the state of the radio button
+     */
     this.setState({ radio: option.key })
   }
 }
