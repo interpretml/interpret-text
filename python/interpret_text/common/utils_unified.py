@@ -150,7 +150,7 @@ def download_path(path):
         tmp_dir.cleanup()
 
 
-def get_single_embedding(model, text, device):
+def _get_single_embedding(model, text, device):
     """Get the bert embedding for a single sentence
     :param text: The current sentence
     :type text: str
@@ -166,7 +166,7 @@ def get_single_embedding(model, text, device):
     tokenized_ids = tokenizer.convert_tokens_to_ids(words)
     token_tensor = torch.tensor([tokenized_ids], device=device)
     embedding = model.bert.embeddings(token_tensor)[0]
-    return embedding
+    return embedding, words
 
 
 def make_bert_embeddings(

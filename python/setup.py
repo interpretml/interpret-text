@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 import os
 
 _major = "0.1"
-_minor = "0.1"
+_minor = "0.8"
 
 if os.path.exists("../major.version"):
     with open("../major.version", "rt") as bf:

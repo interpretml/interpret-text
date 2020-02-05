@@ -33,7 +33,6 @@ class TestUnifiedInformationExplainer(object):
         explanation_unified = interpreter_unified.explain_local(text)
         valid_imp_vals = np.array(
             [
-                0.2620866596698761,
                 0.16004231572151184,
                 0.17308972775936127,
                 0.18205846846103668,
@@ -45,8 +44,7 @@ class TestUnifiedInformationExplainer(object):
                 0.2700383961200714,
                 0.3673151433467865,
                 0.3899800479412079,
-                0.20173774659633636,
-                0.260466068983078,
+                0.20173774659633636
             ]
         )
         print(explanation_unified.local_importance_values)
