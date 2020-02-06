@@ -19,7 +19,7 @@ class ClassicalTextExplainer:
         self.word_importances = None
         self.model = model
         self.is_trained = is_trained
-        if self.model is None and self.is_trained is True:
+        if self.model is None and self.is_trained:
             raise Exception(
                 "is_trained flag can't be set to true, if custom model not provided"
             )
