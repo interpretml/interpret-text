@@ -115,7 +115,7 @@ def plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5):
     def html_escape(text):
         return html.escape(text)
 
-    word_importances = 100.0 * word_importances/(np.sum(np.abs(word_importances)))
+    word_importances = 100.0 * word_importances / (np.sum(np.abs(word_importances)))
 
     highlighted_text = []
     for i, word in enumerate(parsed_sentence):
