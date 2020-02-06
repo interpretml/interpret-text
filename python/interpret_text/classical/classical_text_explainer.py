@@ -28,7 +28,7 @@ class ClassicalTextExplainer:
             # model is user defined
             if not self.is_trained and self.hyperparam_range is None:
                 raise Exception(
-                    "custom model needs to be supplied with custom hyperparamter range to search over"
+                    "custom model needs to be supplied with custom hyperparameter range to search over"
                 )
         self.preprocessor = BOWEncoder() if preprocessor is None else preprocessor
 
@@ -88,7 +88,7 @@ class ClassicalTextExplainer:
             # when #labels == 2, coef_ returns 1D array
             label_coefs_all = self.model.coef_
             if len(self.preprocessor.labelEncoder.classes_) == 2:
-                label_coefs_all = np.vstack((-1*label_coefs_all,
+                label_coefs_all = np.vstack((-1 * label_coefs_all,
                                             label_coefs_all))
             encoded_imp = label_coefs_all[encoded_label, :]
         elif hasattr(self.model, "feature_importances_"):
