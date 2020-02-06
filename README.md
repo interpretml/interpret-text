@@ -59,143 +59,80 @@ This repository uses Anaconda to simplify package and environment management.
 
 To setup on your local machine:
 
-<details><summary><strong><em>1. Set up Environment</em></strong></summary>
-
-a. Install Anaconda with Python = 3.7
-  
-b. Create conda environment named interpret_text
-
-```
-
-conda create -n interpret_text python=3.7
-
-```
-
-Optional, additional reading:
-
-- [conda cheat sheet](https://docs.conda.io/projects/conda/en/4.6.0/_downloads/52a95608c49671267e40c689e0bc00ca/conda-cheatsheet.pdf)
-
-- [jupyter](https://pypi.org/project/jupyter/)
-
-- [nb_conda](https://github.com/Anaconda-Platform/nb_conda)
-
-  
-
-<details><summary><strong><em>On Windows: c. Activate conda environment</strong></em></summary>
-
-```
-
-conda activate interpret_text
-
-pip install pytest
-
-pip install lightgbm
-
-pip install interpret-community
-
-pip install xgboost
-
-pip install tensorflow
-
-conda install pytorch torchvision cpuonly -c pytorch
-
-```
-
-</details>
-
-<details><summary><strong><em>On Linux:</em> c. Activate conda environment</em></strong></summary>
-
-```
-
-conda activate interpret_text
-
-```
-
-</details>
-
-<br></br>
-
-</details>
-
 <details>
 
-<summary><strong><em>2. Clone the interpret-community repository</em></strong></summary>
+<summary><strong><em>1. Clone the interpret-community repository</em></strong></summary>
 
 Clone and cd into the repository
-
 ```
-
 git clone https://github.com/microsoft/interpret-community-text.git
-
 cd interpret-community-text
+```
+</details>
+
+<details><summary><strong><em>2. Set up Environment</em></strong></summary>
+
+    a. Install Anaconda with Python >= 3.7 
+       [Miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) is a quick way to get started.
+
+
+<details><summary><strong><em>2.1 Create and activate conda environment (For CPU): </strong></em></summary>
 
 ```
+    python tools/generate_conda_files.py
+    conda env create -n interpret_cpu --file=interpret_cpu.yaml
+    conda activate interpret_cpu
+```
+</details>
+
+<details><summary><strong><em>2.2 Create and activate conda environment (For GPU): </em></strong></summary>
+
+```
+    python tools/generate_conda_files.py --gpu
+    conda env create -n interpret_gpu --file=interpret_gpu.yaml
+    conda activate interpret_gpu
+```
+</details>
+</details>
+
+<details>
+<summary><strong><em>3. Install package </em></strong></summary>
+
+You can install the package from source or from pipy.
+
+<details><summary><strong><em>3.1 From source (developers): </strong></em></summary>
+
+```
+    pip install -e .
+```
+</details>
+
+<details><summary><strong><em>3.2 From pipy (package users): </strong></em></summary>
+
+```
+    pip install keyring artifacts-keyring
+    pip install interpret-text --index-url "https://pkgs.dev.azure.com/responsibleai/_packaging/responsibleai/pypi/simple" (placehodler)
+```
+</details>
 
 </details>
 
 <details>
-
-<summary><strong><em>3. Install Python module, packages and necessary distributions</em></strong></summary>
-
-```
-
-pip install -e ./python
-
-pip install pytest
-
-pip install lightgbm
-
-pip install interpret-community
-
-pip install xgboost
-
-pip install tensorflow
-
-conda install pytorch torchvision cpuonly -c pytorch
-
-```
-
-If you intend to run repo tests:
-
-```
-
-pip install pytest
-
-pip install lightgbm
-
-pip install interpret-community
-
-pip install xgboost
-
-pip install tensorflow
-
-conda install pytorch torchvision cpuonly -c pytorch
-
-```
-
-</details>
-
-<details>
-
 <summary><strong><em>4. Set up and run Jupyter Notebook server </em></strong></summary>
 
-  
 Install and run Jupyter Notebook
-
 ```
-conda install -c conda-forge notebook
-jupyter notebook
+    pip install notebook
+    jupyter notebook
 ```
-
 </details>
 
-<!---{% from interpret.ext.blackbox import TabularExplainer %}
-
---->
-
-To set up on Azure:
 
 To set up your visualization dashboard:
+
+```
+TODO
+```
 
 # <a name="models"></a>
 
