@@ -8,8 +8,7 @@ import numpy as np
 import uuid
 
 from interpret_community.common.explanation_utils import _sort_values, _order_imp
-from interpret_community.common.constants import Dynamic, ExplanationParams
-from interpret_community.common.constants import ExplainParams
+from interpret_community.common.constants import Dynamic, ExplanationParams, ExplainParams
 from interpret_community.explanation.explanation import (
     LocalExplanation,
     ExpectedValuesMixin,
@@ -20,11 +19,18 @@ from interpret_community.explanation.explanation import (
 class TextExplanation(LocalExplanation):
     """Defines the mixin for text explanations."""
 
-    def __init__(self, **kwargs):
-        """Create the text explanation."""
+    def __init__(self, predicted_label=None, true_label=None, **kwargs):
+        """Create the text explanation.
+        :param predicted_label: The label predicted by the classifier
+        :type predicted_label: string
+        :param true_label: The ground truth label for the sentence
+        :type true_label: string
+        """
         super(TextExplanation, self).__init__(**kwargs)
         order = _order_imp(np.abs(self.local_importance_values))
         self._local_importance_rank = _sort_values(self._features, order)
+        self._predicted_label = predicted_label
+        self._true_label = true_label
         self._logger.debug("Initializing TextExplanation")
         if len(order.shape) == 3:
             i = np.arange(order.shape[0])[:, np.newaxis]
@@ -34,6 +40,15 @@ class TextExplanation(LocalExplanation):
             )[i, j, order]
         else:
             self._ordered_local_importance_values = self.local_importance_values
+
+    @property
+    def predicted_label(self):
+        """Get the predicted label of the document from original model.
+
+        :return: The predicted label of the document.
+        :rtype: string
+        """
+        return self._predicted_label
 
     @property
     def local_importance_rank(self):

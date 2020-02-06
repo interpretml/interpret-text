@@ -13,16 +13,19 @@ class ExplanationDashboard(object):
 
     def __init__(self, explanation):
         """Initialize the Explanation Dashboard for a single sentence."""
-        classNames = explanation._classes.tolist()
-        text = explanation._features
-        explanation = explanation._local_importance_values.tolist()
-        prediction = [i for i in range(len(classNames))]
+        local_importance_values = list(explanation._local_importance_values)
+        classNames = list(explanation._classes)
+        text = list(explanation._features)
+        prediction = [
+            0 if name == explanation._predicted_label else 1 for name in classNames
+        ]
+        # ground_truth = explanation._true_label
         self._widget_instance = ExplanationWidget()
         self._widget_instance.value = {
             "text": text,
             "prediction": prediction,
             "classNames": classNames,
-            "localExplanations": explanation,
+            "localExplanations": local_importance_values,
         }
         display(self._widget_instance)
 

@@ -80,12 +80,12 @@ class Tokenizer:
             ]
 
     def _truncate_seq_pair(self, tokens_a, tokens_b, max_length):
-        """Truncates a sequence pair in place to the maximum length."""
-        # This is a simple heuristic which will always truncate the longer
-        # sequence one token at a time. This makes more sense than
-        # truncating an equal percent of tokens from each, since if one
-        # sequence is very short then each token that's truncated likely
-        # contains more information than a longer sequence.
+        """Truncates a sequence pair in place to the maximum length.
+        This is a simple heuristic which will always truncate the longer
+        sequence one token at a time. This makes more sense than
+        truncating an equal percent of tokens from each, since if one
+        sequence is very short then each token that's truncated likely
+        contains more information than a longer sequence."""
 
         if not tokens_b:
             max_length += 1
