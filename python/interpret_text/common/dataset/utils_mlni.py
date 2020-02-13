@@ -12,10 +12,7 @@
 """
 import os
 import pandas as pd
-from interpret_text.common.dataset.utils_data_shared import (
-    maybe_download,
-    extract_zip,
-)
+from interpret_text.common.dataset.utils_data_shared import maybe_download, extract_zip
 
 URL = "http://www.nyu.edu/projects/bowman/multinli/multinli_1.0.zip"
 DATA_FILES = {
@@ -32,22 +29,14 @@ def download_file_and_extract(
 
     Args:
         local_cache_path (str [optional]) -- Directory to cache files to.
-            Defaults to current working
-        directory (default: {"."})
+            Defaults to current working directory (default: {"."})
         file_split {str} -- [description] (default: {"train"})
-
-    Returns:
-        None -- Nothing is returned
     """
     file_name = URL.split("/")[-1]
     maybe_download(URL, file_name, local_cache_path)
 
-    if not os.path.exists(
-        os.path.join(local_cache_path, DATA_FILES[file_split])
-    ):
-        extract_zip(
-            os.path.join(local_cache_path, file_name), local_cache_path
-        )
+    if not os.path.exists(os.path.join(local_cache_path, DATA_FILES[file_split])):
+        extract_zip(os.path.join(local_cache_path, file_name), local_cache_path)
 
 
 def load_pandas_df(local_cache_path=".", file_split="train"):
