@@ -148,9 +148,48 @@ TODO
 
 # Supported Explainers
 The following is a list of the explainers available in this repository:
-* [Bag of Words](https://en.wikipedia.org/wiki/Bag-of-words_model)
+* Classical Text Explainer - (Default:[Bag-of-words](https://en.wikipedia.org/wiki/Bag-of-words_model) with Logistic Regression)
+
 * [MSR-Asia](https://www.microsoft.com/en-us/research/publication/towards-a-deep-and-unified-understanding-of-deep-neural-models-in-nlp/): uses an information-based measure to provide explanations on the intermediate layers of deep NLP models
-  
+
+## Classical Text Explainer
+
+The ClassicalTextExplainer extends text explainability to classical machine learning models. 
+[This](notebooks/text_classification/text_classification_mnli_bow_lr.ipynb) notebook provides as step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
+
+### Preprocessing and the Pipeline
+
+The ClassicalTextExplainer serves as a high level wrapper for the entire NLP pipeline, by natively handling the text preprocessing, encoding, training and hyperparameter optimization process. 
+This allows the user to simply supply the dataset in text form without need for any external processing, with the entire pipeline text pipelining process being handled by the explainer under the hood.                         
+
+In its default configuration the preprocessing pipeline, uses a 1-gram bag-of-words encoder implemented by sklearn's count vectorizer. The linked [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
+
+### Supported Models
+
+the ClassicalTextExplainer natively supports 2 families of models. Namely, 
+
+* Linear models with support for a '*coefs_*' call under sklearn's linear_model module 
+* Tree based models with a 'feature_importances' call under sklearn's ensemble module  
+
+In the absence of a user supplied model, the ClassicalTextExplainer defaults to sklearn's logistic regression.
+In addition to the above mentioned models, any model that follows the same API layout will also be supported.
+Apart from Logistic regression, we have successfully tested the framework with LGBM and Random Forests as well.
+
+### Extensibility and Modularity:
+
+The ClassicalTextExplainer has been designed with explicit intent of being modular and extensible.
+
+The API allows for users to swap out nearly every component, including the preprocessor, tokenizer, model and even training routine, with varying levels of difficulty. Such that, a modified explainer is still able to leverage the rest of the tooling implemented within the package.
+
+The text encoding and decoding components are both closely tied to each other. Should the user wish to use a custom encoding process, it has to come paired with its own custom decoding process.
+
+### Explainability:
+
+The models natively explained by the ClassicalTextExplainer are all considered to be glass box explainers. This implies a model that is innately explainable and that we can full observe and understand the process adopted by the model in making any prediction. Linear models such as logistic regression and ensemble methods like random forests fall under the umbrella of glass box explainers.
+
+By default, the ClassicalTextExplainer leverages this inherent explainability of both models by exposing weights and importances over encoded tokens as explanations over each word in a document in the visualization dashboard and the explanation object.
+
+The explanations provided by these glassbox methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and string belief in humans being able to understand the internal configuration of the trained machine learning model.
 
 <a  name="use"></a>
 
