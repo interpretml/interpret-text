@@ -21,15 +21,15 @@ class BOWTokenizer:
         stop_words=spacy.lang.en.stop_words.STOP_WORDS,
         punctuations=string.punctuation,
     ):
-    """Intitialize the BOWTokenizer object
+        """Intitialize the BOWTokenizer object
 
-    Args:
-        parser (spacy.lang.en.English - by default): any parser object that
-        supports parser(sentence) call on it.
-        stop_words (iterable over str): set of stop words to be removed. Can be
-        any iterable.
-        punctuations (iterable over str): set of punctuations to be removed.
-    """
+        Args:
+            parser (spacy.lang.en.English - by default): any parser object that
+            supports parser(sentence) call on it.
+            stop_words (iterable over str): set of stop words to be removed.
+            Can be any iterable.
+            punctuations (iterable over str): set of punctuations to be removed
+        """
         self.parser = parser
         # list of stop words and punctuation marks
         self.stop_words = stop_words
@@ -297,7 +297,7 @@ def plot_global_imp(top_words, top_importances, label_name):
     Arguments:
         top_words {list} -- words with 1:1 mapping to top_importances
         top_importances {list} -- top importance values for top words
-        label_name {str} -- label for which these importances are being displayed
+        label_name {str} -- label for which importances are being displayed
     """
     plt.figure(figsize=(14, 7))
     plt.title("most important words for class label: " + str(label_name), fontsize=18)
