@@ -148,7 +148,7 @@ TODO
 
 # Supported Explainers
 The following is a list of the explainers available in this repository:
-* Classical Text Explainer - (Default:[Bag-of-words](https://en.wikipedia.org/wiki/Bag-of-words_model) with Logistic Regression)
+* Classical Text Explainer - (Default: [Bag-of-words](https://en.wikipedia.org/wiki/Bag-of-words_model) with Logistic Regression)
 
 * [MSR-Asia](https://www.microsoft.com/en-us/research/publication/towards-a-deep-and-unified-understanding-of-deep-neural-models-in-nlp/): uses an information-based measure to provide explanations on the intermediate layers of deep NLP models
 
