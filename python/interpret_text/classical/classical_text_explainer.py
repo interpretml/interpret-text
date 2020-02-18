@@ -69,7 +69,7 @@ class ClassicalTextExplainer:
         """ trains the model with training data and labels.
         Includes:
         * encoding X_str into vector form.
-        *note*: y_train is assumed to be encoded into sklearn compatible format
+        *Note*: y_train is assumed to be encoded into sklearn compatible format
         (use sklearn's label encoder for this purpose externally)
         * training model
         * grid search over parameter range

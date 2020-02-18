@@ -23,12 +23,15 @@ class BOWTokenizer:
     ):
         """Intitialize the BOWTokenizer object
 
-        Args:
-            parser (spacy.lang.en.English - by default): any parser object that
-            supports parser(sentence) call on it.
-            stop_words (iterable over str): set of stop words to be removed.
-            Can be any iterable.
-            punctuations (iterable over str): set of punctuations to be removed
+        Arguments:
+            parser {spacy.lang.en.English - by default} -- any parser object
+            that supports parser(sentence) call on it
+
+        Keyword Arguments:
+            stop_words {iterable over str} -- set of stop words to be removed.
+            (default: {spacy.lang.en.stop_words.STOP_WORDS})
+            punctuations {iterable over str} -- set of punctuations to be
+            removed (default: {string.punctuation})
         """
         self.parser = parser
         # list of stop words and punctuation marks
