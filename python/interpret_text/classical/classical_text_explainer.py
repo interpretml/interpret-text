@@ -19,7 +19,8 @@ class ClassicalTextExplainer:
     of fresh explainers using certain parts of this class
     """
 
-    def __init__(self, preprocessor=None, model=None, hyperparam_range=None):
+    def __init__(self, preprocessor=None, model=None,
+                 hyperparam_range=None, is_trained=False):
         """ Initialize the ClassicalTextExplainer
         :param model: an sklearn model or one that follows its API. Natively
         supports linear models with linear coefs mapped to features or tree
@@ -129,7 +130,7 @@ class ClassicalTextExplainer:
         :return: A model explanation object containing importances and metadata
         :rtype: LocalExplanation object
         """
-        
+
         [encoded_text, _] = self.preprocessor.encode_features(
             input_text, needs_fit=False
         )
