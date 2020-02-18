@@ -5,6 +5,9 @@ import { Utils } from '../CommonUtils'
 import { localization } from '../../Localization/localization'
 
 export class BarChart extends React.PureComponent<IChartProps> {
+  /*
+   * returns an accessible bar chart from mlchartlib
+   */
   public render(): React.ReactNode {
     return (
       <AccessibleChart
@@ -16,6 +19,10 @@ export class BarChart extends React.PureComponent<IChartProps> {
   }
 
   private buildPlotlyProps(props): IPlotlyProperty {
+    /* 
+     * builds the bar chart with x and y values as well as the tooltip
+     * defines the layout of the chart 
+     */
     const importances = props.localExplanations
     const k = props.topK
     let sortedList = Utils.sortedTopK(importances, k, this.props.radio)
