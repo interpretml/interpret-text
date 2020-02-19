@@ -122,7 +122,7 @@ class ClassicalTextExplainer:
         )
         return [text_model, best_params]
 
-    def explain_local(self, input_text):
+    def explain_local(self, input_text, abs_sum_to_one=False):
         """ returns an explanation object containing explanations over words
         in the input text string
         :param input_text: string to be explained
