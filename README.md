@@ -6,24 +6,14 @@ This repository contains an SDK and Jupyter notebooks with examples to showcase 
 
 # Contents
 
-  
-
 -  [Overview of Interpret-Text](#overview)
-
 -  [Target Audience](#target-audience)
-
 -  [Getting Started](#getting-started)
-
 -  [Supported Models and NLP Scenarios](#models)
-
 -  [Supported Explainers](#explainers)
-
 -  [Use Interpret-Text](#use)
-
 -  [Contributing](#contrib)
-
--  [Code of Conduct](#code-of-conduct)
-  
+-  [Code of Conduct](#code)
 
 <a  name="overview"></a>
 
@@ -39,21 +29,14 @@ Interpret-Text incorporates community developed interpretability techniques for 
 
 1. Developers/Data Scientists: Having all of the interpretability techniques in one place makes it easy for data scientists to experiment with different interpretability techniques, and explain their model in a scalable and seamless manner. The set of rich interactive visualizations allow developers and data scientists to train and deploy more transparent machine learning models instead of wasting time and effort on generating customized visualizations, addressing scalability issues by optimizing third-party interpretability techniques, and adopting/operationalizing interpretability techniques.
 
-  
-
 2. Business Executives: The core logic and visualizations are beneficial for raising awareness among those involved in developing AI applications, allow them to audit model predictions for potential unfairness, and establish a strong governance framework around the use of AI applications.
-
-  
 
 3. Machine Learning Interpretability Researchers: Interpret's extension hooks make it easy to extend and thus, interpretability researchers who are interested in adding their own techniques, can easily add them to the community repository and compare it to state-of-the-art and proven interpretability techniques and/or other community techniques.
 
-  
 
 <a  name="getting-started"></a>
 
 # Getting Started
-
-  
 
 This repository uses Anaconda to simplify package and environment management.
 
@@ -127,13 +110,6 @@ Install and run Jupyter Notebook
 ```
 </details>
 
-
-To set up your visualization dashboard:
-
-```
-TODO
-```
-
 # <a name="models"></a>
 
 # Supported Models and NLP Scenarios
@@ -155,14 +131,14 @@ The following is a list of the explainers available in this repository:
 ## Classical Text Explainer
 
 The ClassicalTextExplainer extends text explainability to classical machine learning models. 
-[This](notebooks/text_classification/text_classification_mnli_bow_lr.ipynb) notebook provides as step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
+[This](notebooks/text_classification/text_classification_mnli_bow_lr.ipynb) notebook provides a step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
 
 ### Preprocessing and the Pipeline
 
 The ClassicalTextExplainer serves as a high level wrapper for the entire NLP pipeline, by natively handling the text preprocessing, encoding, training and hyperparameter optimization process. 
-This allows the user to simply supply the dataset in text form without need for any external processing, with the entire pipeline text pipelining process being handled by the explainer under the hood.                         
+This allows the user to simply supply the dataset in text form without need for any external processing, with the entire text pipeline process being handled by the explainer under the hood.                         
 
-In its default configuration the preprocessing pipeline, uses a 1-gram bag-of-words encoder implemented by sklearn's count vectorizer. The linked [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
+In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count vectorizer. The [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
 
 ### Supported Models
 
@@ -173,23 +149,23 @@ the ClassicalTextExplainer natively supports 2 families of models. Namely,
 
 In the absence of a user supplied model, the ClassicalTextExplainer defaults to sklearn's logistic regression.
 In addition to the above mentioned models, any model that follows the same API layout will also be supported.
-Apart from Logistic regression, we have successfully tested the framework with LGBM and Random Forests as well.
+Apart from Logistic regression, we have successfully tested the framework with [LightGBM](https://github.com/microsoft/LightGBM) and Random Forests as well.
 
 ### Extensibility and Modularity:
 
 The ClassicalTextExplainer has been designed with explicit intent of being modular and extensible.
 
-The API allows for users to swap out nearly every component, including the preprocessor, tokenizer, model and even training routine, with varying levels of difficulty. Such that, a modified explainer is still able to leverage the rest of the tooling implemented within the package.
+The API allows for users to swap out nearly every component, including the preprocessor, tokenizer, model and even training routine, with varying levels of difficulty. The API is composed such that a modified explainer would still be able to leverage the rest of the tooling implemented within the package.
 
 The text encoding and decoding components are both closely tied to each other. Should the user wish to use a custom encoding process, it has to come paired with its own custom decoding process.
 
 ### Explainability:
 
-The models natively explained by the ClassicalTextExplainer are all considered to be glass box explainers. This implies a model that is innately explainable and that we can full observe and understand the process adopted by the model in making any prediction. Linear models such as logistic regression and ensemble methods like random forests fall under the umbrella of glass box explainers.
+The models natively explained by the ClassicalTextExplainer are all considered to be glass box explainers. This implies a model that is innately explainable and that we can fully observe and understand the process adopted by the model in making any prediction. Linear models such as logistic regression and ensemble methods like random forests fall under the umbrella of glass box explainers.
 
 By default, the ClassicalTextExplainer leverages this inherent explainability of both models by exposing weights and importances over encoded tokens as explanations over each word in a document in the visualization dashboard and the explanation object.
 
-The explanations provided by these glassbox methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and string belief in humans being able to understand the internal configuration of the trained machine learning model.
+The explanations provided by these glassbox methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and strong belief in humans being able to understand the internal configuration of the trained machine learning model.
 
 <a  name="use"></a>
 
@@ -197,6 +173,9 @@ The explanations provided by these glassbox methods serve as direct proxies for 
 
 Teaches the user how to use this package and links to sample notebooks.
 
+## Visualization Dashboard
+
+Load the visualization dashboard in your noteboook to understand and interpret your model:
   
 
 <a  name="contrib"></a>
@@ -220,6 +199,7 @@ $ git commit -s -m 'This is my commit message'
 ```
 When you submit a pull request, a DCO bot will automatically determine whether you need to certify. Simply follow the instructions provided by the bot.
 
+<a name=Code></a>
 # Code of Conduct
 
 This project has adopted the his project has adopted the  [GitHub Community Guidelines](https://help.github.com/en/github/site-policy/github-community-guidelines).
