@@ -171,12 +171,87 @@ The explanations provided by these glassbox methods serve as direct proxies for 
 
 # Use Interpret-Text
 
-Teaches the user how to use this package and links to sample notebooks.
+## Interpretability in training
+
+1. Train your model in a Jupyter notebook running on your local machine. For a sample pipelines see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_mnli_bert.ipynb)
+
+2. Call the explainer: To initialize the explainers, you will need to pass either 1. the dataset or 2. your model, dataset and other information depending on which explainer you are using.
+To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the target layer.
+
+    ```python
+    from interpret_text.unified_information.unified_information_explainer import UnifiedInformationExplainer
+
+    interpreter_unified = UnifiedInformationExplainer(model, 
+                                     train_dataset, 
+                                     device, 
+                                     target_layer)
+    ```
+
+    If you intend to use the `ClassicalTextExplainer` with our default Linear Regression model, you can simply call the fit function with your dataset.
+    ```python
+    from sklearn.preprocessing import LabelEncoder
+    from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+
+    explainer = ClassicalTextExplainer()
+    label_encoder = LabelEncoder()
+    classifier, best_params = explainer.fit(X_train, y_train)
+    ```
+    Instead, if you want to use the `ClassicalTextExplainer` with your own sklearn model. You will need to initialize `ClassicalTextExplainer` with your model, preprocessor and the range of hyperparamaters.
+    ```python
+    from sklearn.preprocessing import LabelEncoder
+    from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+    from interpret_text.common.utils_classical import get_important_words, BOWEncoder
+
+    HYPERPARAM_RANGE = {
+        "solver": ["saga"],
+        "multi_class": ["multinomial"],
+        "C": [10 ** 4],
+    }
+    preprocessor = BOWEncoder()
+    explainer = ClassicalTextExplainer(preprocessor, model, HYPERPARAM_RANGE)
+    ```
+## Instance-level (local) feature importance values
+Get the local feature importance values: use the following function calls to explain an individual instance or a group of instances. 
+
+```python
+# explain the first data point in the test set
+local_explanation = explainer.explain_local(x_test[0])
+
+# sorted feature importance values and feature names
+sorted_local_importance_names = local_explanation.get_ranked_local_names()
+sorted_local_importance_values = local_explanation.get_ranked_local_values()
+```
 
 ## Visualization Dashboard
 
-Load the visualization dashboard in your noteboook to understand and interpret your model:
-  
+### Initializing the `ExplanationDashboard` object
+
+1. In order to use the visualization dashboard, first you will need to import the `ExplanationDashboard` object from the package.
+
+    ```python
+    from interpret_text.widget import ExplanationDashboard
+    ```
+2. When initializing the ExplanationDashboard, you will need to pass the local explanation object that is returned by our explainer.
+
+    ```python
+    ExplanationDashboard(local_explanantion)
+    ```
+    Note: if you are not using one of our explainers, you will need to create your own explanation object by passing the feature importance values
+    ```python
+    from interpret_text.explanation.explanation import _create_local_explanation
+    
+    local_explanantion = _create_local_explanation(
+    classification=True,
+    text_explanation=True,
+    local_importance_values=feature_importance_values,
+    method=name_of_model,
+    model_task="classification",
+    features=parsed_sentence_list,
+    classes=list_of_classes,
+    )
+    ```
+### Using the Dashboard 
+
 
 <a  name="contrib"></a>
 
