@@ -136,6 +136,3 @@ class ClassicalTextExplainer:
         plot_global_imp(top_words, top_importances, label_name)
 
         return global_explanation
-
-    def visualize(self, word_importances, parsed_sentence):
-        plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)
