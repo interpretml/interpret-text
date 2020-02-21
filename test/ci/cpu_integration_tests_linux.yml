@@ -2,7 +2,8 @@
 # Licensed under the MIT License.
 
 # Pull request against these branches will trigger this build
-pr: none
+pr:
+- master
 
 #Any commit to this branch will trigger the build.
 trigger: none
@@ -46,8 +47,15 @@ jobs:
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
-      pytest test/integration/test_notebooks_text_classification.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run Unit tests'
+      pytest test/integration/test_notebook_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run MSRA notebook and explainer'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/integration/test_notebook_linear_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run Linear explainer'
 
   # Uncomment if needed
   - bash: |
