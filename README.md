@@ -156,11 +156,13 @@ The text encoding and decoding components are both closely tied to each other. S
 
 ### Explainability:
 
-The models natively explained by the ClassicalTextExplainer are all considered to be glass box explainers. This implies a model that is innately explainable and that we can fully observe and understand the process adopted by the model in making any prediction. Linear models such as logistic regression and ensemble methods like random forests fall under the umbrella of glass box explainers.
+The ClassicalTextExplainer offers a painfree API to surface explainations inherent to supported models. The natively supported linear models such as linear regression and logisitic regression are considered to be glass-box explainers. A glass-box explainer implies a model that is innately explainable, where the user can fully observe and dissect the process adopted by the model in making a prediction. The family of linear models such as logistic regression and ensemble methods like random forests can be considered to under the umbrella of glass-box explainers. Neural networks and Kernel based models are usually not considered glass-boxes.
 
-By default, the ClassicalTextExplainer leverages this inherent explainability of both models by exposing weights and importances over encoded tokens as explanations over each word in a document in the visualization dashboard and the explanation object.
+By default, the ClassicalTextExplainer leverages this inherent explainability by exposing weights and importances over encoded tokens as explanations over each word in a document. In practice, these can be accessed through the visualization dashboard or the explanation object.
 
-The explanations provided by these glassbox methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and strong belief in humans being able to understand the internal configuration of the trained machine learning model.
+The explanations provided by the aforementiond glass-box methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and strong belief in humans being able to understand the internal configuration of the trained machine learning model.
+
+If the user supplies a custom model, the nature of their model explanability (glass-box , grey-box, black-box) will carry over to importances spit out by the explainer as well.
 
 <a  name="use"></a>
 
