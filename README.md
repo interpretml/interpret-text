@@ -114,30 +114,32 @@ Install and run Jupyter Notebook
 
 # Supported NLP Scenarios
 
- Currently this repository provides support for the the text classification scenario.
+ Currently this repository provides support for the text classification scenario.
 # <a name="explainers"></a>
 
 # Supported Explainers
 The following is a list of the explainers available in this repository:
 * Classical Text Explainer - (Default: [Bag-of-words](https://en.wikipedia.org/wiki/Bag-of-words_model) with Logistic Regression)
 
-* [MSR-Asia](https://www.microsoft.com/en-us/research/publication/towards-a-deep-and-unified-understanding-of-deep-neural-models-in-nlp/): uses an information-based measure to provide explanations on the intermediate layers of deep NLP models
+* [Unified Information Explainer](https://www.microsoft.com/en-us/research/publication/towards-a-deep-and-unified-understanding-of-deep-neural-models-in-nlp/)
+
+* [Introspective Rationale Explainer](http://people.csail.mit.edu/tommi/papers/YCZJ_EMNLP2019.pdf)
 
 ## Classical Text Explainer
 
-The ClassicalTextExplainer extends text explainability to classical machine learning models. 
-[This](notebooks/text_classification/text_classification_mnli_bow_lr.ipynb) notebook provides a step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
+The ClassicalTextExplainer extends text interpretability to classical machine learning models. 
+This [notebook](notebooks/text_classification/text_classification_mnli_bow_lr.ipynb) provides a step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
 
-### Preprocessing and the Pipeline
+### Preprocessing and the Pipeline:
 
 The ClassicalTextExplainer serves as a high level wrapper for the entire NLP pipeline, by natively handling the text preprocessing, encoding, training and hyperparameter optimization process. 
 This allows the user to simply supply the dataset in text form without need for any external processing, with the entire text pipeline process being handled by the explainer under the hood.                         
 
 In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count-vectorizer. The [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
 
-### Supported Models
+### Supported Models:
 
-the ClassicalTextExplainer natively supports 2 families of models. Namely, 
+The ClassicalTextExplainer natively supports 2 families of models. Namely, 
 
 * Linear models with support for a '*coefs_*' call under sklearn's linear_model module 
 * Tree based models with a 'feature_importances' call under sklearn's ensemble module  
@@ -156,16 +158,39 @@ The text encoding and decoding components are both closely tied to each other. S
 
 ### Explainability:
 
-The ClassicalTextExplainer offers a painfree API to surface explainations inherent to supported models. The natively supported linear models such as linear regression and logisitic regression are considered to be glass-box explainers. A glass-box explainer implies a model that is innately explainable, where the user can fully observe and dissect the process adopted by the model in making a prediction. The family of linear models such as logistic regression and ensemble methods like random forests can be considered to under the umbrella of glass-box explainers. Neural networks and Kernel based models are usually not considered glass-boxes.
+The ClassicalTextExplainer offers a painfree API to surface explainations inherent to supported models. The natively supported linear models such as linear regression and logisitic regression are considered to be glass-box explainers. A glass-box explainer implies a model that is innately explainable, where the user can fully observe and dissect the process adopted by the model in making a prediction. The family of linear models such as logistic regression and ensemble methods like random forests can be considered to be under the umbrella of glass-box explainers. Neural networks and Kernel based models are usually not considered glass-box models.
 
 By default, the ClassicalTextExplainer leverages this inherent explainability by exposing weights and importances over encoded tokens as explanations over each word in a document. In practice, these can be accessed through the visualization dashboard or the explanation object.
 
 The explanations provided by the aforementiond glass-box methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and strong belief in humans being able to understand the internal configuration of the trained machine learning model.
 
-If the user supplies a custom model, the nature of their model explanability (glass-box , grey-box, black-box) will carry over to importances spit out by the explainer as well.
+If the user supplies a custom model, the nature of their model explanability (glass-box , grey-box, black-box) will carry over to importances produced by the explainer as well.
+
+
+## Unified Information Explainer
+The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_mnli_bert.ipynb) provides an example of how to load and preprocess data and retrieve explanation for all the layers of BERT - the transformer layers, pooler, and classification layer.
+
+### Preprocessing:
+The UnifiedInformationExplainer handles the required text pre-processing. Each sentence is tokenized using the `BERT Tokenizer`.
+
+### Supported Models:
+The UnifiedInformationExplainer only supports BERT at this time. A user will need to supply a trained or fine-tuned BERT model, the trianing dataset (or a subset if it is too large) and the sentence or text to be explained.  Future work can extend this implementation to support RNNs and LSTMs. 
+
+## Introspective Rationale Explainer
+The IntrospectiveRationaleExplainer uses a generator-predictor framework to produce a comprehensive subset of text input features or rationales that are relevant for the classification task. This introspective model predicts the labels and incorporates the outcome into the rationale selection process. The outcome is a hard or soft selection of rationales (words that have useful information for the classification task) and anti-rationales (words that do not appear to have useful information). This [notebook] **add in the link** provides an example of how to use the introspective rationale generator.
+
+### Preprocessing:
+The IntrospectiveRationaleExplainer has generator and predictor modules that handle the required text pre-processing.
+
+### Supported Models: 
+The IntrospectiveRationaleExplainer is designed to be modular and extensible. The API currently has support for `RNN` and `BERT` models. There are three different sets of modules thathas been implemented in this API:
+* Explain a BERT model (BERT is used in the generator and predictor modules), 
+* Explain an RNN model (RNNs are used in the generator and predictor modules), and
+* Explain an RNN model with BERT as the generator (RNNs are used in the predictor module and BERT is used in the generator module)
+The user can also explain a custom model. In this case, the user will have to provide the pre-processor, predictor and generator modulules to the API.  
+
 
 <a  name="use"></a>
-
 # Use Interpret-Text
 
 ## Interpretability in training
@@ -173,7 +198,7 @@ If the user supplies a custom model, the nature of their model explanability (gl
 1. Train your model in a Jupyter notebook running on your local machine. For a sample pipelines see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_mnli_bert.ipynb)
 
 2. Call the explainer: To initialize the explainers, you will need to pass either 1. the dataset or 2. your model, dataset and other information depending on which explainer you are using.
-To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the target layer.
+To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the BERT target layer.
 
     ```python
     from interpret_text.unified_information.unified_information_explainer import UnifiedInformationExplainer
