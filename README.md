@@ -112,14 +112,9 @@ Install and run Jupyter Notebook
 
 # <a name="models"></a>
 
-# Supported Models and NLP Scenarios
+# Supported NLP Scenarios
 
  Currently this repository provides support for the the text classification scenario.
- 
- The API supports models that are trained on datasets in Python's `scipy.sparse.csr_matrix` format.
-  
-  The explanation functions accept both models and pipelines as input, as long as the model or pipeline follows the sklearn's classifier API.
-
 # <a name="explainers"></a>
 
 # Supported Explainers
@@ -138,7 +133,7 @@ The ClassicalTextExplainer extends text explainability to classical machine lear
 The ClassicalTextExplainer serves as a high level wrapper for the entire NLP pipeline, by natively handling the text preprocessing, encoding, training and hyperparameter optimization process. 
 This allows the user to simply supply the dataset in text form without need for any external processing, with the entire text pipeline process being handled by the explainer under the hood.                         
 
-In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count vectorizer. The [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
+In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count-vectorizer. The [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
 
 ### Supported Models
 
@@ -148,7 +143,7 @@ the ClassicalTextExplainer natively supports 2 families of models. Namely,
 * Tree based models with a 'feature_importances' call under sklearn's ensemble module  
 
 In the absence of a user supplied model, the ClassicalTextExplainer defaults to sklearn's logistic regression.
-In addition to the above mentioned models, any model that follows the same API layout will also be supported.
+In addition to the above mentioned models, any model that follows the same API layout and is compatible with sparse representations as input will also be supported.
 Apart from Logistic regression, we have successfully tested the framework with [LightGBM](https://github.com/microsoft/LightGBM) and Random Forests as well.
 
 ### Extensibility and Modularity:
