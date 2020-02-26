@@ -172,8 +172,8 @@ class ClassicalTextExplainer:
             the whole dataset.
             * Obtain the top feature ids for the selected class label.
             * Map top features back to words.
-            Can be rephased as a local explanation over a sentence that contains
-            every word in the vocabulary.
+            Can be rephrased in an intuitive sense as a local explanation over
+            a sentence that contains every word in the vocabulary.
         :param label_name: Label for which importances are to be returned.
         :type label_name: str
         :return: A model explanation object containing importances and metadata.
