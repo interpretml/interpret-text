@@ -21,7 +21,7 @@ class BOWTokenizer:
         stop_words=spacy.lang.en.stop_words.STOP_WORDS,
         punctuations=string.punctuation,
     ):
-        """Intitialize the BOWTokenizer object.
+        """Initialize the BOWTokenizer object.
 
         Arguments:
             parser {spacy.lang.en.English - by default} -- Any parser object
