@@ -89,7 +89,7 @@ class BOWEncoder:
         Can be used as a skeleton to build more sophisticated encoders on top.
     """
     def __init__(self):
-        """Intializes the Encoder object and sets internal tokenizer,
+        """Initializes the Encoder object and sets internal tokenizer,
             labelEncoder and vectorizer using predefined objects.
         """
         self.tokenizer = BOWTokenizer(
