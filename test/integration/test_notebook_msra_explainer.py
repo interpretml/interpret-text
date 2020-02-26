@@ -10,8 +10,8 @@ OUTPUT_NOTEBOOK = "output.ipynb"
 
 
 @pytest.mark.integration
-def test_text_classification_mnli_bert(notebooks, tmp):
-    notebook_path = notebooks["tc_mnli_bert"]
+def test_text_classification_unified_information(notebooks, tmp):
+    notebook_path = notebooks["tc_unified_information"]
     pm.execute_notebook(
         notebook_path,
         OUTPUT_NOTEBOOK,

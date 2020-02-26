@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from interpret_text.common.utils_classical import plot_local_imp, plot_global_imp
+from interpret_text.common.utils_classical import plot_global_imp
 from interpret_text.common.utils_classical import get_important_words, BOWEncoder
 from interpret_text.common.constants import ExplainerParams
 from interpret_text.explanation.explanation import _create_local_explanation
@@ -208,11 +208,3 @@ class ClassicalTextExplainer:
         plot_global_imp(top_words, top_importances, label_name)
 
         return global_explanation
-
-    def visualize(self, word_importances, parsed_sentence):
-        """Wrapper function for plot_local_imp()
-            Plots the top importances for a parsed sentence when corresponding
-            importances are available.
-            Internal fast prototyping tool for easy visualization.
-            Serves as a visual proxy for dashboard."""
-        plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)
