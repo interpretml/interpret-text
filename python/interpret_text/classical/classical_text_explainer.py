@@ -175,7 +175,7 @@ class ClassicalTextExplainer:
             Can be rephased as a local explanation over a sentence that contains
             every word in the vocabulary.
         :param label_name: Label for which importances are to be returned.
-        :type input_text: str
+        :type label_name: str
         :return: A model explanation object containing importances and metadata.
         :rtype: global_explanation object
         *Note*: Label name is not applicable to tree based models. For them,
