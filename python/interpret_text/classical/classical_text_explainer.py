@@ -128,7 +128,7 @@ class ClassicalTextExplainer:
         :param input_text: String to be explained.
         :type input_text: str
         :return: A model explanation object containing importances and metadata.
-        :rtype: LocalExplanation object
+        :rtype: LocalExplanation
         """
 
         [encoded_text, _] = self.preprocessor.encode_features(
