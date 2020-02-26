@@ -14,25 +14,25 @@ from interpret_community.explanation.explanation import _create_global_explanati
 
 class ClassicalTextExplainer:
     """The ClassicalTextExplainer for returning explanations for n-gram
-    bag-of-words models using SKlearn's classifier API.
+    bag-of-words models using sklearn's classifier API.
     Also serves as extensible wrapper with components built to support addition
-    of fresh explainers using certain parts of this class
+    of fresh explainers using certain parts of this class.
     """
 
     def __init__(self, preprocessor=None, model=None,
                  hyperparam_range=None, is_trained=False):
         """ Initialize the ClassicalTextExplainer
-        :param model: an sklearn model or one that follows its API. Natively
-        supports linear models with linear coefs mapped to features or tree
-        based models with inbuilt feature_importances
+        :param model: Linear models with linear coefs mapped to features or
+            tree based models with inbuilt feature_importances that are sklearn
+            models or follow the sklearn API.
         :type: sklearn.ensemble or sklearn.linear_model (natively supported)
         :param preprocessor: Custom preprocessor for encoding text into vector
-        form. Contains custom parser, vectorizer and tokenizer. Reference
-        utils_classical.BOWEncoder for preprocessor's API template
+            form. Contains custom parser, vectorizer and tokenizer. Reference
+            utils_classical.BOWEncoder for preprocessor's API template.
         :type preprocessor: object
-        :param hyperparam_range: custom hyper parameter range to search over
-        when training input model. passed to sklearn's gridsearchCV's
-        as param_grid argument
+        :param hyperparam_range: Custom hyper parameter range to search over
+            when training input model. passed to sklearn's GridsearchCV's
+            as param_grid argument.
         :type hyperparam_range: dict     """
         self.parsed_sentence = None
         self.word_importances = None
@@ -40,48 +40,48 @@ class ClassicalTextExplainer:
         self.is_trained = is_trained
         if self.model is None and self.is_trained:
             raise Exception(
-                "is_trained flag can't be set to true, if custom model not provided"
+                "Is_trained flag can't be set to true, if custom model not provided."
             )
         self.hyperparam_range = hyperparam_range
         if self.model is not None:
             # model is user defined
             if not self.is_trained and self.hyperparam_range is None:
                 raise Exception(
-                    "custom model needs to be supplied with custom hyperparameter range to search over"
+                    "Custom model needs to be supplied with custom hyperparameter range to search over."
                 )
         self.preprocessor = BOWEncoder() if preprocessor is None else preprocessor
 
     def _encode(self, X_str):
-        """ encode text strings in X_str as vectors
-        :param X_str: strings to be encoded
+        """ Encode text strings in X_str as vectors.
+        :param X_str: Strings to be encoded.
         :type X_str: array_like (array of strings, ndarray, pandas dataframe)
-        :return: A model explanation object. It is guaranteed to be a LocalExplanation
+        :return: A model explanation object. It is guaranteed to be a LocalExplanation.
         :rtype: array_like (ndarray, pandas dataframe). Same rows as X_str
         """
         X_vec, _ = self.preprocessor.encode_features(X_str)
         return X_vec
 
     def train(self, *args, **kwargs):
-        """  wraper function for fit if the user wants to entirely swap out
-        fit with a customer trainer, they can modify train instead."""
+        """  Wrapper function for 'fit()'. If the user wants to entirely swap out
+            'fit()' with a customer trainer, they can modify train instead."""
         return self.fit(*args, **kwargs)
 
     def fit(self, X_str, y_train):
-        """ trains the model with training data and labels.
-        Includes:
-        * encoding X_str into vector form.
-        *Note*: y_train is assumed to be encoded into sklearn compatible format
-        (use sklearn's label encoder for this purpose externally)
-        * training model
-        * grid search over parameter range
-        * returns best model and corresponding hyper parameters
+        """ Trains the model with training data and labels.
+            Includes:
+            * Encoding X_str into vector form.
+            *Note*: y_train is assumed to be encoded into sklearn compatible format.
+            (use sklearn's label encoder for this purpose externally)
+            * Training the model.
+            * Grid search over parameter range.
+            * Returns best model and corresponding hyper parameters.
         :param X_str: Dataset of strings to train on.
         :type X_str: array_like (array of strings, ndarray, pandas dataframe)
-        :param y_train: labels in encoded vector form directly sent to model.fit()
+        :param y_train: Labels in encoded vector form directly sent to model.fit().
         :type y_train: array_like
         :return: List of length 2 . The elements are:
-        * sklearn pipeline object containing trained encoder and trained model
-        * dict containing mapping from features to the best hyperparameters
+            * An sklearn pipeline object containing trained encoder and trained model.
+            * Dict containing mapping from features to the best hyperparameters.
         :rtype: list
         """
         X_train = self._encode(X_str)
@@ -103,7 +103,7 @@ class ClassicalTextExplainer:
         # report metrics
         class Encoder:
             """Encoder object recast into an API that is compatible with
-            Pipeline()
+            Pipeline().
             """
             def __init__(self, explainer):
                 self._explainer = explainer
@@ -123,11 +123,11 @@ class ClassicalTextExplainer:
         return [text_model, best_params]
 
     def explain_local(self, input_text, abs_sum_to_one=False):
-        """ returns an explanation object containing explanations over words
-        in the input text string
-        :param input_text: string to be explained
+        """ Returns an explanation object containing explanations over words
+            in the input text string.
+        :param input_text: String to be explained.
         :type input_text: str
-        :return: A model explanation object containing importances and metadata
+        :return: A model explanation object containing importances and metadata.
         :rtype: LocalExplanation object
         """
 
@@ -168,21 +168,20 @@ class ClassicalTextExplainer:
         return local_explanantion
 
     def explain_global(self, label_name):
-        """ returns list of top 20 features and corresponding importances over
-        the whole dataset.
-        * Obtain the top feature ids for the selected class label.
-        * Map top features back to words.
-        Can be rephased as a local explanation over a sentence that contains
-        every word in the vocabulary.
-        :param label_name: label for which importances are to be returned.
+        """ Returns list of top 20 features and corresponding importances over
+            the whole dataset.
+            * Obtain the top feature ids for the selected class label.
+            * Map top features back to words.
+            Can be rephased as a local explanation over a sentence that contains
+            every word in the vocabulary.
+        :param label_name: Label for which importances are to be returned.
         :type input_text: str
-        :return: A model explanation object containing importances and metadata
+        :return: A model explanation object containing importances and metadata.
         :rtype: global_explanation object
-
-        *Note*: label name is not applicable to tree based models. For them,
-        the most important features are returned over all labels.
-        *Note*: edit get_important_words() function to change num of features
-        to be something other than 20.
+        *Note*: Label name is not applicable to tree based models. For them,
+            the most important features are returned over all labels.
+        *Note*: Edit get_important_words() function to change num of features
+            to be something other than 20.
         """
         clf_type = ""
         if hasattr(self.model, "coef_"):
@@ -206,9 +205,9 @@ class ClassicalTextExplainer:
         return global_explanation
 
     def visualize(self, word_importances, parsed_sentence):
-        """ wrapper function for plot_local_imp()
-        plots the top importances for a parsed sentence when corresponding
-        importances are available
-        Internal fast prototyping tool for easy visualization
-        Serves as a visual proxy for dashboard"""
+        """ Wrapper function for plot_local_imp()
+            Plots the top importances for a parsed sentence when corresponding
+            importances are available.
+            Internal fast prototyping tool for easy visualization.
+            Serves as a visual proxy for dashboard."""
         plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5)

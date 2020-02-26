@@ -13,7 +13,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 # Uses spacy's inbuilt language tool for preprocessing
 # in English [model](https://github.com/explosion/spaCy/tree/master/spacy/lang/en)
 class BOWTokenizer:
-    """Default tokenizer used by BOWEncoder for parsing and tokenizing
+    """Default tokenizer used by BOWEncoder for parsing and tokenizing.
     """
     def __init__(
         self,
@@ -21,17 +21,17 @@ class BOWTokenizer:
         stop_words=spacy.lang.en.stop_words.STOP_WORDS,
         punctuations=string.punctuation,
     ):
-        """Intitialize the BOWTokenizer object
+        """Intitialize the BOWTokenizer object.
 
         Arguments:
-            parser {spacy.lang.en.English - by default} -- any parser object
-            that supports parser(sentence) call on it
+            parser {spacy.lang.en.English - by default} -- Any parser object
+                that supports parser(sentence) call on it.
 
         Keyword Arguments:
-            stop_words {iterable over str} -- set of stop words to be removed.
+            stop_words {iterable over str} -- Set of stop words to be removed.
             (default: {spacy.lang.en.stop_words.STOP_WORDS})
-            punctuations {iterable over str} -- set of punctuations to be
-            removed (default: {string.punctuation})
+            punctuations {iterable over str} -- Set of punctuations to be
+            removed. (default: {string.punctuation})
         """
         self.parser = parser
         # list of stop words and punctuation marks
@@ -42,14 +42,14 @@ class BOWTokenizer:
         """ Returns the sentence (or prose) as a parsed list of tokens.
 
         Arguments:
-            sentence {str} -- Single sentence/prose that needs to be tokenized
+            sentence {str} -- Single sentence/prose that needs to be tokenized.
 
         Keyword Arguments:
             keep_ids {bool} -- If True, returned tokens are indexed by their
-            original positions in the parsed sentence. If False, the returned
-            tokens do not preserve positionality. Is set to False for training
-            but to true at text/execution time, when we need explanability
-            (default: {False})
+                original positions in the parsed sentence. If False, the returned
+                tokens do not preserve positionality. Has to be set to False for
+                training purposes. Set to true at text/execution time, when user
+                needs explanability. (default: {False})
 
         Returns:
             list -- List of all tokens extracted from the sentence.
@@ -58,13 +58,13 @@ class BOWTokenizer:
         # Creating our token object, which is used to create documents with linguistic annotations.
         mytokens = self.parser(sentence)
 
-        # Lemmatizing each token, removing blank space and converting each token into lowercase
+        # Lemmatizing each token, removing blank space and converting each token into lowercase.
         mytokens = [
             word.lemma_.lower().strip() if word.lemma_ != "-PRON-" else word.lower_
             for word in mytokens
         ]
 
-        # Removing stop words
+        # Removing stop words.
         if keep_ids is True:
             return [
                 word
@@ -85,12 +85,12 @@ class BOWTokenizer:
 
 class BOWEncoder:
     """Default encoder class with inbuilt function for decoding text that
-    has been encoded by the same object. Also supports label encoding.
-    Can be used as a skeleton to build more sophisticated Encoders on top.
+        has been encoded by the same object. Also supports label encoding.
+        Can be used as a skeleton to build more sophisticated encoders on top.
     """
     def __init__(self):
         """Intializes the Encoder object and sets internal tokenizer,
-        labelEncoder and vectorizer using predefined objects.
+            labelEncoder and vectorizer using predefined objects.
         """
         self.tokenizer = BOWTokenizer(
             English()
@@ -105,21 +105,21 @@ class BOWEncoder:
     # importances over raw features.
     def encode_features(self, X_str, needs_fit=True, keep_ids=False):
         """ Encodes the dataset from string form to encoded vector form using
-        the tokenizer and vectorizer.
+            the tokenizer and vectorizer.
 
         Arguments:
             X_str {[iterable over strings]} -- The X data in string form.
 
         Keyword Arguments:
             needs_fit {bool} -- Whether the vectorizer itself needs to be
-            trained or not (default: {True})
+                trained or not. (default: {True})
             keep_ids {bool} -- Whether to preserve position of encoded words
-            with respect to raw document. Has to be False for training. Has to
-            be True for explanations and decoding.(default: {False})
+                with respect to raw document. Has to be False for training. Has to
+                be True for explanations and decoding.(default: {False})
 
         Returns:
             [List with 2 components] --
-            * X_vec -- The dataset vectorized and encoded to numeric form
+            * X_vec -- The dataset vectorized and encoded to numeric form.
             * self.vectorizer -- trained vectorizer.
         """
         # encoding while preserving ids, used only for importance computation
@@ -135,22 +135,20 @@ class BOWEncoder:
         return [X_vec, self.vectorizer]
 
     def encode_labels(self, y_str, needs_fit=True):
-        """Uses the default label encoder to encode labels into vector form
+        """Uses the default label encoder to encode labels into vector form.
 
         Arguments:
             y_str {Iterable over str} -- array-like w. label names as elements
 
         Keyword Arguments:
-            needs_fit {bool} -- Does the label encoder need training
+            needs_fit {bool} -- Does the label encoder need training.
             (default: {True})
 
         Returns:
             [List with 2 components] --
-            * y_vec -- The labels vectorized and encoded to numeric form
-            * self.labelEncoder -- trained label encoder object
+            * y_vec -- The labels vectorized and encoded to numeric form.
+            * self.labelEncoder -- trained label encoder object.
         """
-        # TODO : add if statements for labels that are inputted as nd.arrays and lists.
-        # convert from pandas dataframe to ndarray
         y_str = np.asarray(y_str[:]).reshape(-1, 1)
         if needs_fit is True:
             y_vec = self.labelEncoder.fit_transform(y_str)
@@ -165,15 +163,15 @@ class BOWEncoder:
 
         Arguments:
             encoded_imp {list} -- List of importances in order of
-            encoded features
-            input_text {[list]} -- list containing raw text over which
-            importances are to be returned
+                encoded features.
+            input_text {[list]} -- List containing raw text over which
+                importances are to be returned.
 
         Returns:
             [List with 2 components] --
-            * decoded_imp -- importances with 1:1 mapping to parsed sent.
-            * parsed_sentence -- raw text parsed as list with individual raw
-            features
+            * decoded_imp -- Importances with 1:1 mapping to parsed sent.
+            * parsed_sentence -- Raw text parsed as list with individual raw
+                features.
         """
         EMPTYTOKEN = "empty_token"
         parsed_sentence = []
@@ -195,19 +193,20 @@ class BOWEncoder:
 
 
 def plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5):
-    """plots the top importances for a parsed sentence when corresponding
-        importances are available
-        Internal fast prototyping tool for easy visualization
-        Serves as a visual proxy for dashboard
+    """Plots the top importances for a parsed sentence when corresponding
+        importances are available.
+        Internal fast prototyping tool for easy visualization.
+        Serves as a visual proxy for dashboard.
 
     Arguments:
-        parsed_sentence {[list]} -- raw text parsed as list with individual raw
-        features
-        word_importances {[list]} -- importances with 1:1 mapping to parsed
-        sentences
+        parsed_sentence {[list]} -- Raw text parsed as list with individual raw
+        features.
+        word_importances {[list]} -- Importances with 1:1 mapping to parsed
+        sentences.
 
     Keyword Arguments:
-        max_alpha {float} -- [description] (default: {0.5})
+        max_alpha {float} -- Changes intensity of coloring returned by the tool.
+            (default: {0.5})
     """
     # Prevent special characters like & and < to cause the browser...
     # to display something other than what you intended.
@@ -249,21 +248,21 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
 
     Arguments:
         classifier {[classifier object]} -- trained model
-        label_name {str} -- label for which important words are to be obtained
-        only valid for linear_model functions. Not relevant for tree models.
+        label_name {str} -- Label for which important words are to be obtained.
+        Only valid for linear_model functions. Not relevant for tree models.
         bow_encoder {[BOWEncoder object]} -- trained encoder
 
     Keyword Arguments:
         clf_type {str} -- [description] (default: {"coef"})
 
     Raises:
-        Exception: only supports models with coef_ or feature_importances call
+        Exception: Only supports models with coef_ or feature_importances call.
 
     Returns:
         [List with 2 components] --
-        * decoded_imp -- importances with 1:1 mapping to parsed sent.
-        * parsed_sentence -- raw text parsed as list with individual raw
-        features
+        * decoded_imp -- Importances with 1:1 mapping to parsed sent.
+        * parsed_sentence -- Raw text parsed as list with individual raw
+        features.
     """
     if clf_type == "coef":
         label_coefs_all = classifier.coef_
@@ -295,12 +294,12 @@ def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
 
 
 def plot_global_imp(top_words, top_importances, label_name):
-    """Plot top 20 global importances as a matplot lib graph
+    """Plot top 20 global importances as a matplotlib bar graph.
 
     Arguments:
-        top_words {list} -- words with 1:1 mapping to top_importances
-        top_importances {list} -- top importance values for top words
-        label_name {str} -- label for which importances are being displayed
+        top_words {list} -- Words with 1:1 mapping to top_importances.
+        top_importances {list} -- Top importance values for top words.
+        label_name {str} -- Label for which importances are being displayed.
     """
     plt.figure(figsize=(14, 7))
     plt.title("most important words for class label: " + str(label_name), fontsize=18)
