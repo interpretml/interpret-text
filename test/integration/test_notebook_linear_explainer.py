@@ -10,8 +10,8 @@ OUTPUT_NOTEBOOK = "output.ipynb"
 
 
 @pytest.mark.integration
-def test_text_classification_bow_lr(notebooks, tmp):
-    notebook_path = notebooks["text_classification_mnli_bow_lr"]
+def test_text_classification_classical_text(notebooks, tmp):
+    notebook_path = notebooks["tc_classical_text"]
     pm.execute_notebook(
         notebook_path,
         OUTPUT_NOTEBOOK,
