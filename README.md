@@ -1,6 +1,6 @@
 
 # Interpret Community Text SDK
-The Interpret Community Text builds on [Interpret-Community](https://github.com/interpretml/interpret-community), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
+The Interpret Community Text builds on [Interpret](https://github.com/interpretml/interpret-community), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
 This repository contains an SDK and Jupyter notebooks with examples to showcase its use.
 
@@ -18,8 +18,8 @@ This repository contains an SDK and Jupyter notebooks with examples to showcase 
 <a  name="overview"></a>
 
 # Overview of Interpret-Text
-Interpret-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label, or locally for each document. In particular, this open-source toolkit:
-1. Actively incorporates innovative text interpretability techniques, and allows the community to further expand it's offerings
+Interpret-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label or locally for each document. In particular, this open-source toolkit:
+1. Actively incorporates innovative text interpretability techniques, and allows the community to further expand its offerings
 2. Creates a common API across the integrated libraries
 3. Provides an interactive visualization dashboard to empower its users to gain insights into their data
 
@@ -31,7 +31,7 @@ Interpret-Text incorporates community developed interpretability techniques for 
 
 2. Business Executives: The core logic and visualizations are beneficial for raising awareness among those involved in developing AI applications, allow them to audit model predictions for potential unfairness, and establish a strong governance framework around the use of AI applications.
 
-3. Machine Learning Interpretability Researchers: Interpret's extension hooks make it easy to extend and thus, interpretability researchers who are interested in adding their own techniques, can easily add them to the community repository and compare it to state-of-the-art and proven interpretability techniques and/or other community techniques.
+3. Machine Learning Interpretability Researchers: Interpret's extension hooks make it easy to extend, meaning interpretability researchers who are interested in adding their own techniques can easily add them to the community repository and compare it to state-of-the-art and proven interpretability techniques and/or other community techniques.
 
 
 <a  name="getting-started"></a>
@@ -133,13 +133,13 @@ This [notebook](notebooks/text_classification/text_classification_mnli_bow_lr.ip
 ### Preprocessing and the Pipeline:
 
 The ClassicalTextExplainer serves as a high level wrapper for the entire NLP pipeline, by natively handling the text preprocessing, encoding, training and hyperparameter optimization process. 
-This allows the user to simply supply the dataset in text form without need for any external processing, with the entire text pipeline process being handled by the explainer under the hood.                         
+This allows the user to supply the dataset in text form without need for any external processing, with the entire text pipeline process being handled by the explainer under the hood.                         
 
 In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count-vectorizer. The [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
 
 ### Supported Models:
 
-The ClassicalTextExplainer natively supports 2 families of models. Namely, 
+The ClassicalTextExplainer natively supports 2 families of models: 
 
 * Linear models with support for a '*coefs_*' call under sklearn's linear_model module 
 * Tree based models with a 'feature_importances' call under sklearn's ensemble module  
@@ -152,7 +152,7 @@ Apart from Logistic regression, we have successfully tested the framework with [
 
 The ClassicalTextExplainer has been designed with explicit intent of being modular and extensible.
 
-The API allows for users to swap out nearly every component, including the preprocessor, tokenizer, model and even training routine, with varying levels of difficulty. The API is composed such that a modified explainer would still be able to leverage the rest of the tooling implemented within the package.
+The API allows for users to swap out nearly every component including the preprocessor, tokenizer, model and training routine with varying levels of difficulty. The API is composed such that a modified explainer would still be able to leverage the rest of the tooling implemented within the package.
 
 The text encoding and decoding components are both closely tied to each other. Should the user wish to use a custom encoding process, it has to come paired with its own custom decoding process.
 
@@ -195,7 +195,7 @@ The user can also explain a custom model. In this case, the user will have to pr
 
 ## Interpretability in training
 
-1. Train your model in a Jupyter notebook running on your local machine. For a sample pipelines see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_mnli_bert.ipynb)
+1. Train your model in a Jupyter notebook running on your local machine: For a sample pipelines see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_mnli_bert.ipynb)
 
 2. Call the explainer: To initialize the explainers, you will need to pass either 1. the dataset or 2. your model, dataset and other information depending on which explainer you are using.
 To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the BERT target layer.
@@ -218,7 +218,7 @@ To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you
     label_encoder = LabelEncoder()
     classifier, best_params = explainer.fit(X_train, y_train)
     ```
-    Instead, if you want to use the `ClassicalTextExplainer` with your own sklearn model. You will need to initialize `ClassicalTextExplainer` with your model, preprocessor and the range of hyperparamaters.
+    Instead, if you want to use the `ClassicalTextExplainer` with your own sklearn model, you will need to initialize `ClassicalTextExplainer` with your model, preprocessor and the range of hyperparamaters.
     ```python
     from sklearn.preprocessing import LabelEncoder
     from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
@@ -248,17 +248,17 @@ sorted_local_importance_values = local_explanation.get_ranked_local_values()
 
 ### Initializing the `ExplanationDashboard` object
 
-1. In order to use the visualization dashboard, first you will need to import the `ExplanationDashboard` object from the package.
+1. To use the visualization dashboard, import the `ExplanationDashboard` object from the package.
 
     ```python
     from interpret_text.widget import ExplanationDashboard
     ```
-2. When initializing the ExplanationDashboard, you will need to pass the local explanation object that is returned by our explainer.
+2. When initializing the ExplanationDashboard, you need to pass the local explanation object that is returned by our explainer.
 
     ```python
     ExplanationDashboard(local_explanantion)
     ```
-    Note: if you are not using one of our explainers, you will need to create your own explanation object by passing the feature importance values
+    Note: if you are not using one of our explainers, you need to create your own explanation object by passing the feature importance values
     ```python
     from interpret_text.explanation.explanation import _create_local_explanation
     
