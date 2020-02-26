@@ -39,7 +39,7 @@ class BOWTokenizer:
         self.punctuations = punctuations
 
     def tokenize(self, sentence, keep_ids=False):
-        """ Returns the sentence (or prose) as a parsed list of tokens.
+        """Returns the sentence (or prose) as a parsed list of tokens.
 
         Arguments:
             sentence {str} -- Single sentence/prose that needs to be tokenized.
@@ -104,7 +104,7 @@ class BOWEncoder:
     # The keep_ids flag, is used by explain local in the explainer to decode
     # importances over raw features.
     def encode_features(self, X_str, needs_fit=True, keep_ids=False):
-        """ Encodes the dataset from string form to encoded vector form using
+        """Encodes the dataset from string form to encoded vector form using
             the tokenizer and vectorizer.
 
         Arguments:
@@ -157,7 +157,7 @@ class BOWEncoder:
         return [y_vec, self.labelEncoder]
 
     def decode_imp(self, encoded_imp, input_text):
-        """ Decodes importances over encoded features as importances over
+        """Decodes importances over encoded features as importances over
         raw features. Assumes the encoding was done with the same object.
         Operates on a datapoint-by-datapoint basis.
 

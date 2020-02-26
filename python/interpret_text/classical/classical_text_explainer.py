@@ -21,7 +21,7 @@ class ClassicalTextExplainer:
 
     def __init__(self, preprocessor=None, model=None,
                  hyperparam_range=None, is_trained=False):
-        """ Initialize the ClassicalTextExplainer
+        """Initialize the ClassicalTextExplainer
         :param model: Linear models with linear coefs mapped to features or
             tree based models with inbuilt feature_importances that are sklearn
             models or follow the sklearn API.
@@ -52,7 +52,7 @@ class ClassicalTextExplainer:
         self.preprocessor = BOWEncoder() if preprocessor is None else preprocessor
 
     def _encode(self, X_str):
-        """ Encode text strings in X_str as vectors.
+        """Encode text strings in X_str as vectors.
         :param X_str: Strings to be encoded.
         :type X_str: array_like (array of strings, ndarray, pandas dataframe)
         :return: A model explanation object. It is guaranteed to be a LocalExplanation.
@@ -62,12 +62,17 @@ class ClassicalTextExplainer:
         return X_vec
 
     def train(self, *args, **kwargs):
-        """  Wrapper function for 'fit()'. If the user wants to entirely swap out
-            'fit()' with a customer trainer, they can modify train instead."""
-        return self.fit(*args, **kwargs)
+        """Wrapper function for 'fit()'. If the user wants to entirely swap out
+            'fit()' with a customer trainer, they can modify train instead.
+        :return: A model explanation object. It is guaranteed to be a LocalExplanation.
+        :return: List of length 2 . The elements are:
+            * An sklearn pipeline object containing trained encoder and trained model.
+            * Dict containing mapping from features to the best hyperparameters.
+        :rtype: list
+        return self.fit(*args, **kwargs)"""
 
     def fit(self, X_str, y_train):
-        """ Trains the model with training data and labels.
+        """Trains the model with training data and labels.
             Includes:
             * Encoding X_str into vector form.
             *Note*: y_train is assumed to be encoded into sklearn compatible format.
@@ -123,7 +128,7 @@ class ClassicalTextExplainer:
         return [text_model, best_params]
 
     def explain_local(self, input_text, abs_sum_to_one=False):
-        """ Returns an explanation object containing explanations over words
+        """Returns an explanation object containing explanations over words
             in the input text string.
         :param input_text: String to be explained.
         :type input_text: str
@@ -168,7 +173,7 @@ class ClassicalTextExplainer:
         return local_explanantion
 
     def explain_global(self, label_name):
-        """ Returns list of top 20 features and corresponding importances over
+        """Returns list of top 20 features and corresponding importances over
             the whole dataset.
             * Obtain the top feature ids for the selected class label.
             * Map top features back to words.
@@ -205,7 +210,7 @@ class ClassicalTextExplainer:
         return global_explanation
 
     def visualize(self, word_importances, parsed_sentence):
-        """ Wrapper function for plot_local_imp()
+        """Wrapper function for plot_local_imp()
             Plots the top importances for a parsed sentence when corresponding
             importances are available.
             Internal fast prototyping tool for easy visualization.
