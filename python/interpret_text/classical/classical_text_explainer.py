@@ -68,8 +68,8 @@ class ClassicalTextExplainer:
         :return: List of length 2 . The elements are:
             * An sklearn pipeline object containing trained encoder and trained model.
             * Dict containing mapping from features to the best hyperparameters.
-        :rtype: list
-        return self.fit(*args, **kwargs)"""
+        :rtype: list"""
+        return self.fit(*args, **kwargs)
 
     def fit(self, X_str, y_train):
         """Trains the model with training data and labels.
