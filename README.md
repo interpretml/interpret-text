@@ -277,7 +277,7 @@ sorted_local_importance_values = local_explanation.get_ranked_local_values()
 ### Using the Dashboard 
 The dashboard visualizes the local feature importances of the document with an interactive bar chart and text area with highlighting and underlining of important words in your document. Words associated with positive feature importance contributed to the classification of the document towards the label indicated on the dashboard, words associated with negative feature importance contributed against it. The cap on number of important words is decided by the total number words with non-zero feature importances. Hovering over either the bars in the chart or the highlighted/underlined words will reveal a tooltip with the numerical feature importance. In the chart tooltip, the context of the word shows both the word before and after to allow users a way to differentiate between the same words used multiple times.
 
-![Visualization Dashboard](img/Interpret-text viz dashboard.gif)
+![Visualization Dashboard](/img/Interpret-text%20viz%20dashboard.gif)
 
 <a  name="contrib"></a>
 
