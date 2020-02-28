@@ -1,16 +1,15 @@
 export interface IExplanationDashboardProps {
-    modelInformation: IModelInformation;
-    dataSummary: IDatasetSummary;
-    }
-
-export interface IModelInformation {
-    modelClass: 'msra'| 'bow' | 'rmp';
-}
-
+  /*
+   * the interface design for the dashboard
+   */
+  dataSummary: IDatasetSummary;
+  }
 export interface IDatasetSummary {
-    text: string[];
-    classNames?: string[];
-    localExplanations: number[];
-    prediction?: number[];
-    topK?: number;
+  /*
+   * information about the document given
+   */
+  text: string[];
+  classNames?: string[];
+  localExplanations: number[];
+  prediction?: number[];
 }

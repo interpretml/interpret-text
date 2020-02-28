@@ -8,29 +8,47 @@ import numpy as np
 import uuid
 
 from interpret_community.common.explanation_utils import _sort_values, _order_imp
-from interpret_community.common.constants import Dynamic, ExplanationParams
-from interpret_community.common.constants import ExplainParams
-from interpret_community.explanation.explanation import _get_aggregate_kwargs, \
-    _create_global_explanation_kwargs
-from interpret_community.explanation.explanation import LocalExplanation, ExpectedValuesMixin, \
-    ClassesMixin
+from interpret_community.common.constants import Dynamic, ExplanationParams, ExplainParams
+from interpret_community.explanation.explanation import (
+    LocalExplanation,
+    ExpectedValuesMixin,
+    ClassesMixin,
+)
 
 
 class TextExplanation(LocalExplanation):
     """Defines the mixin for text explanations."""
 
-    def __init__(self, **kwargs):
-        """Create the text explanation."""
+    def __init__(self, predicted_label=None, true_label=None, **kwargs):
+        """Create the text explanation.
+        :param predicted_label: The label predicted by the classifier
+        :type predicted_label: string
+        :param true_label: The ground truth label for the sentence
+        :type true_label: string
+        """
         super(TextExplanation, self).__init__(**kwargs)
         order = _order_imp(np.abs(self.local_importance_values))
         self._local_importance_rank = _sort_values(self._features, order)
-        self._logger.debug('Initializing TextExplanation')
+        self._predicted_label = predicted_label
+        self._true_label = true_label
+        self._logger.debug("Initializing TextExplanation")
         if len(order.shape) == 3:
             i = np.arange(order.shape[0])[:, np.newaxis]
             j = np.arange(order.shape[1])[:, np.newaxis]
-            self._ordered_local_importance_values = np.array(self.local_importance_values)[i, j, order]
+            self._ordered_local_importance_values = np.array(
+                self.local_importance_values
+            )[i, j, order]
         else:
             self._ordered_local_importance_values = self.local_importance_values
+
+    @property
+    def predicted_label(self):
+        """Get the predicted label of the document from original model.
+
+        :return: The predicted label of the document.
+        :rtype: string
+        """
+        return self._predicted_label
 
     @property
     def local_importance_rank(self):
@@ -74,16 +92,27 @@ class TextExplanation(LocalExplanation):
         """
         if not super()._does_quack(explanation):
             return False
-        if not hasattr(explanation, ExplainParams.LOCAL_IMPORTANCE_RANK) or explanation.local_importance_rank is None:
+        if (
+            not hasattr(explanation, ExplainParams.LOCAL_IMPORTANCE_RANK)
+            or explanation.local_importance_rank is None
+        ):
             return False
-        if (not hasattr(explanation, ExplainParams.ORDERED_LOCAL_IMPORTANCE_VALUES) or
-                explanation.ordered_local_importance_values is None):
+        if (
+            not hasattr(explanation, ExplainParams.ORDERED_LOCAL_IMPORTANCE_VALUES)
+            or explanation.ordered_local_importance_values is None
+        ):
             return False
         return True
 
-def _create_local_explanation(expected_values=None, classification=True,
-                              text_explanation=False, image_explanation=False,
-                              explanation_id=None, **kwargs):
+
+def _create_local_explanation(
+    expected_values=None,
+    classification=True,
+    text_explanation=False,
+    image_explanation=False,
+    explanation_id=None,
+    **kwargs
+):
     """Dynamically creates an explanation based on local type and specified data.
 
     :param expected_values: The expected values of the model.

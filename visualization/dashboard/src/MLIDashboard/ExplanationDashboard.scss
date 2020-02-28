@@ -1,0 +1,104 @@
+.explainerDashboard {
+    width: 100%;
+    height: 100%;
+    background-color: #f2f2f2;
+    font-family: 'Segoe UI', 'Segoe UI Web (West European)', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+    display: flex;
+    flex-direction: column;
+    .sliderWithText {
+        margin-right: 3%;
+        margin-left: 3%;
+        .slider {
+            margin-top: 3%;
+        }
+        .textBelowSlider {
+            font-size: 20px;
+            text-align: center;
+            color: #636363;
+            margin: 10px;
+            font-weight: lighter;
+        }
+    }
+    .chartWithRadio {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        .barChart{
+            margin-left:2%;
+            min-height: 300px;
+            max-height: 450px;
+            min-width: 400px;
+            flex: 1;
+        }
+        .chartRight {
+            flex-direction: column;
+            margin-left: 3%;
+            margin-right: 3%;
+            max-width: 230px;
+            min-width: 230px;
+            .labelPrediction {
+                font-size: 24px;
+                font-weight: 500;
+                margin-bottom:20px;
+                color: black;
+                font-size: 24px;
+            }
+            .radio {
+                font-weight: lighter;
+                font-size: 12px;
+            }
+            .chartLegend {
+                margin-top: 10px;
+                color: #666666;
+                font-size: 11px;
+            }
+        }
+    }
+    .highlightWithLegend {
+        background-color: white;
+        display: flex;
+        flex-direction: row;
+        .textHighlighting {
+            margin-left: 3%;
+            margin-top: 2%;
+            border-style: groove;
+            border-color: #CCCCCC;
+            border-radius: 1px;
+            overflow-y: auto;
+            max-height: 200px;
+            min-width: 400px;
+            line-height: 32px;
+            padding: 25px;
+            font-weight: lighter;
+        }
+        .textRight {
+            flex-direction: column;
+            margin: 3%;
+            font-size: 11px;
+            max-width: 230px;
+            min-width: 230px;
+            .legend {
+                margin-bottom: 17px;
+                color: #b7b7b7;
+            }
+            .posFeatureImportance {
+                margin-bottom: 5px;
+                background-color: #5A53FF;
+                color: white;
+                font-weight: bold;
+                font-weight: lighter;
+                margin-right: 3px;
+                padding: 2px;
+            }
+            .negFeatureImportance {
+                margin-top: 5px;
+                font-weight: bold;
+                text-decoration-line: underline;
+                color: #5A53FF;
+                font-weight: lighter;
+                margin-right: 3px;
+                padding: 2px;
+            }
+        }
+    }
+}
