@@ -1,6 +1,6 @@
 
 # Interpret Community Text SDK
-The Interpret Community Text builds on [Interpret](https://github.com/interpretml/interpret-community), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
+The Interpret Community Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
 This repository contains an SDK and Jupyter notebooks with examples to showcase its use.
 
@@ -128,7 +128,7 @@ The following is a list of the explainers available in this repository:
 ## Classical Text Explainer
 
 The ClassicalTextExplainer extends text interpretability to classical machine learning models. 
-This [notebook](notebooks/text_classification/text_classification_mnli_bow_lr.ipynb) provides a step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
+This [notebook](notebooks/text_classification/text_classification_classical_text_explainer.ipynb) provides a step by step walkthrough of operationalizing the ClassicalTextExplainer in an ML pipeline.
 
 ### Preprocessing and the Pipeline:
 
@@ -158,7 +158,7 @@ The text encoding and decoding components are both closely tied to each other. S
 
 ### Explainability:
 
-The ClassicalTextExplainer offers a painfree API to surface explainations inherent to supported models. The natively supported linear models such as linear regression and logisitic regression are considered to be glass-box explainers. A glass-box explainer implies a model that is innately explainable, where the user can fully observe and dissect the process adopted by the model in making a prediction. The family of linear models such as logistic regression and ensemble methods like random forests can be considered to be under the umbrella of glass-box explainers. Neural networks and Kernel based models are usually not considered glass-box models.
+The ClassicalTextExplainer offers a painfree API to surface explanations inherent to supported models. The natively supported linear models such as linear regression and logisitic regression are considered to be glass-box explainers. A glass-box explainer implies a model that is innately explainable, where the user can fully observe and dissect the process adopted by the model in making a prediction. The family of linear models such as logistic regression and ensemble methods like random forests can be considered to be under the umbrella of glass-box explainers. Neural networks and Kernel based models are usually not considered glass-box models.
 
 By default, the ClassicalTextExplainer leverages this inherent explainability by exposing weights and importances over encoded tokens as explanations over each word in a document. In practice, these can be accessed through the visualization dashboard or the explanation object.
 
@@ -168,16 +168,18 @@ If the user supplies a custom model, the nature of their model explanability (gl
 
 
 ## Unified Information Explainer
-The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_mnli_bert.ipynb) provides an example of how to load and preprocess data and retrieve explanation for all the layers of BERT - the transformer layers, pooler, and classification layer.
+The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_unified_information_explainer.ipynb) provides an example of how to load and preprocess data and retrieve explanation for all the layers of BERT - the transformer layers, pooler, and classification layer.
 
 ### Preprocessing:
 The UnifiedInformationExplainer handles the required text pre-processing. Each sentence is tokenized using the `BERT Tokenizer`.
 
 ### Supported Models:
-The UnifiedInformationExplainer only supports BERT at this time. A user will need to supply a trained or fine-tuned BERT model, the trianing dataset (or a subset if it is too large) and the sentence or text to be explained.  Future work can extend this implementation to support RNNs and LSTMs. 
+The UnifiedInformationExplainer only supports BERT at this time. A user will need to supply a trained or fine-tuned BERT model, the training dataset (or a subset if it is too large) and the sentence or text to be explained.  Future work can extend this implementation to support RNNs and LSTMs. 
 
 ## Introspective Rationale Explainer
-The IntrospectiveRationaleExplainer uses a generator-predictor framework to produce a comprehensive subset of text input features or rationales that are relevant for the classification task. This introspective model predicts the labels and incorporates the outcome into the rationale selection process. The outcome is a hard or soft selection of rationales (words that have useful information for the classification task) and anti-rationales (words that do not appear to have useful information). This [notebook] **add in the link** provides an example of how to use the introspective rationale generator.
+The IntrospectiveRationaleExplainer uses a generator-predictor framework to produce a comprehensive subset of text input features or rationales that are relevant for the classification task. This introspective model predicts the labels and incorporates the outcome into the rationale selection process. The outcome is a hard or soft selection of rationales (words that have useful information for the classification task) and anti-rationales (words that do not appear to have useful information). 
+
+<!-- This [notebook] **ADD LINK ONCE NOTEBOOK IS MERGED INTO MASTER** provides an example of how to use the introspective rationale generator. -->
 
 ### Preprocessing:
 The IntrospectiveRationaleExplainer has generator and predictor modules that handle the required text pre-processing.
