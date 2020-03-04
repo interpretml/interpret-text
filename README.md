@@ -6,7 +6,7 @@ This repository contains an SDK and Jupyter notebooks with examples to showcase 
 
 # Contents
 
--  [Overview of Interpret-Text](#overview)
+-  [Overview of Interpret-Community-Text](#overview)
 -  [Target Audience](#target-audience)
 -  [Getting Started](#getting-started)
 -  [Supported Models and NLP Scenarios](#models)
@@ -17,8 +17,8 @@ This repository contains an SDK and Jupyter notebooks with examples to showcase 
 
 <a  name="overview"></a>
 
-# Overview of Interpret-Text
-Interpret-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label or locally for each document. In particular, this open-source toolkit:
+# Overview of Interpret-Community-Text
+Interpret-Community-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label or locally for each document. In particular, this open-source toolkit:
 1. Actively incorporates innovative text interpretability techniques, and allows the community to further expand its offerings
 2. Creates a common API across the integrated libraries
 3. Provides an interactive visualization dashboard to empower its users to gain insights into their data
@@ -44,7 +44,7 @@ To setup on your local machine:
 
 <details>
 
-<summary><strong><em>1. Clone the interpret-community repository</em></strong></summary>
+<summary><strong><em>1. Clone the interpret-community-text repository</em></strong></summary>
 
 Clone and cd into the repository
 ```
@@ -162,13 +162,13 @@ The ClassicalTextExplainer offers a painfree API to surface explanations inheren
 
 By default, the ClassicalTextExplainer leverages this inherent explainability by exposing weights and importances over encoded tokens as explanations over each word in a document. In practice, these can be accessed through the visualization dashboard or the explanation object.
 
-The explanations provided by the aforementiond glass-box methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and strong belief in humans being able to understand the internal configuration of the trained machine learning model.
+The explanations provided by the aforementioned glass-box methods serve as direct proxies for weights and parameters in the model, which make the final prediction. This allows us to have high confidence in the correctness of the explanation and strong belief in humans being able to understand the internal configuration of the trained machine learning model.
 
 If the user supplies a custom model, the nature of their model explanability (glass-box , grey-box, black-box) will carry over to importances produced by the explainer as well.
 
 
 ## Unified Information Explainer
-The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_unified_information_explainer.ipynb) provides an example of how to load and preprocess data and retrieve explanation for all the layers of BERT - the transformer layers, pooler, and classification layer.
+The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_unified_information_explainer.ipynb) provides an example of how to load and preprocess data and retrieve explanations for all the layers of BERT - the transformer layers, pooler, and classification layer.
 
 ### Preprocessing:
 The UnifiedInformationExplainer handles the required text pre-processing. Each sentence is tokenized using the `BERT Tokenizer`.
@@ -185,7 +185,7 @@ The IntrospectiveRationaleExplainer uses a generator-predictor framework to prod
 The IntrospectiveRationaleExplainer has generator and predictor modules that handle the required text pre-processing.
 
 ### Supported Models: 
-The IntrospectiveRationaleExplainer is designed to be modular and extensible. The API currently has support for `RNN` and `BERT` models. There are three different sets of modules thathas been implemented in this API:
+The IntrospectiveRationaleExplainer is designed to be modular and extensible. The API currently has support for `RNN` and `BERT` models. There are three different sets of modules that has been implemented in this API:
 * Explain a BERT model (BERT is used in the generator and predictor modules), 
 * Explain an RNN model (RNNs are used in the generator and predictor modules), and
 * Explain an RNN model with BERT as the generator (RNNs are used in the predictor module and BERT is used in the generator module)
@@ -197,9 +197,13 @@ The user can also explain a custom model. In this case, the user will have to pr
 
 ## Interpretability in training
 
-1. Train your model in a Jupyter notebook running on your local machine: For a sample pipelines see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_mnli_bert.ipynb)
+1. Train your model in a Jupyter notebook running on your local machine: For sample code on pre-processing and training, see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_unified_information_explainer.ipynb).
 
-2. Call the explainer: To initialize the explainers, you will need to pass either 1. the dataset or 2. your model, dataset and other information depending on which explainer you are using.
+2. Call the explainer: To initialize the explainers, you will need to pass either:
+
+* the dataset or
+* your own model, dataset, and other information depending on your choice of explainer
+
 To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the BERT target layer.
 
     ```python
