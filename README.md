@@ -168,7 +168,7 @@ If the user supplies a custom model, the nature of their model explanability (gl
 
 
 ## Unified Information Explainer
-The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_unified_information_explainer.ipynb) provides an example of how to load and preprocess data and retrieve explanation for all the layers of BERT - the transformer layers, pooler, and classification layer.
+The UnifiedInformationExplainer uses an information-based measure to provide unified and coherent explanations on the intermediate layers of deep NLP models. While this model can explain various deep NLP models, we only implement text interpretability for BERT here. This [notebook](notebooks/text_classification/text_classification_unified_information_explainer.ipynb) provides an example of how to load and preprocess data and retrieve explanations for all the layers of BERT - the transformer layers, pooler, and classification layer.
 
 ### Preprocessing:
 The UnifiedInformationExplainer handles the required text pre-processing. Each sentence is tokenized using the `BERT Tokenizer`.
