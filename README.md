@@ -17,7 +17,7 @@ This repository contains an SDK and Jupyter notebooks with examples to showcase 
 
 <a  name="overview"></a>
 
-# Overview of Interpret-Text
+# Overview of Interpret-Community-Text
 Interpret-Community-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label or locally for each document. In particular, this open-source toolkit:
 1. Actively incorporates innovative text interpretability techniques, and allows the community to further expand its offerings
 2. Creates a common API across the integrated libraries
