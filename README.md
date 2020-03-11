@@ -1,12 +1,12 @@
 
-# Interpret Community Text SDK
+# Interpret-Text SDK
 The Interpret Community Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
 This repository contains an SDK and Jupyter notebooks with examples to showcase its use.
 
 # Contents
 
--  [Overview of Interpret-Community-Text](#overview)
+-  [Overview of Interpret-Text](#overview)
 -  [Target Audience](#target-audience)
 -  [Getting Started](#getting-started)
 -  [Supported Models and NLP Scenarios](#models)
@@ -17,8 +17,8 @@ This repository contains an SDK and Jupyter notebooks with examples to showcase 
 
 <a  name="overview"></a>
 
-# Overview of Interpret-Community-Text
-Interpret-Community-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label or locally for each document. In particular, this open-source toolkit:
+# Overview of Interpret-Text
+Interpret-Text incorporates community developed interpretability techniques for NLP models and a visualization dashboard to view the results. Users can run their experiments across multiple state-of-the-art explainers and easily perform comparative analysis on them. Using these tools, users will be able to explain their machine learning models globally on each label or locally for each document. In particular, this open-source toolkit:
 1. Actively incorporates innovative text interpretability techniques, and allows the community to further expand its offerings
 2. Creates a common API across the integrated libraries
 3. Provides an interactive visualization dashboard to empower its users to gain insights into their data
@@ -44,12 +44,12 @@ To setup on your local machine:
 
 <details>
 
-<summary><strong><em>1. Clone the interpret-community-text repository</em></strong></summary>
+<summary><strong><em>1. Clone the interpret-text repository</em></strong></summary>
 
 Clone and cd into the repository
 ```
-git clone https://github.com/microsoft/interpret-community-text.git
-cd interpret-community-text
+git clone https://github.com/interpretml/interpret-text-contrib.git
+cd interpret-text-contrib
 ```
 </details>
 
@@ -197,7 +197,7 @@ The user can also explain a custom model. In this case, the user will have to pr
 
 ## Interpretability in training
 
-1. Train your model in a Jupyter notebook running on your local machine: For sample code on pre-processing and training, see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](https://github.com/microsoft/interpret-community-text/blob/master/notebooks/text_classification/text_classification_unified_information_explainer.ipynb).
+1. Train your model in a Jupyter notebook running on your local machine: For sample code on pre-processing and training, see [nlp-recipes](https://github.com/microsoft/nlp-recipes/blob/master/examples/text_classification/tc_mnli_transformers.ipynb) or our [sample notebook](notebooks/text_classification/text_classification_unified_information_explainer.ipynb).
 
 2. Call the explainer: To initialize the explainers, you will need to pass either:
 
