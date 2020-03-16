@@ -1,6 +1,6 @@
 import torch
 from interpret_text.common.utils_unified import (
-    get_single_embedding,
+    _get_single_embedding,
     make_bert_embeddings,
 )
 from utils_test import get_mnli_test_dataset, get_bert_model
@@ -16,7 +16,7 @@ class TestMSRAUtils(object):
         model = get_bert_model()
         device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
         text = "rare bird has more than enough charm to make it memorable."
-        embedded_input = get_single_embedding(model, text, device)
+        embedded_input = _get_single_embedding(model, text, device)
         assert embedded_input is not None
 
     def test_make_bert_embeddings(self):
