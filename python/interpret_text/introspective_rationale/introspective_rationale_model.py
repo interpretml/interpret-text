@@ -9,10 +9,10 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from interpret_text.common.utils_three_player import generate_data
+from interpret_text.common.utils_introspective_rationale import generate_data
 
 
-class ThreePlayerIntrospectiveModel(nn.Module):
+class IntrospectiveRationalModel(nn.Module):
     """An implementation for an explainable neural network for natural
     language processing and generating rationales used by that network.
     Based on the paper "Rethinking Cooperative Rationalization: Introspective
@@ -30,7 +30,7 @@ class ThreePlayerIntrospectiveModel(nn.Module):
     ):
         """Initializes the model parameters and components
         """
-        super(ThreePlayerIntrospectiveModel, self).__init__()
+        super(IntrospectiveRationalModel, self).__init__()
         self.args = args
         self.lambda_sparsity = args.lambda_sparsity
         self.lambda_continuity = args.lambda_continuity

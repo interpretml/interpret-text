@@ -1,12 +1,12 @@
 from interpret_text.common.utils_classical import plot_local_imp
-from interpret_text.three_player_introspective.three_player_introspective_components import (
+from interpret_text.introspective_rationale.introspective_rationale_components import (
     ClassifierModule,
     IntrospectionGeneratorModule,
     ClassifierWrapper,
 )
-from interpret_text.three_player_introspective.three_player_introspective_model import ThreePlayerIntrospectiveModel
+from interpret_text.introspective_rationale.introspective_rationale_model import IntrospectiveRationalModel
 from interpret_text.explanation.explanation import _create_local_explanation
-from interpret_text.common.utils_three_player import generate_data
+from interpret_text.common.utils_introspective_rationale import generate_data
 
 import torch
 import numpy as np
@@ -14,7 +14,7 @@ import pandas as pd
 from transformers import BertForSequenceClassification
 
 
-class ThreePlayerIntrospectiveExplainer:
+class IntrospectiveRationaleExplainer:
     """
     An explainer for training an explainable neural network for natural
     language processing and generating rationales used by that network.
@@ -33,7 +33,7 @@ class ThreePlayerIntrospectiveExplainer:
         gen_classifier=None,
     ):
         """
-        Initialize the ThreePlayerIntrospectiveExplainer
+        Initialize the IntrospectiveRationaleExplainer
         classifier type: {BERT, RNN, BERT-RNN, custom}
         If BERT, explainer, anti explainer, and generator classifier will
         be BERT modules
@@ -119,7 +119,7 @@ class ThreePlayerIntrospectiveExplainer:
             args, self.gen_classifier
         )
 
-        self.model = ThreePlayerIntrospectiveModel(
+        self.model = IntrospectiveRationalModel(
             args,
             preprocessor,
             self.explainer,
@@ -150,7 +150,7 @@ class ThreePlayerIntrospectiveExplainer:
         :param pretrained_model_path: a path to a saved torch state dictionary
         :type pretrained_model_path: string
         :return: the pretrained model
-        :rtype: ThreePlayerIntrospectiveModel
+        :rtype: IntrospectiveRationalModel
         """
         if self.cuda:
             self.model.load_state_dict(torch.load(pretrained_model_path))
@@ -181,7 +181,7 @@ class ThreePlayerIntrospectiveExplainer:
             ids, pad/word masks, and token counts for each testing example
         :type df_test: pd.DataFrame
         :return: the fitted model
-        :rtype: ThreePlayerIntrospectiveModel
+        :rtype: IntrospectiveRationalModel
         """
 
         if self.args.pretrain_cls:

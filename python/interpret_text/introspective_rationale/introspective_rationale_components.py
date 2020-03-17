@@ -7,7 +7,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from interpret_text.common.utils_three_player import generate_data
+from interpret_text.common.utils_introspective_rationale import generate_data
 
 
 class ClassifierWrapper():
