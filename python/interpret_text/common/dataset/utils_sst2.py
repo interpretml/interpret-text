@@ -7,7 +7,7 @@
     https://nlp.stanford.edu/sentiment/index.html  
 """
 import pandas as pd
-from interpret_text.common.dataset.utils_data_shared import maybe_download
+from interpret_text.common.dataset import maybe_download
 
 host = "https://github.com/AcademiaSinicaNLPLab/"\
         "sentiment_dataset/raw/master/data/"
