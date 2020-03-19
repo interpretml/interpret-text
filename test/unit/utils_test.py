@@ -12,7 +12,7 @@ def get_mnli_test_dataset():
 
 def get_ssts_dataset(file_split):
     DATA_FOLDER = "./temp"
-    df = load_sst2_pandas_df(DATA_FOLDER, file_split)
+    df = load_sst2_pandas_df(file_split, DATA_FOLDER)
     return df[:50]
 
 def get_bert_model():
