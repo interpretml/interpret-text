@@ -4,7 +4,7 @@ from interpret_text.introspective_rationale.introspective_rationale_components i
     IntrospectionGeneratorModule,
     ClassifierWrapper,
 )
-from interpret_text.introspective_rationale.introspective_rationale_model import IntrospectiveRationalModel
+from interpret_text.introspective_rationale.introspective_rationale_model import IntrospectiveRationaleModel
 from interpret_text.explanation.explanation import _create_local_explanation
 from interpret_text.common.utils_introspective_rationale import generate_data
 
@@ -119,7 +119,7 @@ class IntrospectiveRationaleExplainer:
             args, self.gen_classifier
         )
 
-        self.model = IntrospectiveRationalModel(
+        self.model = IntrospectiveRationaleModel(
             args,
             preprocessor,
             self.explainer,
@@ -150,7 +150,7 @@ class IntrospectiveRationaleExplainer:
         :param pretrained_model_path: a path to a saved torch state dictionary
         :type pretrained_model_path: string
         :return: the pretrained model
-        :rtype: IntrospectiveRationalModel
+        :rtype: IntrospectiveRationaleModel
         """
         if self.cuda:
             self.model.load_state_dict(torch.load(pretrained_model_path))
@@ -181,7 +181,7 @@ class IntrospectiveRationaleExplainer:
             ids, pad/word masks, and token counts for each testing example
         :type df_test: pd.DataFrame
         :return: the fitted model
-        :rtype: IntrospectiveRationalModel
+        :rtype: IntrospectiveRationaleModel
         """
 
         if self.args.pretrain_cls:
