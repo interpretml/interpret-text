@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 
 from transformers import BertTokenizer
-from interpret_text.common.dataset.utils_data_shared import download_and_unzip
 import torch
 
 from torch.autograd import Variable
@@ -403,17 +402,3 @@ class GlovePreprocessor:
                 tokens.append("<UNK>")
         return tokens
 
-
-def load_glove_embeddings(local_cache_path="."):
-    """Download premade glove embeddings (if not already downloaded)
-    and unzip the downloaded file
-
-    :param local_cache_path: download destination directory, defaults to "."
-    :type local_cache_path: str, optional
-    :return: file path to downloaded/unzipped file
-    :rtype: str
-    """
-    URL = "http://nlp.stanford.edu/data/glove.6B.zip"
-    file_name = "glove.6B.100d.txt"
-    file_path = download_and_unzip(URL, file_name)
-    return file_path

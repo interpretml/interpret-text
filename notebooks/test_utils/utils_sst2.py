@@ -7,7 +7,7 @@
     https://nlp.stanford.edu/sentiment/index.html  
 """
 import pandas as pd
-from interpret_text.common.dataset import maybe_download
+from notebooks.test_utils.utils_data_shared import maybe_download
 
 host = "https://github.com/AcademiaSinicaNLPLab/"\
         "sentiment_dataset/raw/master/data/"
@@ -19,7 +19,7 @@ DATA_URLS = {
 
 
 def load_sst2_pandas_df(file_split, local_cache_path="."):
-    """Downloads and extracts dataset into a pandas dataframe
+    """Downloads and extracts test_utils into a pandas dataframe
     :param file_split: The subset to load.
         One of: {"train", "dev", "split"}
     :type X_tokens: string

@@ -103,3 +103,18 @@ def download_and_unzip(URL, file_name, local_cache_path="."):
                 raise e
         extract_zip(zip_path, dest_path=local_cache_path)
     return os.path.join(local_cache_path, file_name)
+
+
+def load_glove_embeddings(local_cache_path="."):
+    """Download premade glove embeddings (if not already downloaded)
+    and unzip the downloaded file
+
+    :param local_cache_path: download destination directory, defaults to "."
+    :type local_cache_path: str, optional
+    :return: file path to downloaded/unzipped file
+    :rtype: str
+    """
+    URL = "http://nlp.stanford.edu/data/glove.6B.zip"
+    file_name = "glove.6B.100d.txt"
+    file_path = download_and_unzip(URL, file_name, local_cache_path)
+    return file_path
