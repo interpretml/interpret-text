@@ -85,8 +85,12 @@ You can install the package from source or from pipy.
 
 <details><summary><strong><em>3.1 From source (developers): </strong></em></summary>
 
+Run the below commands from ```interpret-text-contrib/python```
+
 ```
     pip install -e .
+    jupyter nbextension install --py --sys-prefix interpret_text.widget
+    jupyter nbextension enable interpret_text.widget --py --sys-prefix
 ```
 </details>
 
