@@ -62,7 +62,7 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s
       pytest test/integration/test_notebook_three_player_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run three player explainer'
+    displayName: 'Run introspective rationale explainer'
 
   # Uncomment if needed
   - bash: |
