@@ -89,7 +89,7 @@ Run the below commands from ```interpret-text-contrib/python```
 
 ```
     pip install -e .
-    jupyter nbextension install --py --sys-prefix interpret_text.widget
+    jupyter nbextension install interpret_text.widget --py --sys-prefix 
     jupyter nbextension enable interpret_text.widget --py --sys-prefix
 ```
 </details>
