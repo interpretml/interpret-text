@@ -3,9 +3,8 @@
 # ---------------------------------------------------------
 
 # Tests for model explainability SDK
-
+from notebooks.test_utils.utils_mnli import load_mnli_pandas_df
 from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
-from interpret_text.common.utils_unified import load_pandas_df
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from utils_test import get_mnli_test_dataset
@@ -16,14 +15,17 @@ class TestClassicalExplainer(object):
 
     def test_explain_model_local(self):
         # test data
-        #mnli_test_dataset = get_mnli_test_dataset()
-        DATA_FOLDER = "./temp"
-        df = load_pandas_df(DATA_FOLDER, "train")
-        df = df[df["gold_label"] == "neutral"]  # get unique sentences
+        train_df = get_mnli_test_dataset('train')
+        X_str = train_df['sentence1']
+        ylabels = train_df['genre']
+
+        #DATA_FOLDER = "./temp"
+        #df = load_mnli_pandas_df(DATA_FOLDER, "train")
+        #df = df[df["gold_label"] == "neutral"]  # get unique sentences
 
         # fetch documents and labels from data frame
-        X_str = df['sentence1'][:50]  # the document we want to analyze
-        ylabels = df['genre'][:50]  # the labels, or answers, we want to test against
+        #X_str = df['sentence1'][:50]  # the document we want to analyze
+        #ylabels = df['genre'][:50]  # the labels, or answers, we want to test against
 
         X_train, X_test, y_train, y_test = train_test_split(X_str, ylabels, train_size=0.8, test_size=0.2)
 
