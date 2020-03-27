@@ -16,7 +16,8 @@ def notebooks():
     # Path for the notebooks
     paths = {
         "tc_unified_information": os.path.join(folder_notebooks, "text_classification", "text_classification_unified_information_explainer.ipynb"),
-        "tc_classical_text": os.path.join(folder_notebooks, "text_classification", "text_classification_classical_text_explainer.ipynb")
+        "tc_classical_text": os.path.join(folder_notebooks, "text_classification", "text_classification_classical_text_explainer.ipynb"),
+        "tc_introspective_rationale": os.path.join(folder_notebooks, "text_classification", "text_classification_introspective_rationale_explainer.ipynb")
     }
     return paths
 

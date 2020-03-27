@@ -48,7 +48,14 @@ jobs:
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
-      pytest test/unit/test_notebook_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+      pytest test/unit/test_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run classical explainer tests'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/unit/test_unified_information_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run unified information explainer tests'
 
   - bash: |
