@@ -47,10 +47,10 @@ class IntrospectiveRationaleExplainer:
         self.args = args
 
         if classifier_type == "BERT":
-            args.gen_embedding_dim = 768 # input dimension to use in the generator classifier
+            args.gen_embedding_dim = 768  # input dimension to use in the generator classifier
             args.bert_explainers = True
-            args.embedding_dim = 768 # input dimension to use in the estimator/anti-estimator classifiers
-            args.hidden_dim = 768 # input dimension to use in the hidden generator RNN
+            args.embedding_dim = 768  # input dimension to use in the estimator/anti-estimator classifiers
+            args.hidden_dim = 768  # input dimension to use in the hidden generator RNN
             self.explainer = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
                 num_labels=args.num_labels,
