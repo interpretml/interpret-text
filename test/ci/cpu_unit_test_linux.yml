@@ -11,7 +11,7 @@ trigger: none
 
 jobs:
 - job: cpu_unit_tests_linux
-  timeoutInMinutes: 40 # how long to run the job before automatically cancelling
+  timeoutInMinutes: 120 # how long to run the job before automatically cancelling
   pool:
     vmImage: 'ubuntu-16.04' # hosted machine 
     # name: nameofagentpool
@@ -49,21 +49,21 @@ jobs:
       source activate interpret_cpu
       cd /home/vsts/work/1/s
       pytest test/unit/test_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run classical explainer tests'
+    displayName: 'Run classical explainer unit tests'
 
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
       pytest test/unit/test_unified_information_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run unified information explainer tests'
+    displayName: 'Run unified information explainer unit tests'
 
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
       pytest test/unit/test_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run introspective rationale explainer tests'
+    displayName: 'Run introspective rationale explainer unit tests'
 
   - bash: |
       cd /usr/share/miniconda/bin

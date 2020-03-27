@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # ---------------------------------------------------------
 
-# Tests for model explainability SDK
+# Tests for classical explainer
 from notebooks.test_utils.utils_mnli import load_mnli_pandas_df
 from interpret_text.classical import ClassicalTextExplainer
 from sklearn.model_selection import train_test_split
@@ -16,19 +16,20 @@ class TestClassicalExplainer(object):
         assert True
 
     def test_explain_model_local(self):
-        # test data
+        """
+        Test for explain_local of classical explainer
+        :return:
+        """
         train_df = get_mnli_test_dataset('train')
+
         X_str = train_df['sentence1']
         ylabels = train_df['genre']
-
         X_train, X_test, y_train, y_test = train_test_split(X_str, ylabels, train_size=0.8, test_size=0.2)
 
         label_encoder = LabelEncoder()
         y_train = label_encoder.fit_transform(y_train)
 
-        # Create explainer
         explainer = ClassicalTextExplainer()
-
         classifier, best_params = explainer.fit(X_train, y_train)
         explainer.preprocessor.labelEncoder = label_encoder
 
