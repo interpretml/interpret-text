@@ -10,7 +10,7 @@ from IPython.core.display import display, HTML
 from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.explanation.explanation import _create_local_explanation
 from interpret_text.common.utils_unified import (
-    get_single_embedding,
+    _get_single_embedding,
     make_bert_embeddings,
 )
 
@@ -89,7 +89,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         """
         assert text is not None, "input text is required to generate explanation"
 
-        embedded_input, parsed_sentence = get_single_embedding(self.model, text, self.device)
+        embedded_input, parsed_sentence = _get_single_embedding(self.model, text, self.device)
         self.input_embeddings = embedded_input
         self.parsed_sentence = parsed_sentence
 
