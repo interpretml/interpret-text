@@ -105,7 +105,6 @@ class ClassicalTextExplainer:
         else:
             best_params = self.model.get_params()
 
-        # report metrics
         class Encoder:
             """Encoder object recast into an API that is compatible with
             Pipeline().

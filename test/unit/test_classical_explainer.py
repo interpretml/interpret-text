@@ -9,6 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from utils_test import get_mnli_test_dataset
 
+DOCUMENT = "rare bird has more than enough charm to make it memorable."
+
 class TestClassicalExplainer(object):
     def test_working(self):
         assert True
@@ -38,8 +40,10 @@ class TestClassicalExplainer(object):
         classifier, best_params = explainer.fit(X_train, y_train)
         explainer.preprocessor.labelEncoder = label_encoder
 
-        document = "rare bird has more than enough charm to make it memorable."
-        local_explanantion = explainer.explain_local(document)
+        local_explanantion = explainer.explain_local(DOCUMENT)
+        assert len(local_explanantion.local_importance_values) == len(local_explanantion.features)
+        assrt len(local_explanantion.classes) == len(classifier.)
+
 
 
 
