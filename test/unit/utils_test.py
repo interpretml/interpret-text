@@ -9,7 +9,6 @@ def get_mnli_test_dataset(file_split):
     df = load_mnli_pandas_df(DATA_FOLDER, file_split)
     df = df[df["gold_label"] == "neutral"]  # get unique sentences
     return df[:50]
-    #return df[TEXT_COL][:50]
 
 def get_ssts_dataset(file_split):
     DATA_FOLDER = "./temp"
