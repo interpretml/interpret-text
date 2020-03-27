@@ -4,7 +4,7 @@
 
 # Tests for model explainability SDK
 from notebooks.test_utils.utils_mnli import load_mnli_pandas_df
-from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+from interpret_text.classical import ClassicalTextExplainer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from utils_test import get_mnli_test_dataset

@@ -1,1 +1,1 @@
-from .classical_text_explainer import ClassicalTextExplainer
+from .classical_text_explainer import ClassicalTextExplainer  # noqa
