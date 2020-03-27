@@ -21,6 +21,7 @@ class TestUnifiedInformationExplainer(object):
     def test_explain_model_BERT_seq_classification(self):
         device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
         mnli_test_dataset = get_mnli_test_dataset("train")
+        mnli_test_dataset = mnli_test_dataset["sentence1"]
         text = "rare bird has more than enough charm to make it memorable."
         model = get_bert_model()
         model.to(device)
