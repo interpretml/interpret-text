@@ -21,14 +21,6 @@ class TestClassicalExplainer(object):
         X_str = train_df['sentence1']
         ylabels = train_df['genre']
 
-        #DATA_FOLDER = "./temp"
-        #df = load_mnli_pandas_df(DATA_FOLDER, "train")
-        #df = df[df["gold_label"] == "neutral"]  # get unique sentences
-
-        # fetch documents and labels from data frame
-        #X_str = df['sentence1'][:50]  # the document we want to analyze
-        #ylabels = df['genre'][:50]  # the labels, or answers, we want to test against
-
         X_train, X_test, y_train, y_test = train_test_split(X_str, ylabels, train_size=0.8, test_size=0.2)
 
         label_encoder = LabelEncoder()
