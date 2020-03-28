@@ -33,10 +33,3 @@ class TestClassicalExplainer(object):
 
         local_explanantion = explainer.explain_local(DOCUMENT)
         assert len(local_explanantion.local_importance_values) == len(local_explanantion.features)
-
-
-
-
-
-
-
