@@ -10,8 +10,8 @@ trigger: none
 
 
 jobs:
-- job: cpu_unit_tests_linux
-  timeoutInMinutes: 40 # how long to run the job before automatically cancelling
+- job: cpu_integration_tests_linux
+  timeoutInMinutes: 120 # how long to run the job before automatically cancelling
   pool:
     vmImage: 'ubuntu-16.04' # hosted machine 
     # name: nameofagentpool
@@ -47,21 +47,21 @@ jobs:
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
-      pytest test/integration/test_notebook_msra_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run MSRA notebook and explainer'
+      pytest test/integration/test_notebook_unified_information_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run unified information explainer'
 
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
-      pytest test/integration/test_notebook_linear_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
-    displayName: 'Run Linear explainer'
+      pytest test/integration/test_notebook_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run classical explainer'
 
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s
-      pytest test/integration/test_notebook_three_player_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+      pytest test/integration/test_notebook_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
     displayName: 'Run introspective rationale explainer'
 
   # Uncomment if needed

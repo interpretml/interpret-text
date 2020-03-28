@@ -401,4 +401,3 @@ class GlovePreprocessor:
             else:
                 tokens.append("<UNK>")
         return tokens
-

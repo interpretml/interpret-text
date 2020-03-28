@@ -13,6 +13,9 @@ import numpy as np
 import pandas as pd
 from transformers import BertForSequenceClassification
 
+BERT_EMBEDDING_DIM = 768
+RNN_EMBEDDING_DIM = 100
+
 
 class IntrospectiveRationaleExplainer:
     """
@@ -47,10 +50,10 @@ class IntrospectiveRationaleExplainer:
         self.args = args
 
         if classifier_type == "BERT":
-            args.gen_embedding_dim = 768 # input dimension to use in the generator classifier
+            args.gen_embedding_dim = BERT_EMBEDDING_DIM  # input dimension to use in the generator classifier
             args.bert_explainers = True
-            args.embedding_dim = 768 # input dimension to use in the estimator/anti-estimator classifiers
-            args.hidden_dim = 768 # input dimension to use in the hidden generator RNN
+            args.embedding_dim = BERT_EMBEDDING_DIM  # input dimension to use in the estimator/anti-estimator classifiers
+            args.hidden_dim = BERT_EMBEDDING_DIM  # input dimension to use in the hidden generator RNN
             self.explainer = BertForSequenceClassification.from_pretrained(
                 "bert-base-uncased",
                 num_labels=args.num_labels,
@@ -76,9 +79,9 @@ class IntrospectiveRationaleExplainer:
             assert args.embedding_path is not None, \
                 "embedding path must be specified if using RNN modules"
             args.bert_explainers = False
-            args.gen_embedding_dim = 100
-            args.embedding_dim = 100
-            args.hidden_dim = 100
+            args.gen_embedding_dim = RNN_EMBEDDING_DIM
+            args.embedding_dim = RNN_EMBEDDING_DIM
+            args.hidden_dim = RNN_EMBEDDING_DIM
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
             self.anti_explainer = ClassifierModule(args,
                                                    preprocessor.word_vocab)
@@ -88,9 +91,9 @@ class IntrospectiveRationaleExplainer:
             assert args.embedding_path is not None, \
                 "embedding path must be specified if using RNN modules"
             args.bert_explainers = False
-            args.gen_embedding_dim = 768
-            args.embedding_dim = 100
-            args.hidden_dim = 768
+            args.gen_embedding_dim = BERT_EMBEDDING_DIM
+            args.embedding_dim = RNN_EMBEDDING_DIM
+            args.hidden_dim = BERT_EMBEDDING_DIM
             self.explainer = ClassifierModule(args, preprocessor.word_vocab)
             self.anti_explainer = ClassifierModule(args,
                                                    preprocessor.word_vocab)

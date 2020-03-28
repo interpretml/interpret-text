@@ -11,8 +11,8 @@ OUTPUT_NOTEBOOK = "output.ipynb"
 
 
 @pytest.mark.integration
-def test_text_classification_three_player_explainer(notebooks, tmp):
-    notebook_path = notebooks["text_classification_sst2_three_player"]
+def test_text_classification_introspective_rationale(notebooks, tmp):
+    notebook_path = notebooks["tc_introspective_rationale"]
     pm.execute_notebook(
         notebook_path,
         OUTPUT_NOTEBOOK,
