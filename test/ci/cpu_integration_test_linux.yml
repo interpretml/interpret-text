@@ -10,7 +10,7 @@ trigger: none
 
 
 jobs:
-- job: cpu_unit_tests_linux
+- job: cpu_integration_tests_linux
   timeoutInMinutes: 40 # how long to run the job before automatically cancelling
   pool:
     vmImage: 'ubuntu-16.04' # hosted machine 

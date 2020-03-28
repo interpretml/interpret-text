@@ -16,6 +16,7 @@ from transformers import BertForSequenceClassification
 BERT_EMBEDDING_DIM = 768
 RNN_EMBEDDING_DIM = 100
 
+
 class IntrospectiveRationaleExplainer:
     """
     An explainer for training an explainable neural network for natural
