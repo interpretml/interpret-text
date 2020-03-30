@@ -183,7 +183,7 @@ The UnifiedInformationExplainer only supports BERT at this time. A user will nee
 ## Introspective Rationale Explainer
 The IntrospectiveRationaleExplainer uses a generator-predictor framework to produce a comprehensive subset of text input features or rationales that are relevant for the classification task. This introspective model predicts the labels and incorporates the outcome into the rationale selection process. The outcome is a hard or soft selection of rationales (words that have useful information for the classification task) and anti-rationales (words that do not appear to have useful information). 
 
-<!-- This [notebook] **ADD LINK ONCE NOTEBOOK IS MERGED INTO MASTER** provides an example of how to use the introspective rationale generator. -->
+This [notebook](notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb) provides an example of how to use the introspective rationale generator.
 
 ### Preprocessing:
 The IntrospectiveRationaleExplainer has generator and predictor modules that handle the required text pre-processing.
