@@ -18,7 +18,7 @@ MAX_SENT_COUNT = 70
 SENTENCE = "This is a super amazing movie with bad acting"
 
 
-class TestIntrospectiveRationaleExplainerNew(object):
+class TestIntrospectiveRationaleExplainer(object):
     def test_working(self):
         assert True
 
