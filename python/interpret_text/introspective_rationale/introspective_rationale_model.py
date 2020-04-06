@@ -6,13 +6,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from interpret_text.common.base_text_model import BaseTextModel
 from torch.autograd import Variable
 from tqdm import tqdm
 
 from interpret_text.common.utils_introspective_rationale import generate_data
 
 
-class IntrospectiveRationaleModel(nn.Module):
+class IntrospectiveRationaleModel(BaseTextModel, nn.Module):
     """An implementation for an explainable neural network for natural
     language processing and generating rationales used by that network.
     Based on the paper "Rethinking Cooperative Rationalization: Introspective

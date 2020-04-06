@@ -1,25 +1,33 @@
 import pandas as pd
-from typing import Any, Iterable
+from typing import List
 
 from interpret_text.common.base_explainer import BaseTextPreprocessor
 from transformers import BertTokenizer
 
 
 class BertPreprocessor(BaseTextPreprocessor):
+    """ A class that tokenizes and otherwise processes text to be encoded
+       by a BERT model.
+    """
     
-    MAX_TOKEN_LENGTH = 50  # change to param?
+    MAX_TOKEN_LENGTH = 50
     TOKEN_PAD_TO_MAX = True 
-    BUILD_WORD_DICT = True  # Default = False?
+    BUILD_WORD_DICT = True
+    COUNT_SPECIAL_TOKENS = 1000
     
-    def build_vocab(self, text: str) -> Any:
+    def build_vocab(self, text: List[str]):
+        """ Build vocabulary
+
+        :param text: a list of text used to built vocabulary
+        :type text: List
+        """
         words_to_indexes = {}
         counts = {}
         tokenizer = self.get_tokenizer()
         
         for special_token in tokenizer.all_special_tokens:
             words_to_indexes[special_token] = tokenizer.convert_tokens_to_ids(special_token)
-            counts[special_token] = 1000
-        print(words_to_indexes)
+            counts[special_token] = self.COUNT_SPECIAL_TOKENS
 
         for sentence in text:
             tokens = self.generate_tokens(sentence)
@@ -42,14 +50,19 @@ class BertPreprocessor(BaseTextPreprocessor):
                 words_to_indexes[token] = i
                 counts[token] = 0
 
-        print('max num:', max_num)
-        print("vocab size:", len(words_to_indexes))
-
         self.word_vocab = words_to_indexes
         self.reverse_word_vocab = indexes_to_words
         self.counts = counts
 
-    def preprocess(self, data: Iterable[Any]) -> Iterable[Any]:
+    def preprocess(self, data: List[str]) -> pd.DataFrame:
+        """ Converts a list of text into a dataframe containing padded token ids,
+        masks distinguishing word tokens from pads, and word token counts for each text in the list.
+
+        :param data: A list of strings
+        :type data: List[str]
+        :return: Pandas Dataframe of string
+        :rtype  pd.DataFrame
+        """
         input_ids = []
         attention_mask = []
         counts = []
@@ -71,12 +84,31 @@ class BertPreprocessor(BaseTextPreprocessor):
 
         return tokens
 
-    def decode_single(self, id_list) -> Iterable[Any]:
+    def decode_single(self, id_list: List) -> List:
+        """ Decodes a single list of token ids to tokens
+
+        :param id_list: a list of token ids
+        :type id_list: List
+        :return: a list of tokens
+        :rtype: List
+        """
         tokenizer = self.get_tokenizer()
         return tokenizer.convert_ids_to_tokens(id_list)
 
-    def generate_tokens(self, sentence: str) -> Iterable[Any]:
+    def generate_tokens(self, sentence: str) -> List:
+        """ Generate tokens for given sentence
+
+        :param sentence: sentence to be tokenized
+        :type sentence: str
+        :return: A list of tokens
+        :rtype List
+        """
         return self.get_tokenizer().tokenize(sentence)
 
     def get_tokenizer(self) -> BertTokenizer:
+        """ Return bert tokenizer
+
+        :return: BertTokenizer
+        :rtype BertTokenizer
+        """
         return BertTokenizer.from_pretrained("bert-base-uncased")
