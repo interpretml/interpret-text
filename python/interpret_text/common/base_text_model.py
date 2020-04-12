@@ -1,0 +1,2 @@
+class BaseTextModel:
+    pass

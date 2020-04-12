@@ -63,6 +63,7 @@ PIP_BASE = {
     "pre-commit": "pre-commit>=1.20.0",
     "spacy": "spacy>=2.2.3",
     "transformers": "transformers==2.4.1",
+    "pydantic": "pydantic==1.4"
 }
 PIP_GPU = {}
 
