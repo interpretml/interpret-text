@@ -9,12 +9,12 @@ class BertPreprocessor(BaseTextPreprocessor):
     """ A class that tokenizes and otherwise processes text to be encoded
        by a BERT model.
     """
-    
+
     MAX_TOKEN_LENGTH = 50
-    TOKEN_PAD_TO_MAX = True 
+    TOKEN_PAD_TO_MAX = True
     BUILD_WORD_DICT = True
     COUNT_SPECIAL_TOKENS = 1000
-    
+
     def build_vocab(self, text: List[str]):
         """ Build vocabulary
 
@@ -24,7 +24,7 @@ class BertPreprocessor(BaseTextPreprocessor):
         words_to_indexes = {}
         counts = {}
         tokenizer = self.get_tokenizer()
-        
+
         for special_token in tokenizer.all_special_tokens:
             words_to_indexes[special_token] = tokenizer.convert_tokens_to_ids(special_token)
             counts[special_token] = self.COUNT_SPECIAL_TOKENS
@@ -66,7 +66,7 @@ class BertPreprocessor(BaseTextPreprocessor):
         input_ids = []
         attention_mask = []
         counts = []
-        
+
         tokenizer = self.get_tokenizer()
         for text in data:
             d = tokenizer.encode_plus(

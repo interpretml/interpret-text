@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import torch
 from torch.autograd import Variable
 
@@ -14,7 +13,7 @@ def generate_data(batch, use_cuda):
 
     :param batch: A pandas dataframe containing the tokens, masks, counts, and
         labels associated with a batch of data
-    :type batch: pd.DataFrame
+    :type batch: DataFrame
     :param use_cuda: whether to use CUDA
     :type use_cuda: bool
     :return: formatted and ordered tokens (x), masks (m), and

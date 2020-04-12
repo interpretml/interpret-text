@@ -17,7 +17,7 @@ class IntrospectiveRationaleModelConfig(BaseModelConfig):
     # used only by RNN
     embedding_path: Optional[str]
 
-    label_embedding_dim: Optional[int] #400
+    label_embedding_dim: Optional[int]
     fixed_classifier: Optional[bool]
 
     # lambas for loss function
@@ -30,17 +30,17 @@ class IntrospectiveRationaleModelConfig(BaseModelConfig):
 
     # this is the target number of target continuous pieces
     # it has no effect now, because lambda_continuity is 0.
-    count_pieces: Optional[int] #4
+    count_pieces: Optional[int]
 
     # rate at which the generator explores different rationales
-    exploration_rate: Optional[float] #0.05
+    exploration_rate: Optional[float]
 
     # multiplier to reward/penalize an accuracy gap between the classifier
     # and anti-classifier
-    lambda_acc_gap: Optional[float] #1.2
+    lambda_acc_gap: Optional[float]
 
     # learning rate
-    lr: Optional[float] #2e-4
+    lr: Optional[float]
 
     # whether to tune the weights of the embedding layer in the RNN classifier module
     # many of these weights are from passed in glove embeddings, but
@@ -48,16 +48,16 @@ class IntrospectiveRationaleModelConfig(BaseModelConfig):
     fine_tuning: Optional[bool]
 
     # training parameters
-    train_batch_size : Optional[int] # 32
-    test_batch_size : Optional[int] # 32
+    train_batch_size: Optional[int]
+    test_batch_size: Optional[int]
 
     # stop training if validation acc does not improve for more than
     # training_stop thresh
-    training_stop_thresh: Optional[int] # 5
+    training_stop_thresh: Optional[int]
 
     # the numerical labels for classification
     # ex: MNLI needs [0, 1, 2, 3, 4]
-    labels: Optional[Any]# [0, 1]
+    labels: Optional[Any]
 
     # for saving models and logging
     save_best_model: Optional[bool]

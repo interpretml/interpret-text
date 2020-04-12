@@ -2,6 +2,7 @@ from typing import Dict
 
 """ Default model configuration used by BERT, RNN and BERT_RNN """
 
+
 def get_bert_default_config() -> Dict:
     return{
         "cuda": False,
@@ -14,7 +15,7 @@ def get_bert_default_config() -> Dict:
         "embedding_dimension": 768,
         "gen_embedding_dim": 768,
         "label_embedding_dim": 400,
-        "fixed_classifier":False,
+        "fixed_classifier": False,
         "lambda_sparsity": 1.0,
         "lambda_continuity": 0,
         "lambda_anti": 1.0,

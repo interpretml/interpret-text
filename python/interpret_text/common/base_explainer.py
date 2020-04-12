@@ -68,7 +68,7 @@ class BaseTextExplainer(ABC):
         pass
 
     @abstractmethod
-    def get_preprocessor(self)-> BaseTextPreprocessor:
+    def get_preprocessor(self) -> BaseTextPreprocessor:
         """ Abstract method to return processor
 
         :return: Preprocessor of the explainer

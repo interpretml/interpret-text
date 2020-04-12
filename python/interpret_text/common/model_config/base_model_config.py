@@ -13,4 +13,4 @@ class BaseModelConfig(BaseModel):
     save_best_model: Optional[bool]
     model_save_dir: str
     model_prefix: str
-    num_labels:int
+    num_labels: int
