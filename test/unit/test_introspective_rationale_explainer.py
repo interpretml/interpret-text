@@ -104,9 +104,11 @@ class TestIntrospectiveRationaleExplainer(object):
     def test_rnn_explain_local(self):
         train_data = get_ssts_dataset('train')
         test_data = get_ssts_dataset('test')
+        all_data = pd.concat([train_data, test_data])
         X_train = train_data[TEXT_COL]
         X_test = test_data[TEXT_COL]
         preprocessor = GlovePreprocessor(count_threshold=TOKEN_COUNT_THRESHOLD, token_cutoff=MAX_SENT_COUNT)
+        preprocessor.build_vocab(all_data[TEXT_COL])
 
         df_train = pd.concat([train_data[LABEL_COL], preprocessor.preprocess(X_train)], axis=1)
         df_test = pd.concat([test_data[LABEL_COL], preprocessor.preprocess(X_test)], axis=1)
