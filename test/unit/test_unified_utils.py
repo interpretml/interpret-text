@@ -1,5 +1,5 @@
 import torch
-from interpret_text.experimental.common import (
+from interpret_text.experimental.common.utils_unified import (
     _get_single_embedding,
     make_bert_embeddings,
 )

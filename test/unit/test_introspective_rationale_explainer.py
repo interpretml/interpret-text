@@ -1,6 +1,6 @@
 import pandas as pd
-from interpret_text.experimental.common import BertPreprocessor
-from interpret_text.experimental.common import GlovePreprocessor
+from interpret_text.experimental.common.preprocessor.bert_preprocessor import BertPreprocessor
+from interpret_text.experimental.common.preprocessor.glove_preprocessor import GlovePreprocessor
 from interpret_text.experimental.introspective_rationale.introspective_rationale_components import ClassifierModule
 from interpret_text.experimental.introspective_rationale.introspective_rationale_explainer import IntrospectiveRationaleExplainer
 from model_config_constants import RNN_MODEL_CONFIG, BERT_MODEL_CONFIG
