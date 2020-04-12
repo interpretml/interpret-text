@@ -12,7 +12,7 @@ import logging
 
 import torch
 from pytorch_pretrained_bert import BertTokenizer
-from interpret_text.common.utils_bert import Language, Tokenizer
+from interpret_text.experimental.common import Language, Tokenizer
 
 log = logging.getLogger(__name__)
 

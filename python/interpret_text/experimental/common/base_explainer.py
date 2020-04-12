@@ -6,9 +6,9 @@
 from abc import abstractmethod, ABC
 from typing import Optional, Any, Iterable
 
-from interpret_text.common.base_text_model import BaseTextModel
-from interpret_text.common.preprocessor.base_text_preprocessor import BaseTextPreprocessor
-from interpret_text.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.common.base_text_model import BaseTextModel
+from interpret_text.experimental.common.preprocessor.base_text_preprocessor import BaseTextPreprocessor
+from interpret_text.experimental.explanation.explanation import _create_local_explanation
 
 
 class BaseTextExplainer(ABC):

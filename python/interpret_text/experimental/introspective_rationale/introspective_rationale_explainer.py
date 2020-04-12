@@ -3,18 +3,18 @@ from typing import Iterable, Any, Optional, Union, Dict
 import numpy as np
 import pandas as pd
 import torch
-from interpret_text.common.base_explainer import BaseTextExplainer
-from interpret_text.common.model_config.introspective_rationale_model_config import IntrospectiveRationaleModelConfig
-from interpret_text.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
+from interpret_text.experimental.common.base_explainer import BaseTextExplainer
+from interpret_text.experimental.common import IntrospectiveRationaleModelConfig
+from interpret_text.experimental.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
     get_bert_rnn_default_config
-from interpret_text.common.preprocessor.bert_preprocessor import BertPreprocessor
-from interpret_text.common.preprocessor.glove_preprocessor import GlovePreprocessor
-from interpret_text.common.utils_classical import plot_local_imp
-from interpret_text.common.utils_introspective_rationale import generate_data
-from interpret_text.explanation.explanation import _create_local_explanation
-from interpret_text.introspective_rationale.introspective_rationale_components import ClassifierWrapper, \
+from interpret_text.experimental.common import BertPreprocessor
+from interpret_text.experimental.common import GlovePreprocessor
+from interpret_text.experimental.common import plot_local_imp
+from interpret_text.experimental.common.utils_introspective_rationale import generate_data
+from interpret_text.experimental.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.introspective_rationale.introspective_rationale_components import ClassifierWrapper, \
     ClassifierModule, IntrospectionGeneratorModule
-from interpret_text.introspective_rationale.introspective_rationale_model import IntrospectiveRationaleModel
+from interpret_text.experimental.introspective_rationale import IntrospectiveRationaleModel
 from transformers import BertForSequenceClassification
 
 CLASSIFIER_TYPE_BERT = "BERT"

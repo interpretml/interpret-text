@@ -7,9 +7,9 @@ import html
 import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
 
-from interpret_text.common.structured_model_mixin import PureStructuredModelMixin
-from interpret_text.explanation.explanation import _create_local_explanation
-from interpret_text.common.utils_unified import (
+from interpret_text.experimental.common.structured_model_mixin import PureStructuredModelMixin
+from interpret_text.experimental.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.common import (
     _get_single_embedding,
     make_bert_embeddings,
 )

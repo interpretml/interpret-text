@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, Tenso
 from pytorch_pretrained_bert.modeling import BertForSequenceClassification
 from pytorch_pretrained_bert.optimization import BertAdam
 
-from interpret_text.common.utils_pytorch import get_device, move_to_device
+from interpret_text.experimental.common.utils_pytorch import get_device, move_to_device
 
 from collections import namedtuple
 from cached_property import cached_property

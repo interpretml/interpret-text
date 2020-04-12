@@ -6,11 +6,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from interpret_text.common.base_text_model import BaseTextModel
+from interpret_text.experimental.common.base_text_model import BaseTextModel
 from torch.autograd import Variable
 from tqdm import tqdm
 
-from interpret_text.common.utils_introspective_rationale import generate_data
+from interpret_text.experimental.common.utils_introspective_rationale import generate_data
 
 
 class IntrospectiveRationaleModel(BaseTextModel, nn.Module):

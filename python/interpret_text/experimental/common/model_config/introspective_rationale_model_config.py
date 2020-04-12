@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from interpret_text.common.model_config.base_model_config import BaseModelConfig
+from interpret_text.experimental.common.model_config.base_model_config import BaseModelConfig
 
 
 class IntrospectiveRationaleModelConfig(BaseModelConfig):
