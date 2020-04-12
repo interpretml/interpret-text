@@ -8,7 +8,7 @@ import torch
 from numpy import dot
 from numpy.linalg import norm
 
-from interpret_text.unified_information.unified_information_explainer import (
+from interpret_text.experimental.unified_information.unified_information_explainer import (
     UnifiedInformationExplainer,
 )
 from utils_test import get_mnli_test_dataset, get_bert_model

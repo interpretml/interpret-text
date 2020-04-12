@@ -139,7 +139,7 @@ This [notebook](notebooks/text_classification/text_classification_classical_text
 The ClassicalTextExplainer serves as a high level wrapper for the entire NLP pipeline, by natively handling the text preprocessing, encoding, training and hyperparameter optimization process. 
 This allows the user to supply the dataset in text form without need for any external processing, with the entire text pipeline process being handled by the explainer under the hood.                         
 
-In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count-vectorizer. The [utilities](python/interpret_text/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
+In its default configuration the preprocessing pipeline uses a 1-gram bag-of-words encoder implemented by sklearn's count-vectorizer. The [utilities](python/interpret_text/experimental/common/utils_classical.py) file contains the finer details of the preprocessing steps in the default pipeline.            
 
 ### Supported Models:
 

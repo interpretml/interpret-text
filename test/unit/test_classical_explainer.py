@@ -3,7 +3,7 @@
 # ---------------------------------------------------------
 
 # Tests for classical explainer
-from interpret_text.classical import ClassicalTextExplainer
+from interpret_text.experimental.classical import ClassicalTextExplainer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from utils_test import get_mnli_test_dataset
