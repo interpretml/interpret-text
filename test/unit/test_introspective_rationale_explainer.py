@@ -106,12 +106,12 @@ class TestIntrospectiveRationaleExplainer(object):
         test_data = get_ssts_dataset('test')
         X_train = train_data[TEXT_COL]
         X_test = test_data[TEXT_COL]
-        preprocessor = BertPreprocessor()
+        preprocessor = GlovePreprocessor(count_threshold=MAX_SENT_COUNT, token_cutoff=MAX_SENT_COUNT)
 
         df_train = pd.concat([train_data[LABEL_COL], preprocessor.preprocess(X_train)], axis=1)
         df_test = pd.concat([test_data[LABEL_COL], preprocessor.preprocess(X_test)], axis=1)
-        model_config = BERT_MODEL_CONFIG
-        explainer = IntrospectiveRationaleExplainer(classifier_type=CLASSIFIER_TYPE_BERT, cuda=CUDA)
+        model_config = RNN_MODEL_CONFIG
+        explainer = IntrospectiveRationaleExplainer(classifier_type=CLASSIFIER_TYPE_RNN, cuda=CUDA)
         explainer.build_model_config(model_config)
         explainer.set_preprocessor(preprocessor)
         explainer.load()
