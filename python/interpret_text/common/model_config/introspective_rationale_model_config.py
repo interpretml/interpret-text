@@ -26,7 +26,7 @@ class IntrospectiveRationaleModelConfig(BaseModelConfig):
     lambda_anti: Optional[float]
 
     # target_sparsity is the desired sparsity ratio
-    target_sparsity:Optional[float]
+    target_sparsity: Optional[float]
 
     # this is the target number of target continuous pieces
     # it has no effect now, because lambda_continuity is 0.

@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import torch
 from interpret_text.common.base_explainer import BaseTextExplainer
-from interpret_text.common.base_text_model import BaseTextModel
 from interpret_text.common.model_config.introspective_rationale_model_config import IntrospectiveRationaleModelConfig
 from interpret_text.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
     get_bert_rnn_default_config
@@ -28,9 +27,9 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
     """ Introspective Rationale Explainer
     """
 
-    def __init__(self,classifier_type:
-    Union[CLASSIFIER_TYPE_RNN, CLASSIFIER_TYPE_BERT_RNN, CLASSIFIER_TYPE_BERT,CLASSIFIER_TYPE_CUSTOM]=CLASSIFIER_TYPE_RNN,
-                 cuda=False):
+    def __init__(self, classifier_type:
+                 Union[CLASSIFIER_TYPE_RNN, CLASSIFIER_TYPE_BERT_RNN,
+                       CLASSIFIER_TYPE_BERT, CLASSIFIER_TYPE_CUSTOM] = CLASSIFIER_TYPE_RNN, cuda=False):
         """ Initialize the explainer"""
         self.classifier_type = classifier_type
         self.cuda = cuda
@@ -71,7 +70,7 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         else:
             self.classifier = classifier
 
-    def set_anti_classifier(self, classifier_type=CLASSIFIER_TYPE_RNN, anti_classifier= None):
+    def set_anti_classifier(self, classifier_type=CLASSIFIER_TYPE_RNN, anti_classifier=None):
         """ Set anti classifier from prepackaged option or provide custom anti classifier
 
         :param classifier_type: One of ['BERT', 'RNN', 'BERT_RNN']
@@ -204,7 +203,7 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         df_sentence = pd.concat(
             [df_dummy_label, self.preprocessor.preprocess([text.lower()])],
             axis=1
-            )
+        )
         batch_dict = generate_data(df_sentence, self.model_config.cuda)
         x = batch_dict["x"]
         m = batch_dict["m"]
