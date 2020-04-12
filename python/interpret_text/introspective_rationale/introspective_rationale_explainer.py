@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import torch
 from interpret_text.common.base_explainer import BaseTextExplainer
+from interpret_text.common.base_text_model import BaseTextModel
 from interpret_text.common.model_config.introspective_rationale_model_config import IntrospectiveRationaleModelConfig
 from interpret_text.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
     get_bert_rnn_default_config
@@ -285,6 +286,11 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         )
         if self.cuda:
             self.model.cuda()
+
+    def get_model(self) -> IntrospectiveRationaleModel:
+        """ Get model for this explainer
+        """
+        return self.model
 
     def set_preprocessor(self, preprocessor: Union[GlovePreprocessor, BertPreprocessor]):
         """ Set processor for this explainer
