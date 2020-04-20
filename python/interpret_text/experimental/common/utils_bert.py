@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, Tenso
 from pytorch_pretrained_bert.modeling import BertForSequenceClassification
 from pytorch_pretrained_bert.optimization import BertAdam
 
-from interpret_text.common.utils_pytorch import get_device, move_to_device
+from interpret_text.experimental.common.utils_pytorch import get_device, move_to_device
 
 from collections import namedtuple
 from cached_property import cached_property
@@ -132,7 +132,7 @@ class Tokenizer:
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
-            tokens = [x[0 : max_len - 2] + ["[SEP]"] for x in tokens]
+            tokens = [x[0: max_len - 2] + ["[SEP]"] for x in tokens]
             token_type_ids = None
         else:
             # get tokens for each sentence [[t00, t01, ...] [t10, t11,... ]]
@@ -196,7 +196,7 @@ class Tokenizer:
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
-            tokens = [x[0 : max_len - 2] + ["[SEP]"] for x in tokens]
+            tokens = [x[0: max_len - 2] + ["[SEP]"] for x in tokens]
             token_type_ids = None
         else:
             # get tokens for each sentence [[t00, t01, ...] [t10, t11,... ]]

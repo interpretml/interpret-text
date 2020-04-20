@@ -10,7 +10,7 @@ import numpy as np
 import logging
 import shap
 
-from interpret_text.shap_text_explainer import TextExplainer
+from interpret_text.experimental.shap_text_explainer import TextExplainer
 
 # from azureml.contrib.explain.model.explanation.explanation_client import ExplanationClient
 

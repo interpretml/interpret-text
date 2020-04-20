@@ -1,7 +1,7 @@
 import pandas as pd
 from typing import List
 
-from interpret_text.common.base_explainer import BaseTextPreprocessor
+from interpret_text.experimental.common.base_explainer import BaseTextPreprocessor
 from transformers import BertTokenizer
 
 

@@ -1,10 +1,10 @@
-from interpret_text.common.preprocessor.bert_preprocessor import BertPreprocessor
-from interpret_text.common.preprocessor.glove_preprocessor import GlovePreprocessor
-from interpret_text.introspective_rationale.introspective_rationale_explainer import IntrospectiveRationaleExplainer
+from interpret_text.experimental.common.preprocessor.bert_preprocessor import BertPreprocessor
+from interpret_text.experimental.common.preprocessor.glove_preprocessor import GlovePreprocessor
+from interpret_text.experimental.introspective_rationale.introspective_rationale_explainer import IntrospectiveRationaleExplainer
 
 from notebooks.test_utils.utils_mnli import load_mnli_pandas_df
 from notebooks.test_utils.utils_sst2 import load_sst2_pandas_df
-from interpret_text.common.utils_bert import BERTSequenceClassifier
+from interpret_text.experimental.common.utils_bert import BERTSequenceClassifier
 
 CLASSIFIER_TYPE_BERT = "BERT"
 CLASSIFIER_TYPE_BERT_RNN = "BERT_RNN"

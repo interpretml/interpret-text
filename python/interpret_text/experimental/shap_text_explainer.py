@@ -9,8 +9,8 @@ import re
 
 from interpret_community.common.blackbox_explainer import BlackBoxExplainer
 from interpret_community.common.explanation_utils import _convert_to_list
-from .explanation.explanation import _create_local_explanation
-from .common.text_explainer_utils import _find_golden_doc
+from interpret_text.experimental.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.common import _find_golden_doc
 from interpret_community.common.constants import Attributes, ExplainParams, ExplainType
 
 import warnings
