@@ -132,7 +132,7 @@ class Tokenizer:
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
-            tokens = [x[0 : max_len - 2] + ["[SEP]"] for x in tokens]
+            tokens = [x[0: max_len - 2] + ["[SEP]"] for x in tokens]
             token_type_ids = None
         else:
             # get tokens for each sentence [[t00, t01, ...] [t10, t11,... ]]
@@ -196,7 +196,7 @@ class Tokenizer:
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
-            tokens = [x[0 : max_len - 2] + ["[SEP]"] for x in tokens]
+            tokens = [x[0: max_len - 2] + ["[SEP]"] for x in tokens]
             token_type_ids = None
         else:
             # get tokens for each sentence [[t00, t01, ...] [t10, t11,... ]]

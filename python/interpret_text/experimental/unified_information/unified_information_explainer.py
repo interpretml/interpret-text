@@ -1,3 +1,5 @@
+# TODO: Refactor to use BaseTextExplainer (see IntrospectiveRationaleExplainer)
+
 import torch
 from torch import nn, optim
 from tqdm import tqdm
