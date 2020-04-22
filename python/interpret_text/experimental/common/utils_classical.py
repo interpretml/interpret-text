@@ -241,58 +241,6 @@ def plot_local_imp(parsed_sentence, word_importances, max_alpha=0.5):
     display(HTML(highlighted_text))
 
 
-def get_important_words(classifier, label_name, bow_encoder, clf_type="coef"):
-    """Obtains top important words for global importances specifically for the
-    natively supported BOWEncoder and sklearn's linear_model or tree based
-    models.
-
-    Arguments:
-        classifier {[classifier object]} -- trained model
-        label_name {str} -- Label for which important words are to be obtained.
-        Only valid for linear_model functions. Not relevant for tree models.
-        bow_encoder {[BOWEncoder object]} -- trained encoder
-
-    Keyword Arguments:
-        clf_type {str} -- [description] (default: {"coef"})
-
-    Raises:
-        Exception: Only supports models with coef_ or feature_importances call.
-
-    Returns:
-        [List with 2 components] --
-        * decoded_imp -- Importances with 1:1 mapping to parsed sent.
-        * parsed_sentence -- Raw text parsed as list with individual raw
-        features.
-    """
-    if clf_type == "coef":
-        label_coefs_all = classifier.coef_
-        # special case if labels are binary.
-        # cast importances to be size (2,#features) and not (#features,)
-        if len(bow_encoder.labelEncoder.classes_) == 2:
-            label_coefs_all = np.vstack(-1 * label_coefs_all, label_coefs_all)
-        # obtain label number / row corresponding to labelname
-        label_row_num = bow_encoder.labelEncoder.transform([label_name])
-        # convert from vector to scalar
-        label_row_num = label_row_num[0]
-        # obtain importance row corresponding to label number
-        label_coefs = label_coefs_all[label_row_num, :]
-    elif clf_type == "feature_importances":
-        label_coefs = classifier.feature_importances_
-    else:
-        raise Exception("This feature is not yet supported.")
-    # obtain feature ids of top labels sorted inascending order
-    # use np.abs to obtain highest magnitude of importance, discarding directionality
-    # np.argsort to ids corresponding to descending order of importances
-    # np.flip to convert descending order to ascending order
-    sorting_ids = np.flip(np.argsort(np.abs(label_coefs)))
-    top_ids = sorting_ids[0:20]  # view top 20 features per label
-    # obtain raw words corresponding to top feature ids
-    top_words = [bow_encoder.vectorizer.get_feature_names()[i] for i in top_ids]
-    # obtain importance magnitudes corresponding to top feature ids
-    top_importances = [label_coefs[i] for i in top_ids]
-    return [top_words, top_importances]
-
-
 def plot_global_imp(top_words, top_importances, label_name):
     """Plot top 20 global importances as a matplotlib bar graph.
 

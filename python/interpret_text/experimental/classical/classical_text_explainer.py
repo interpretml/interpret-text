@@ -4,11 +4,9 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from interpret_text.experimental.common.utils_classical import plot_global_imp
-from interpret_text.experimental.common.utils_classical import get_important_words, BOWEncoder
+from interpret_text.experimental.common.utils_classical import BOWEncoder
 from interpret_text.experimental.common.constants import ExplainerParams
 from interpret_text.experimental.explanation.explanation import _create_local_explanation
-from interpret_community.explanation.explanation import _create_global_explanation
 
 # BOW explainer class that allows extensibility to other encoders
 # Uses logistic regression and 1-gram model by default
