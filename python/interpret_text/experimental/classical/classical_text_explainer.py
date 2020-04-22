@@ -4,11 +4,9 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from interpret_text.experimental.common.utils_classical import plot_global_imp
-from interpret_text.experimental.common.utils_classical import get_important_words, BOWEncoder
+from interpret_text.experimental.common.utils_classical import BOWEncoder
 from interpret_text.experimental.common.constants import ExplainerParams
 from interpret_text.experimental.explanation.explanation import _create_local_explanation
-from interpret_community.explanation.explanation import _create_global_explanation
 
 # BOW explainer class that allows extensibility to other encoders
 # Uses logistic regression and 1-gram model by default
@@ -172,40 +170,3 @@ class ClassicalTextExplainer:
             classes=self.preprocessor.labelEncoder.classes_,
         )
         return local_explanantion
-
-    def explain_global(self, label_name):
-        """Returns list of top 20 features and corresponding importances over
-            the whole dataset.
-            * Obtain the top feature ids for the selected class label.
-            * Map top features back to words.
-            Can be rephrased in an intuitive sense as a local explanation over
-            a sentence that contains every word in the vocabulary.
-        :param label_name: Label for which importances are to be returned.
-        :type label_name: str
-        :return: A model explanation object containing importances and metadata.
-        :rtype: global_explanation object
-        *Note*: Label name is not applicable to tree based models. For them,
-            the most important features are returned over all labels.
-        *Note*: Edit get_important_words() function to change num of features
-            to be something other than 20.
-        """
-        clf_type = ""
-        if hasattr(self.model, "coef_"):
-            clf_type = "coef"
-        elif hasattr(self.model, "feature_importances_"):
-            clf_type = "feature_importances"
-        else:
-            raise Exception("model is missing coef_ or feature_importances_ attribute")
-        top_words, top_importances = get_important_words(
-            self.model, label_name, self.preprocessor, clf_type=clf_type
-        )
-        global_explanation = _create_global_explanation(
-            global_importance_values=top_importances,
-            features=top_words,
-            method=str(type(self.model)),
-            model_task="classification",
-        )
-        # Plot the feature importances
-        plot_global_imp(top_words, top_importances, label_name)
-
-        return global_explanation
