@@ -9,3 +9,8 @@ class ExplainerParams(object):
         "multi_class": ["multinomial"],
         "C": [10 ** 4],
     }
+
+
+class BertTokens(object):
+    SEP = "[SEP]"
+    CLS = "[CLS]"

@@ -24,6 +24,7 @@ from pytorch_pretrained_bert.modeling import BertForSequenceClassification
 from pytorch_pretrained_bert.optimization import BertAdam
 
 from interpret_text.experimental.common.utils_pytorch import get_device, move_to_device
+from interpret_text.experimental.common.constants import BertTokens
 
 from collections import namedtuple
 from cached_property import cached_property
@@ -99,10 +100,10 @@ class Tokenizer:
             else:
                 tokens_b.pop()
 
-        tokens_a.append("[SEP]")
+        tokens_a.append(BertTokens.SEP)
 
         if tokens_b:
-            tokens_b.append("[SEP]")
+            tokens_b.append(BertTokens.SEP)
 
         return [tokens_a, tokens_b]
 
@@ -132,7 +133,7 @@ class Tokenizer:
             max_len = BERT_MAX_LEN
 
         if isinstance(tokens[0][0], str):
-            tokens = [x[0: max_len - 2] + ["[SEP]"] for x in tokens]
+            tokens = [x[0: max_len - 2] + [BertTokens.SEP] for x in tokens]
             token_type_ids = None
         else:
             # get tokens for each sentence [[t00, t01, ...] [t10, t11,... ]]
@@ -160,7 +161,7 @@ class Tokenizer:
             # pad sequence
             token_type_ids = [x + [0] * (max_len - len(x)) for x in token_type_ids]
 
-        tokens = [["[CLS]"] + x for x in tokens]
+        tokens = [[BertTokens.CLS] + x for x in tokens]
         # convert tokens to indices
         tokens = [self.tokenizer.convert_tokens_to_ids(x) for x in tokens]
         # pad sequence
@@ -224,7 +225,7 @@ class Tokenizer:
             # pad sequence
             token_type_ids = [x + [0] * (max_len - len(x)) for x in token_type_ids]
 
-        tokens = [["[CLS]"] + x for x in tokens]
+        tokens = [[BertTokens.CLS] + x for x in tokens]
         # convert tokens to indices
         input_ids = [self.tokenizer.convert_tokens_to_ids(x) for x in tokens]
         # pad sequence

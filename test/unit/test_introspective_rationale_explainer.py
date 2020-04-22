@@ -98,8 +98,8 @@ class TestIntrospectiveRationaleExplainer(object):
 
         kwargs = {"preprocessor": preprocessor, "hard_importances": False}
         local_explanation = explainer.explain_local(SENTENCE, **kwargs)
-        # BERT adds [CLS] at the beginning of a sentence and [SEP] at the end of each sentence.
-        assert len(local_explanation.local_importance_values) == len(SENTENCE.split()) + 2
+        # BERT adds [CLS] at the beginning of a sentence and [SEP] at the end of each sentence  but we remove them.
+        assert len(local_explanation.local_importance_values) == len(SENTENCE.split())
 
     def test_rnn_explain_local(self):
         train_data = get_ssts_dataset('train')

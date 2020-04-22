@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import torch
 from interpret_text.experimental.common.base_explainer import BaseTextExplainer
+from interpret_text.experimental.common.constants import BertTokens
 from interpret_text.experimental.common.model_config.introspective_rationale_model_config import IntrospectiveRationaleModelConfig
 from interpret_text.experimental.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
     get_bert_rnn_default_config
@@ -224,11 +225,19 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
             seq_len = int(m.sum().item())
             ids = x[:seq_len][0]
         tokens = kwargs['preprocessor'].decode_single(ids)
-
+        local_importance_values = zs.flatten()
+        # post-processing for BERT to remove SEP and CLS tokens
+        # TODO: might we want to add a "post-process" method to the preprocessor?
+        tokens_to_remove = [BertTokens.SEP, BertTokens.CLS]
+        token_indexes = [idx for idx, token in enumerate(tokens) if token in tokens_to_remove]
+        if token_indexes:
+            local_importance_values = np.delete(local_importance_values, token_indexes)
+            for token_index in sorted(token_indexes, reverse=True):
+                del tokens[token_index]
         local_explanation = _create_local_explanation(
             classification=True,
             text_explanation=True,
-            local_importance_values=zs.flatten(),
+            local_importance_values=local_importance_values,
             method=str(type(self.model)),
             model_task="classification",
             features=tokens,
