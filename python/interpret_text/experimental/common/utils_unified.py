@@ -13,6 +13,7 @@ import logging
 import torch
 from pytorch_pretrained_bert import BertTokenizer
 from interpret_text.experimental.common.utils_bert import Language, Tokenizer
+from interpret_text.experimental.common.constants import BertTokens
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ def _get_single_embedding(model, text, device):
     :rtype: torch.embedding
     """
     tokenizer = BertTokenizer.from_pretrained(Language.ENGLISH)
-    words = ["[CLS]"] + tokenizer.tokenize(text) + ["[SEP]"]
+    words = [BertTokens.CLS] + tokenizer.tokenize(text) + [BertTokens.SEP]
     tokenized_ids = tokenizer.convert_tokens_to_ids(words)
     token_tensor = torch.tensor([tokenized_ids], device=device)
     embedding = model.bert.embeddings(token_tensor)[0]
