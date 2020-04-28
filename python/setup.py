@@ -70,10 +70,10 @@ setup(
         (
             "share/jupyter/nbextensions/interpret-text-widget",
             [
-                "interpret_text/widget/static/extension.js",
-                "interpret_text/widget/static/extension.js.map",
-                "interpret_text/widget/static/index.js",
-                "interpret_text/widget/static/index.js.map",
+                "interpret_text/experimental/widget/static/extension.js",
+                "interpret_text/experimental/widget/static/extension.js.map",
+                "interpret_text/experimental/widget/static/index.js",
+                "interpret_text/experimental/widget/static/index.js.map",
             ],
         ),
         (
@@ -83,7 +83,7 @@ setup(
         (
             "share/jupyter/lab/extensions",
             [
-                "interpret_text/widget/js/"
+                "interpret_text/experimental/widget/js/"
                 "interpret_text_widget/labextension/interpret-text-widget-0.1.7.tgz"
             ],
         ),
