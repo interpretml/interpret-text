@@ -44,7 +44,7 @@ DEPENDENCIES = [
     "pandas",
     "pydantic",
     "spacy",
-    "ipywidets",
+    "ipywidgets",
     "transformers==2.4.1",
     "scipy",
     "scikit-learn",
