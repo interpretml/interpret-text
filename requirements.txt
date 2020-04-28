@@ -1,2 +1,6 @@
 flake8
 pytest
+papermill
+scrapbook
+xgboost
+lightgbm
