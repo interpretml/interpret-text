@@ -50,6 +50,8 @@ DEPENDENCIES = [
     "scikit-learn",
     "tqdm",
     "torch",
+    "pytorch_pretrained_bert",
+    "cached_property",
     "interpret-community",
     "shap>=0.20.0, <=0.29.3",
 ]
