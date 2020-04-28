@@ -5,3 +5,4 @@ scrapbook
 xgboost
 lightgbm
 pytorch_pretrained_bert
+cached_property
