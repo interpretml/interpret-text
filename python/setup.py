@@ -42,9 +42,12 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "numpy",
     "pandas",
+    "pydantic",
+    "spacy",
+    "transformers",
     "scipy",
     "scikit-learn",
-    "interpret",
+    "torch",
     "interpret-community",
     "shap>=0.20.0, <=0.29.3",
 ]
