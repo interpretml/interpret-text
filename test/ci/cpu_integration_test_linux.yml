@@ -32,15 +32,13 @@ jobs:
   # Conda environment creation
   - bash: |
       cd /home/vsts/work/1/s
-      python tools/generate_conda_files.py
-      conda env create -n interpret_cpu --file=interpret_cpu.yaml
+      conda env create -n interpret_cpu python
     displayName: 'Creating Conda Environment with dependencies'
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
       cd /home/vsts/work/1/s/python
       pip install -e .
-      pip install git+https://github.com/microsoft/nlp.git
     displayName: 'Install setup.py files'
 
   - bash: |
