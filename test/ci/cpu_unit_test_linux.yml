@@ -34,8 +34,7 @@ jobs:
 
   # Conda environment creation
   - bash: |
-      python tools/generate_conda_files.py
-      conda env create -n interpret_cpu --file=interpret_cpu.yaml
+      conda create -n interpret_cpu python --yes
     displayName: 'Creating Conda Environment with dependencies'
   - bash: |
       cd /usr/share/miniconda/bin

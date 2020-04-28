@@ -32,7 +32,7 @@ jobs:
   # Conda environment creation
   - bash: |
       cd /home/vsts/work/1/s
-      conda create -n interpret_cpu python
+      conda create -n interpret_cpu python --yes
     displayName: 'Creating Conda Environment with dependencies'
   - bash: |
       cd /usr/share/miniconda/bin
