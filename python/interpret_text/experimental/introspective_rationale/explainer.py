@@ -12,10 +12,10 @@ from interpret_text.experimental.common.preprocessor.bert_preprocessor import Be
 from interpret_text.experimental.common.preprocessor.glove_preprocessor import GlovePreprocessor
 from interpret_text.experimental.common.utils_classical import plot_local_imp
 from interpret_text.experimental.common.utils_introspective_rationale import generate_data
-from interpret_text.experimental.explanation.explanation import _create_local_explanation
-from interpret_text.experimental.introspective_rationale.introspective_rationale_components import ClassifierWrapper, \
+from interpret_text.experimental.explanation import _create_local_explanation
+from interpret_text.experimental.introspective_rationale.components import ClassifierWrapper, \
     ClassifierModule, IntrospectionGeneratorModule
-from interpret_text.experimental.introspective_rationale.introspective_rationale_model import IntrospectiveRationaleModel
+from interpret_text.experimental.introspective_rationale.model import IntrospectiveRationaleModel
 from transformers import BertForSequenceClassification
 
 CLASSIFIER_TYPE_BERT = "BERT"
