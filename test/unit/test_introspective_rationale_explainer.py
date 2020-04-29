@@ -96,8 +96,7 @@ class TestIntrospectiveRationaleExplainer(object):
         explainer.load()
         explainer.fit(df_train, df_test)
 
-        kwargs = {"preprocessor": preprocessor, "hard_importances": False}
-        local_explanation = explainer.explain_local(SENTENCE, **kwargs)
+        local_explanation = explainer.explain_local(SENTENCE)
         # BERT adds [CLS] at the beginning of a sentence and [SEP] at the end of each sentence  but we remove them.
         assert len(local_explanation.local_importance_values) == len(SENTENCE.split())
 
@@ -119,6 +118,5 @@ class TestIntrospectiveRationaleExplainer(object):
         explainer.load()
         explainer.fit(df_train, df_test)
 
-        kwargs = {"preprocessor": preprocessor, "hard_importances": False}
-        local_explanation = explainer.explain_local(SENTENCE, **kwargs)
+        local_explanation = explainer.explain_local(SENTENCE)
         assert len(local_explanation.local_importance_values) == len(SENTENCE.split())

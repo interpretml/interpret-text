@@ -8,20 +8,22 @@ from typing import Optional, Any, Iterable
 
 from interpret_text.experimental.common.base_text_model import BaseTextModel
 from interpret_text.experimental.common.preprocessor.base_text_preprocessor import BaseTextPreprocessor
-from interpret_text.experimental.explanation import _create_local_explanation
+from interpret_text.experimental.explanation import LocalExplanation
 
 
 class BaseTextExplainer(ABC):
     """ The base class for explainers to create explanataion """
 
     @abstractmethod
-    def explain_local(self, text: str, **kwargs) -> _create_local_explanation:
+    def explain_local(self, X, y=None, name=None) -> LocalExplanation:
         """Abstract method to explain local features
 
-        :param text: text required for local feature importance
+        :param X: String to be explained.
+        :type X: str
+        :param y: The ground truth label for the sentence
+        :type y: string
+        :param name: a name for saving the explanation, currently ignored
         :type str
-        :param kwargs: additional parameters
-        :type Any
         :return: A local explanation object
         :rtype DynamicLocalExplanation
         """
@@ -75,3 +77,14 @@ class BaseTextExplainer(ABC):
         :type BaseTextPreprocessor
         """
         pass
+
+
+def _validate_X(X):
+    if isinstance(X, list):
+        if len(X) == 1:
+            return X[0]  # Make X a string
+        else:
+            raise ValueError("A list of multiple text inputs is not supported yet.")
+    elif not isinstance(X, str):
+        raise ValueError("Invalid input, str or list input expected, received {}".format(type(X)))
+    return X
