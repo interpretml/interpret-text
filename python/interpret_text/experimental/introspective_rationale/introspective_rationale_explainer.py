@@ -210,11 +210,12 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         predict_dict = self.predict(df_sentence)
         zs = predict_dict["rationale"]
 
-        # The not hard_importance condition was implied, ids is undefined otherwise
         prediction = predict_dict["predict"]
         prediction_idx = prediction[0].max(0)[1]
         prediction = model_args.labels[prediction_idx]
         zs = np.array(zs.cpu())
+
+        # The not hard_importance condition was implied, ids is undefined otherwise
         float_zs = self.model.get_z_scores(df_sentence)
         float_zs = float_zs[:, :, 1].detach()
         float_zs = np.array(float_zs.cpu())

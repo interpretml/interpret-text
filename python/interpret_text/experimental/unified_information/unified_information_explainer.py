@@ -84,10 +84,12 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :type X: string
         :param y: The ground truth label for the sentence
         :type y: string
+        :param name: a name for saving the explanation, currently ignored
+        :type str
         :param num_iteration: The number of iterations through the optimize function. This is a parameter
-        that should be tuned to your dataset. If set to 0, all words will be important as the Loss function
-        will not be optimzed. If set to a very high number, all words will not be important as the loss will
-        be severly optimized. The more the iterations, slower the explanations.
+            that should be tuned to your dataset. If set to 0, all words will be important as the Loss function
+            will not be optimzed. If set to a very high number, all words will not be important as the loss will
+            be severly optimized. The more the iterations, slower the explanations.
         :type num_iteration: int
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
@@ -128,7 +130,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         self._optimize(num_iteration, lr=0.01, show_progress=True)
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
-        # predicted_label = self._wrapped_model.predict([X])
+        predicted_label = self._wrapped_model.predict([X])
         return _create_local_explanation(
             classification=True,
             text_explanation=True,
@@ -137,6 +139,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             model_task="classification",
             features=self.parsed_sentence[1:-1],
             classes=self.classes,
+            predicted_label=predicted_label,
             true_label=y,
         )
 
