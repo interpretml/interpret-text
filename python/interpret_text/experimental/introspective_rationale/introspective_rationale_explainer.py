@@ -3,7 +3,7 @@ from typing import Iterable, Any, Optional, Union, Dict
 import numpy as np
 import pandas as pd
 import torch
-from interpret_text.experimental.common.base_explainer import BaseTextExplainer
+from interpret_text.experimental.common.base_explainer import BaseTextExplainer, _validate_X
 from interpret_text.experimental.common.constants import BertTokens
 from interpret_text.experimental.common.model_config.introspective_rationale_model_config import IntrospectiveRationaleModelConfig
 from interpret_text.experimental.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
@@ -12,7 +12,7 @@ from interpret_text.experimental.common.preprocessor.bert_preprocessor import Be
 from interpret_text.experimental.common.preprocessor.glove_preprocessor import GlovePreprocessor
 from interpret_text.experimental.common.utils_classical import plot_local_imp
 from interpret_text.experimental.common.utils_introspective_rationale import generate_data
-from interpret_text.experimental.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.explanation.explanation import _create_local_explanation, LocalExplanation
 from interpret_text.experimental.introspective_rationale.introspective_rationale_components import ClassifierWrapper, \
     ClassifierModule, IntrospectionGeneratorModule
 from interpret_text.experimental.introspective_rationale.introspective_rationale_model import IntrospectiveRationaleModel
@@ -185,24 +185,23 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
             config = {}
         return config
 
-    def explain_local(self, text: str, **kwargs) -> _create_local_explanation:
+    def explain_local(self, X, y=None, name=None) -> LocalExplanation:
         """ Create a local explanation for a given text
-        :param text: A segment of text
-        :type text: str
-        :param kwargs:
-                preprocessor: an intialized preprocessor to tokenize the
-                given text with .preprocess() and .decode_single() methods
-                preprocessor: Ex. GlovePreprocessor or BertPreprocessor
-                hard_importances: whether to generate "hard" important/ non-important rationales
-                or float rationale scores, defaults to True
-                hard_importances: bool, optional
+        :param X: String to be explained.
+        :type X: str
+        :param y: The ground truth label for the sentence
+        :type y: string
+        :param name: a name for saving the explanation, currently ignored
+        :type str
         :return: local explanation object
         :rtype: DynamicLocalExplanation
         """
+        X = _validate_X(X)
+
         model_args = self.model_config
         df_dummy_label = pd.DataFrame.from_dict({"labels": [0]})
         df_sentence = pd.concat(
-            [df_dummy_label, self.preprocessor.preprocess([text.lower()])],
+            [df_dummy_label, self.preprocessor.preprocess([X.lower()])],
             axis=1
         )
         batch_dict = generate_data(df_sentence, self.model_config.cuda)
@@ -214,17 +213,7 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         prediction_idx = prediction[0].max(0)[1]
         prediction = model_args.labels[prediction_idx]
         zs = np.array(zs.cpu())
-        if not kwargs['hard_importances']:
-            float_zs = self.model.get_z_scores(df_sentence)
-            float_zs = float_zs[:, :, 1].detach()
-            float_zs = np.array(float_zs.cpu())
-            # set importances all words not selected as part of the rationale
-            # to zero
-            zs = zs * float_zs
-            # generate human-readable tokens (individual words)
-            seq_len = int(m.sum().item())
-            ids = x[:seq_len][0]
-        tokens = kwargs['preprocessor'].decode_single(ids)
+        tokens = self.preprocessor.decode_single(ids)
         local_importance_values = zs.flatten()
         # post-processing for BERT to remove SEP and CLS tokens
         # TODO: might we want to add a "post-process" method to the preprocessor?

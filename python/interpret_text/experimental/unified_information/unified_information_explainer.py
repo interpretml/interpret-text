@@ -9,6 +9,9 @@ import html
 import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
 
+from interpret_community.common.model_wrapper import WrappedPytorchModel
+from interpret_community.common.base_explainer import _validate_X
+
 from interpret_text.experimental.common.structured_model_mixin import PureStructuredModelMixin
 from interpret_text.experimental.explanation.explanation import _create_local_explanation
 from interpret_text.experimental.common.utils_unified import (
@@ -21,7 +24,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
     """The UnifiedInformationExplainer for returning explanations for pytorch NN models.
     """
 
-    def __init__(self, model, train_dataset, device, target_layer=14, max_points=1000):
+    def __init__(self, model, train_dataset, device, target_layer=14, max_points=1000, classes=None):
         """ Initialize the UnifiedInformationExplainer
         :param model: a pytorch model
         :type: torch.nn
@@ -35,6 +38,8 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :param max_points: The fraction of the dataset to be used when calculating the regularization
         parameter. A max of 1000 is recommended. Higher numbers will lead to slower explanations and memory issues.
         :type max_points: int
+        :param classes: An iterable array containing the label classes
+        :type classes: string[]
         """
         super(UnifiedInformationExplainer, self).__init__()
         self.device = device
@@ -52,7 +57,9 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         self.max_points = max_points
         self.target_layer = target_layer
         self.model = model
+        self._wrapped_model = WrappedPytorchModel(self.model)
         self.train_dataset = train_dataset
+        self.classes = classes
 
         assert (
             self.train_dataset is not None
@@ -71,16 +78,12 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             % (self.target_layer)
         )
 
-    def explain_local(self, text, classes=None, predicted_label=None, true_label=None, num_iteration=150):
+    def explain_local(self, X, y=None, name=None, num_iteration=150):
         """Explain the model by using MSRA's interpretor
-        :param text: The text
-        :type text: string
-        :param classes: An iterable array containing the label classes
-        :type classes: string[]
-        :param predicted_label: The label predicted by the classifier
-        :type predicted_label: string
-        :param true_label: The ground truth label for the sentense
-        :type true_label: string
+        :param X: The text
+        :type X: string
+        :param y: The ground truth label for the sentence
+        :type y: string
         :param num_iteration: The number of iterations through the optimize function. This is a parameter
         that should be tuned to your dataset. If set to 0, all words will be important as the Loss function
         will not be optimzed. If set to a very high number, all words will not be important as the loss will
@@ -89,7 +92,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         :return: A model explanation object. It is guaranteed to be a LocalExplanation
         :rtype: DynamicLocalExplanation
         """
-        assert text is not None, "input text is required to generate explanation"
+        X = _validate_X(X)
 
         embedded_input, parsed_sentence = _get_single_embedding(self.model, text, self.device)
         self.input_embeddings = embedded_input
@@ -125,6 +128,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         self._optimize(num_iteration, lr=0.01, show_progress=True)
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
+        # predicted_label = self._wrapped_model.predict([X])
         return _create_local_explanation(
             classification=True,
             text_explanation=True,
@@ -132,9 +136,8 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             method="neural network",
             model_task="classification",
             features=self.parsed_sentence[1:-1],
-            classes=classes,
-            predicted_label=predicted_label,
-            true_label=true_label,
+            classes=self.classes,
+            true_label=y,
         )
 
     def _calculate_regularization(self, sampled_x, model, reduced_axes=None):

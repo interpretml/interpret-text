@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
+from interpret_text.experimental.common.base_explainer import _validate_X
 from interpret_text.experimental.common.utils_classical import BOWEncoder
 from interpret_text.experimental.common.constants import ExplainerParams
 from interpret_text.experimental.explanation.explanation import _create_local_explanation
@@ -126,17 +127,22 @@ class ClassicalTextExplainer:
         )
         return [text_model, best_params]
 
-    def explain_local(self, input_text, abs_sum_to_one=False):
+    def explain_local(self, X, y=None, name=None):
         """Returns an explanation object containing explanations over words
             in the input text string.
-        :param input_text: String to be explained.
-        :type input_text: str
+        :param X: String to be explained.
+        :type X: str
+        :param y: The ground truth label for the sentence
+        :type y: string
+        :param name: a name for saving the explanation, currently ignored
+        :type str
         :return: A model explanation object containing importances and metadata.
         :rtype: LocalExplanation
         """
+        X = _validate_X(X)
 
         [encoded_text, _] = self.preprocessor.encode_features(
-            input_text, needs_fit=False
+            X, needs_fit=False
         )
         encoded_label = self.model.predict(encoded_text)
         # convert from vector to scalar
@@ -154,11 +160,8 @@ class ClassicalTextExplainer:
         else:
             raise Exception("model is missing coef_ or feature_importances_ attribute")
         decoded_imp, parsed_sentence_list = self.preprocessor.decode_imp(
-            encoded_imp, input_text
+            encoded_imp, X
         )
-
-        if abs_sum_to_one is True:
-            decoded_imp = decoded_imp / (np.sum(np.abs(decoded_imp)))
 
         local_explanantion = _create_local_explanation(
             classification=True,
@@ -168,5 +171,6 @@ class ClassicalTextExplainer:
             model_task="classification",
             features=parsed_sentence_list,
             classes=self.preprocessor.labelEncoder.classes_,
+            true_label=y
         )
         return local_explanantion
