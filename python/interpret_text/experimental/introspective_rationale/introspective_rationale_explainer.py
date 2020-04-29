@@ -209,10 +209,22 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         m = batch_dict["m"]
         predict_dict = self.predict(df_sentence)
         zs = predict_dict["rationale"]
+
+        # The not hard_importance condition was implied, ids is undefined otherwise
         prediction = predict_dict["predict"]
         prediction_idx = prediction[0].max(0)[1]
         prediction = model_args.labels[prediction_idx]
         zs = np.array(zs.cpu())
+        float_zs = self.model.get_z_scores(df_sentence)
+        float_zs = float_zs[:, :, 1].detach()
+        float_zs = np.array(float_zs.cpu())
+        # set importances all words not selected as part of the rationale
+        # to zero
+        zs = zs * float_zs
+        # generate human-readable tokens (individual words)
+        seq_len = int(m.sum().item())
+        ids = x[:seq_len][0]
+
         tokens = self.preprocessor.decode_single(ids)
         local_importance_values = zs.flatten()
         # post-processing for BERT to remove SEP and CLS tokens
