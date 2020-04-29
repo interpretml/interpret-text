@@ -12,8 +12,13 @@ from interpret_text.experimental.common.preprocessor.bert_preprocessor import Be
 from interpret_text.experimental.common.preprocessor.glove_preprocessor import GlovePreprocessor
 from interpret_text.experimental.common.utils_classical import plot_local_imp
 from interpret_text.experimental.common.utils_introspective_rationale import generate_data
+<<<<<<< HEAD
 from interpret_text.experimental.explanation.explanation import _create_local_explanation, LocalExplanation
 from interpret_text.experimental.introspective_rationale.introspective_rationale_components import ClassifierWrapper, \
+=======
+from interpret_text.experimental.explanation import _create_local_explanation, LocalExplanation
+from interpret_text.experimental.introspective_rationale.components import ClassifierWrapper, \
+>>>>>>> Update explainers to interpret's spec
     ClassifierModule, IntrospectionGeneratorModule
 from interpret_text.experimental.introspective_rationale.model import IntrospectiveRationaleModel
 from transformers import BertForSequenceClassification
@@ -214,6 +219,7 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         prediction_idx = prediction[0].max(0)[1]
         prediction = model_args.labels[prediction_idx]
         zs = np.array(zs.cpu())
+<<<<<<< HEAD
 
         # The not hard_importance condition was implied, ids is undefined otherwise
         float_zs = self.model.get_z_scores(df_sentence)
@@ -226,6 +232,8 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         seq_len = int(m.sum().item())
         ids = x[:seq_len][0]
 
+=======
+>>>>>>> Update explainers to interpret's spec
         tokens = self.preprocessor.decode_single(ids)
         local_importance_values = zs.flatten()
         # post-processing for BERT to remove SEP and CLS tokens

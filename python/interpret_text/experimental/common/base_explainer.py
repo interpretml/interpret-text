@@ -8,7 +8,7 @@ from typing import Optional, Any, Iterable
 
 from interpret_text.experimental.common.base_text_model import BaseTextModel
 from interpret_text.experimental.common.preprocessor.base_text_preprocessor import BaseTextPreprocessor
-from interpret_text.experimental.explanation.explanation import LocalExplanation
+from interpret_text.experimental.explanation import LocalExplanation
 
 
 class BaseTextExplainer(ABC):
