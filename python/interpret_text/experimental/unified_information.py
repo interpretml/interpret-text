@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
 
 from interpret_text.experimental.common.structured_model_mixin import PureStructuredModelMixin
-from interpret_text.experimental.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.explanation import _create_local_explanation
 from interpret_text.experimental.common.utils_unified import (
     _get_single_embedding,
     make_bert_embeddings,
