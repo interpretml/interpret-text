@@ -9,8 +9,6 @@ import html
 import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
 
-
-from interpret_community.common.model_wrapper import WrappedPytorchModel
 from interpret_text.experimental.common.base_explainer import _validate_X
 
 from interpret_text.experimental.common.structured_model_mixin import PureStructuredModelMixin
@@ -59,7 +57,6 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         self.max_points = max_points
         self.target_layer = target_layer
         self.model = model
-        self._wrapped_model = WrappedPytorchModel(self.model)
         self.train_dataset = train_dataset
         self.classes = classes
 
@@ -132,7 +129,6 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         self._optimize(num_iteration, lr=0.01, show_progress=True)
         local_importance_values = self._get_sigma()
         self.local_importance_values = local_importance_values
-        predicted_label = self._wrapped_model.predict([X])
         return _create_local_explanation(
             classification=True,
             text_explanation=True,
@@ -141,7 +137,6 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             model_task="classification",
             features=self.parsed_sentence[1:-1],
             classes=self.classes,
-            predicted_label=predicted_label,
             true_label=y,
         )
 
