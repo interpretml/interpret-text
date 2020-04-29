@@ -9,6 +9,7 @@ import html
 import matplotlib.pyplot as plt
 from IPython.core.display import display, HTML
 
+
 from interpret_community.common.model_wrapper import WrappedPytorchModel
 from interpret_text.experimental.common.base_explainer import _validate_X
 
@@ -23,6 +24,7 @@ from interpret_text.experimental.common.utils_unified import (
 class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
     """The UnifiedInformationExplainer for returning explanations for pytorch NN models.
     """
+
 
     def __init__(self, model, train_dataset, device, target_layer=14, max_points=1000, classes=None):
         """ Initialize the UnifiedInformationExplainer

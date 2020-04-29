@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import torch
 from interpret_text.experimental.common.base_explainer import BaseTextExplainer, _validate_X
+
 from interpret_text.experimental.common.constants import BertTokens
 from interpret_text.experimental.common.model_config.introspective_rationale_model_config import IntrospectiveRationaleModelConfig
 from interpret_text.experimental.common.model_config.model_config_constants import get_bert_default_config, get_rnn_default_config, \
@@ -13,6 +14,7 @@ from interpret_text.experimental.common.preprocessor.glove_preprocessor import G
 from interpret_text.experimental.common.utils_classical import plot_local_imp
 from interpret_text.experimental.common.utils_introspective_rationale import generate_data
 from interpret_text.experimental.explanation import _create_local_explanation, LocalExplanation
+
 from interpret_text.experimental.introspective_rationale.components import ClassifierWrapper, \
     ClassifierModule, IntrospectionGeneratorModule
 from interpret_text.experimental.introspective_rationale.model import IntrospectiveRationaleModel
@@ -215,6 +217,7 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         prediction = model_args.labels[prediction_idx]
         zs = np.array(zs.cpu())
 
+
         # The not hard_importance condition was implied, ids is undefined otherwise
         float_zs = self.model.get_z_scores(df_sentence)
         float_zs = float_zs[:, :, 1].detach()
@@ -227,6 +230,7 @@ class IntrospectiveRationaleExplainer(BaseTextExplainer):
         ids = x[:seq_len][0]
 
         tokens = self.preprocessor.decode_single(ids)
+
         local_importance_values = zs.flatten()
         # post-processing for BERT to remove SEP and CLS tokens
         # TODO: might we want to add a "post-process" method to the preprocessor?

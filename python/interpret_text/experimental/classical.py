@@ -5,6 +5,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from interpret_text.experimental.common.base_explainer import _validate_X
+
 from interpret_text.experimental.common.utils_classical import BOWEncoder
 from interpret_text.experimental.common.constants import ExplainerParams
 from interpret_text.experimental.explanation import _create_local_explanation
@@ -127,6 +128,7 @@ class ClassicalTextExplainer:
         )
         return [text_model, best_params]
 
+
     def explain_local(self, X, y=None, name=None):
         """Returns an explanation object containing explanations over words
             in the input text string.
@@ -162,6 +164,7 @@ class ClassicalTextExplainer:
         decoded_imp, parsed_sentence_list = self.preprocessor.decode_imp(
             encoded_imp, X
         )
+
 
         local_explanantion = _create_local_explanation(
             classification=True,

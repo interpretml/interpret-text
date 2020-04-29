@@ -11,6 +11,7 @@ from interpret_text.experimental.common.preprocessor.base_text_preprocessor impo
 from interpret_text.experimental.explanation import LocalExplanation
 
 
+
 class BaseTextExplainer(ABC):
     """ The base class for explainers to create explanataion """
 
