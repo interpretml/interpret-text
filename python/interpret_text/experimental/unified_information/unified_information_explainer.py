@@ -94,7 +94,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         """
         X = _validate_X(X)
 
-        embedded_input, parsed_sentence = _get_single_embedding(self.model, text, self.device)
+        embedded_input, parsed_sentence = _get_single_embedding(self.model, X, self.device)
         self.input_embeddings = embedded_input
         self.parsed_sentence = parsed_sentence
 
