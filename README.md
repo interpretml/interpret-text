@@ -222,7 +222,7 @@ interpreter_unified = UnifiedInformationExplainer(model,
     If you intend to use the `ClassicalTextExplainer` with our default Linear Regression model, you can simply call the fit function with your dataset.
 ```python
 from sklearn.preprocessing import LabelEncoder
-from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+from interpret_text.classical import ClassicalTextExplainer
 
 explainer = ClassicalTextExplainer()
 label_encoder = LabelEncoder()
@@ -231,7 +231,7 @@ classifier, best_params = explainer.fit(X_train, y_train)
     Instead, if you want to use the `ClassicalTextExplainer` with your own sklearn model, you will need to initialize `ClassicalTextExplainer` with your model, preprocessor and the range of hyperparamaters.
 ```python
 from sklearn.preprocessing import LabelEncoder
-from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+from interpret_text.classical import ClassicalTextExplainer
 from interpret_text.common.utils_classical import get_important_words, BOWEncoder
 
 HYPERPARAM_RANGE = {
