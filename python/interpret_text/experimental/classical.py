@@ -128,7 +128,6 @@ class ClassicalTextExplainer:
         )
         return [text_model, best_params]
 
-
     def explain_local(self, X, y=None, name=None):
         """Returns an explanation object containing explanations over words
             in the input text string.
@@ -164,7 +163,6 @@ class ClassicalTextExplainer:
         decoded_imp, parsed_sentence_list = self.preprocessor.decode_imp(
             encoded_imp, X
         )
-
 
         local_explanantion = _create_local_explanation(
             classification=True,

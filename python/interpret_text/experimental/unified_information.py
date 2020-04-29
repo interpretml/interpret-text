@@ -23,7 +23,6 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
     """The UnifiedInformationExplainer for returning explanations for pytorch NN models.
     """
 
-
     def __init__(self, model, train_dataset, device, target_layer=14, max_points=1000, classes=None):
         """ Initialize the UnifiedInformationExplainer
         :param model: a pytorch model
