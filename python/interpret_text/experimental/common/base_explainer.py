@@ -78,6 +78,7 @@ class BaseTextExplainer(ABC):
         """
         pass
 
+
 def _validate_X(X):
     if isinstance(X, list):
         if len(X) == 1:
