@@ -1,9 +1,6 @@
-scikit-learn
-spacy
 flake8
+nteract-scrapbook>=0.2.1
 pytest
-ipywidgets
-tqdm
-interpret-community
-scipy
-pandas
+papermill
+xgboost
+lightgbm

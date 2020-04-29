@@ -38,9 +38,9 @@ jobs:
   - bash: |
       cd /usr/share/miniconda/bin
       source activate interpret_cpu
-      cd /home/vsts/work/1/s/python
-      pip install -e .
-      pip install git+https://github.com/microsoft/nlp.git
+      cd /home/vsts/work/1/s
+      pip install -e python/
+      pip install -r requirements.txt
     displayName: 'Install setup.py files'
 
   - bash: |

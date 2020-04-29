@@ -42,9 +42,16 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "numpy",
     "pandas",
+    "pydantic",
+    "spacy",
+    "ipywidgets",
+    "transformers==2.4.1",
     "scipy",
     "scikit-learn",
-    "interpret",
+    "tqdm",
+    "torch",
+    "pytorch_pretrained_bert",
+    "cached_property",
     "interpret-community",
     "shap>=0.20.0, <=0.29.3",
 ]
