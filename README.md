@@ -211,7 +211,7 @@ The user can also explain a custom model. In this case, the user will have to pr
 To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the BERT target layer.
 
 ``` python
-from interpret_text.unified_information.unified_information_explainer import UnifiedInformationExplainer
+from interpret_text.unified_information import UnifiedInformationExplainer
 
 interpreter_unified = UnifiedInformationExplainer(model, 
                                  train_dataset, 
