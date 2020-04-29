@@ -15,7 +15,7 @@ from interpret_text.experimental.common.utils_introspective_rationale import gen
 from interpret_text.experimental.explanation.explanation import _create_local_explanation, LocalExplanation
 from interpret_text.experimental.introspective_rationale.introspective_rationale_components import ClassifierWrapper, \
     ClassifierModule, IntrospectionGeneratorModule
-from interpret_text.experimental.introspective_rationale.introspective_rationale_model import IntrospectiveRationaleModel
+from interpret_text.experimental.introspective_rationale.model import IntrospectiveRationaleModel
 from transformers import BertForSequenceClassification
 
 CLASSIFIER_TYPE_BERT = "BERT"

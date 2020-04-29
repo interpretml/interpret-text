@@ -211,7 +211,7 @@ The user can also explain a custom model. In this case, the user will have to pr
 To initialize the `UnifiedInformationExplainer`, pass the model, the dataset you used to train the model along with the CUDA device and the BERT target layer.
 
 ``` python
-from interpret_text.unified_information.unified_information_explainer import UnifiedInformationExplainer
+from interpret_text.unified_information import UnifiedInformationExplainer
 
 interpreter_unified = UnifiedInformationExplainer(model, 
                                  train_dataset, 
@@ -222,7 +222,7 @@ interpreter_unified = UnifiedInformationExplainer(model,
     If you intend to use the `ClassicalTextExplainer` with our default Linear Regression model, you can simply call the fit function with your dataset.
 ```python
 from sklearn.preprocessing import LabelEncoder
-from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+from interpret_text.classical import ClassicalTextExplainer
 
 explainer = ClassicalTextExplainer()
 label_encoder = LabelEncoder()
@@ -231,7 +231,7 @@ classifier, best_params = explainer.fit(X_train, y_train)
     Instead, if you want to use the `ClassicalTextExplainer` with your own sklearn model, you will need to initialize `ClassicalTextExplainer` with your model, preprocessor and the range of hyperparamaters.
 ```python
 from sklearn.preprocessing import LabelEncoder
-from interpret_text.classical.classical_text_explainer import ClassicalTextExplainer
+from interpret_text.classical import ClassicalTextExplainer
 from interpret_text.common.utils_classical import get_important_words, BOWEncoder
 
 HYPERPARAM_RANGE = {

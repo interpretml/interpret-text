@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from interpret_text.experimental.common.base_explainer import _validate_X
 from interpret_text.experimental.common.utils_classical import BOWEncoder
 from interpret_text.experimental.common.constants import ExplainerParams
-from interpret_text.experimental.explanation.explanation import _create_local_explanation
+from interpret_text.experimental.explanation import _create_local_explanation
 
 # BOW explainer class that allows extensibility to other encoders
 # Uses logistic regression and 1-gram model by default
