@@ -9,7 +9,7 @@ This repository contains an SDK and example Jupyter notebooks to showcase its us
 -  [Overview of Interpret-Text](#overview)
 -  [Target Audience](#target-audience)
 -  [Getting Started](#getting-started)
--  [Supported Models and NLP Scenarios](#models)
+-  [Supported NLP Scenarios](#models)
 -  [Supported Explainers](#explainers)
 -  [Use Interpret-Text](#use)
 -  [Contributing](#contrib)
@@ -118,7 +118,7 @@ Install and run Jupyter Notebook
 
 # Supported NLP Scenarios
 
- Currently this repository provides support for the text classification scenario.
+Currently this repository only provides support for the text classification scenario.
 # <a name="explainers"></a>
 
 # Supported Explainers
@@ -138,6 +138,7 @@ The following is a list of the explainers available in this repository:
 | Explain BERT | No | Yes  | Yes  |
 | Explain RNN  | No | No | Yes |
 | Handles NLP pipeline | Yes, text pre-processing, encoding, training, hyperparameter tuning | Yes, uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Yes, generator and predictor modules handle the required text pre-processing.
+| Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb)|
 
 ## Classical Text Explainer
 
@@ -300,7 +301,7 @@ The dashboard visualizes the local feature importances of the document with an i
 <a  name="contrib"></a>
 
 # Contributing
-This project welcomes contributions and suggestions. Most contributions require you to agree to the Github Developer Certificate of Origin, DCO. For details, please visit  [https://probot.github.io/apps/dco/](https://probot.github.io/apps/dco/).
+We welcome contributions and suggestions! Most contributions require you to agree to the Github Developer Certificate of Origin, DCO. For details, please visit  [https://probot.github.io/apps/dco/](https://probot.github.io/apps/dco/).
 
 The Developer Certificate of Origin (DCO) is a lightweight way for contributors to certify that they wrote or otherwise have the right to submit the code they are contributing to the project. Here is the full text of the DCO, reformatted for readability:
 ```
@@ -318,7 +319,7 @@ $ git commit -s -m 'This is my commit message'
 ```
 When you submit a pull request, a DCO bot will automatically determine whether you need to certify. Simply follow the instructions provided by the bot.
 
-<a name=Code></a>
+<a name=code></a>
 # Code of Conduct
 
 This project has adopted the his project has adopted the  [GitHub Community Guidelines](https://help.github.com/en/github/site-policy/github-community-guidelines).
