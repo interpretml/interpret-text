@@ -1,8 +1,8 @@
 
-# Interpret-Text SDK
-Interpret Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
+# Interpret-Text - Alpha Release 
+Interpret-Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
-This repository contains an SDK and Jupyter notebooks with examples to showcase its use.
+This repository contains an SDK and example Jupyter notebooks to showcase its use.
 
 # Contents
 
@@ -48,8 +48,8 @@ To setup on your local machine:
 
 Clone and cd into the repository
 ```
-git clone https://github.com/interpretml/interpret-text-contrib.git
-cd interpret-text-contrib
+git clone https://github.com/interpretml/interpret-text.git
+cd interpret-text
 ```
 </details>
 
@@ -85,7 +85,7 @@ You can install the package from source or from pipy.
 
 <details><summary><strong><em>3.1 From source (developers): </strong></em></summary>
 
-Run the below commands from ```interpret-text-contrib/python```
+Run the below commands from ```interpret-text/python```
 
 ```
     pip install -e .
@@ -128,6 +128,16 @@ The following is a list of the explainers available in this repository:
 * [Unified Information Explainer](https://www.microsoft.com/en-us/research/publication/towards-a-deep-and-unified-understanding-of-deep-neural-models-in-nlp/)
 
 * [Introspective Rationale Explainer](http://people.csail.mit.edu/tommi/papers/YCZJ_EMNLP2019.pdf)
+
+## When should I use which?
+|  | Classical Text Explainer | Unified Information Explainer | Introspective Rationale Explainer |
+|---------------|---------|:-------------------:|:----------------------------:|
+| Inherently explainable | Yes | No | No |
+| Scikit-learn compatible | Linear and tree-based ensemble models | No  | No  |
+| PyTorch compatible | No | Yes | Yes     |
+| Explain BERT | No | Yes  | Yes  |
+| Explain RNN  | No | No | Yes |
+| Handles NLP pipeline | Yes, text pre-processing, encoding, training, hyperparameter tuning | Yes, uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Yes, generator and predictor modules handle the required text pre-processing.
 
 ## Classical Text Explainer
 
