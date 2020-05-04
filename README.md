@@ -94,11 +94,10 @@ Run the below commands from ```interpret-text/python```
 ```
 </details>
 
-<details><summary><strong><em>3.2 From pipy (package users): </strong></em></summary>
+<details><summary><strong><em>3.2 From github (package users): </strong></em></summary>
 
 ```
-    pip install keyring artifacts-keyring
-    pip install interpret-text --index-url "https://pkgs.dev.azure.com/responsibleai/_packaging/responsibleai/pypi/simple" (placehodler)
+    pip install --upgrade git+https://github.com/interpretml/interpret-text.git#subdirectory=python
 ```
 </details>
 
