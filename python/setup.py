@@ -2,28 +2,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # ---------------------------------------------------------
 
-"""Setup file for interpret-community package."""
+"""Setup file for interpret-text package."""
 from setuptools import setup, find_packages
-import os
 
-_major = "0.1"
-_minor = "0.8"
+_major = "0"
+_minor = "1"
+_patch = "1"
 
-if os.path.exists("../major.version"):
-    with open("../major.version", "rt") as bf:
-        _major = str(bf.read()).strip()
-
-if os.path.exists("../minor.version"):
-    with open("../minor.version", "rt") as bf:
-        _minor = str(bf.read()).strip()
-
-VERSION = "{}.{}".format(_major, _minor)
-SELFVERSION = VERSION
-if os.path.exists("patch.version"):
-    with open("patch.version", "rt") as bf:
-        _patch = str(bf.read()).strip()
-        SELFVERSION = "{}.{}".format(VERSION, _patch)
-
+VERSION = "{}.{}.{}".format(_major, _minor, _patch)
 
 CLASSIFIERS = [
     "Development Status :: 5 - Production/Stable",
@@ -33,6 +19,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: MacOS",
@@ -56,22 +43,19 @@ DEPENDENCIES = [
     "shap>=0.20.0, <=0.29.3",
 ]
 
-EXTRAS = {"sample": ["hdbscan"], "deep": ["tensorflow"], "mimic": ["lightgbm"]}
-
 setup(
     name="interpret-text",
-    version=SELFVERSION,
+    version=VERSION,
     description="Microsoft Interpret Text SDK for Python",
-    long_description="",  # README,
+    long_description="",
     long_description_content_type="text/markdown",
     author="Microsoft Corp",
     author_email="ilmat@microsoft.com",
     license="MIT License",
-    url="https://docs.microsoft.com/en-us/azure/machine-learning/service/",
+    url="https://github.com/interpretml/interpret-text",
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests"]),
     install_requires=DEPENDENCIES,
-    extras_require=EXTRAS,
     include_package_data=True,
     data_files=[
         (
