@@ -128,15 +128,13 @@ The following is a list of the explainers available in this repository:
 
 * [Introspective Rationale Explainer](http://people.csail.mit.edu/tommi/papers/YCZJ_EMNLP2019.pdf)
 
-## When should I use which?
+## Explanation Method Comparison Chart
 |  | Classical Text Explainer | Unified Information Explainer | Introspective Rationale Explainer |
 |---------------|---------|:-------------------:|:----------------------------:|
-| Inherently explainable | Yes | No | No |
-| Scikit-learn compatible | Linear and tree-based ensemble models | No  | No  |
-| PyTorch compatible | No | Yes | Yes     |
+| Input model support | Scikit-learn linear models and tree-based models | PyTorch | PyTorch |
 | Explain BERT | No | Yes  | Yes  |
 | Explain RNN  | No | No | Yes |
-| Handles NLP pipeline | Yes, text pre-processing, encoding, training, hyperparameter tuning | Yes, uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Yes, generator and predictor modules handle the required text pre-processing.
+| NLP pipeline support | Handles text pre-processing, encoding, training, hyperparameter tuning | Uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Generator and predictor modules handle the required text pre-processing.
 | Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb)|
 
 ## Classical Text Explainer
