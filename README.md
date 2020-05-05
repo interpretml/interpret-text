@@ -97,8 +97,7 @@ Run the below commands from ```interpret-text-contrib/python```
 <details><summary><strong><em>3.2 From pipy (package users): </strong></em></summary>
 
 ```
-    pip install keyring artifacts-keyring
-    pip install interpret-text --index-url "https://pkgs.dev.azure.com/responsibleai/_packaging/responsibleai/pypi/simple" (placehodler)
+    pip install interpret-text
 ```
 </details>
 
