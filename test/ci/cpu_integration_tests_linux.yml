@@ -1,0 +1,80 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+# Pull request against these branches will trigger this build
+pr:
+- master
+
+#Any commit to this branch will trigger the build.
+trigger: none
+
+
+jobs:
+- job: cpu_integration_tests_linux
+  timeoutInMinutes: 120 # how long to run the job before automatically cancelling
+  pool:
+    vmImage: 'ubuntu-16.04' # hosted machine 
+    # name: nameofagentpool
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.6'
+      architecture: 'x64'
+      addToPath: true
+    displayName: 'Use Python 3.6'
+    
+  - bash: |
+      echo "##vso[task.prependpath]/data/anaconda/bin"
+    displayName: Add Conda to PATH
+
+  # Conda environment creation
+  - bash: |
+      cd /home/vsts/work/1/s
+      python tools/generate_conda_files.py
+      conda env create -n interpret_cpu --file=interpret_cpu.yaml
+    displayName: 'Creating Conda Environment with dependencies'
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pip install -e python/
+      pip install -r requirements.txt
+    displayName: 'Install setup.py files'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/integration/test_notebook_unified_information_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run unified information explainer'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/integration/test_notebook_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run classical explainer'
+
+  - bash: |
+      cd /usr/share/miniconda/bin
+      source activate interpret_cpu
+      cd /home/vsts/work/1/s
+      pytest test/integration/test_notebook_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)"
+    displayName: 'Run introspective rationale explainer'
+
+  # Uncomment if needed
+  - bash: |
+      echo Remove Conda Environment
+      conda remove -n interpret_cpu --all -q --force -y
+      echo Done Cleanup
+    displayName: 'Cleanup Task'
+    condition: always()
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFiles: '**/*.xml'
+      failTaskOnFailedTests: true
+    condition: succeededOrFailed()
+    displayName: 'Publish Test Results'
