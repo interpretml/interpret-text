@@ -97,7 +97,7 @@ Run the below commands from ```interpret-text/python```
 <details><summary><strong><em>3.2 From github (package users): </strong></em></summary>
 
 ```
-    pip install --upgrade git+https://github.com/interpretml/interpret-text.git#subdirectory=python
+    pip install interpret-text
 ```
 </details>
 
