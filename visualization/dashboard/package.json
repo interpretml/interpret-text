@@ -35,10 +35,10 @@
     "eslint-plugin-react": "^7.16.0",
     "eslint-plugin-standard": "^4.0.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^24.8.0",
+    "jest": "^26.0.1",
     "node-sass-chokidar": "1.3.4",
     "react-test-renderer": "^16.8.6",
-    "ts-jest": "^24.0.2",
+    "ts-jest": "^25.4.0",
     "typescript": "^3.5.2"
   },
   "dependencies": {
@@ -48,6 +48,7 @@
     "plotly.js-dist": "^1.51.3",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
-    "typescript": "^3.6.4"
+    "typescript": "^3.6.4",
+    "yargs-parser": "^18.1.3"
   }
 }
