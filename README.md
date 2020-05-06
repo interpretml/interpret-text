@@ -1,15 +1,15 @@
 
-# Interpret-Text SDK
-Interpret Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
+# Interpret-Text - Alpha Release 
+Interpret-Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
-This repository contains an SDK and Jupyter notebooks with examples to showcase its use.
+This repository contains an SDK and example Jupyter notebooks to showcase its use.
 
 # Contents
 
 -  [Overview of Interpret-Text](#overview)
 -  [Target Audience](#target-audience)
 -  [Getting Started](#getting-started)
--  [Supported Models and NLP Scenarios](#models)
+-  [Supported NLP Scenarios](#models)
 -  [Supported Explainers](#explainers)
 -  [Use Interpret-Text](#use)
 -  [Contributing](#contrib)
@@ -48,8 +48,8 @@ To setup on your local machine:
 
 Clone and cd into the repository
 ```
-git clone https://github.com/interpretml/interpret-text-contrib.git
-cd interpret-text-contrib
+git clone https://github.com/interpretml/interpret-text.git
+cd interpret-text
 ```
 </details>
 
@@ -85,7 +85,7 @@ You can install the package from source or from pipy.
 
 <details><summary><strong><em>3.1 From source (developers): </strong></em></summary>
 
-Run the below commands from ```interpret-text-contrib/python```
+Run the below commands from ```interpret-text/python```
 
 ```
     pip install -e .
@@ -94,11 +94,10 @@ Run the below commands from ```interpret-text-contrib/python```
 ```
 </details>
 
-<details><summary><strong><em>3.2 From pipy (package users): </strong></em></summary>
+<details><summary><strong><em>3.2 From github (package users): </strong></em></summary>
 
 ```
-    pip install keyring artifacts-keyring
-    pip install interpret-text --index-url "https://pkgs.dev.azure.com/responsibleai/_packaging/responsibleai/pypi/simple" (placehodler)
+    pip install --upgrade git+https://github.com/interpretml/interpret-text.git#subdirectory=python
 ```
 </details>
 
@@ -118,7 +117,7 @@ Install and run Jupyter Notebook
 
 # Supported NLP Scenarios
 
- Currently this repository provides support for the text classification scenario.
+Currently this repository only provides support for the text classification scenario.
 # <a name="explainers"></a>
 
 # Supported Explainers
@@ -128,6 +127,15 @@ The following is a list of the explainers available in this repository:
 * [Unified Information Explainer](https://www.microsoft.com/en-us/research/publication/towards-a-deep-and-unified-understanding-of-deep-neural-models-in-nlp/)
 
 * [Introspective Rationale Explainer](http://people.csail.mit.edu/tommi/papers/YCZJ_EMNLP2019.pdf)
+
+## Explanation Method Comparison Chart
+|  | Classical Text Explainer | Unified Information Explainer | Introspective Rationale Explainer |
+|---------------|---------|:-------------------:|:----------------------------:|
+| Input model support | Scikit-learn linear models and tree-based models | PyTorch | PyTorch |
+| Explain BERT | No | Yes  | Yes  |
+| Explain RNN  | No | No | Yes |
+| NLP pipeline support | Handles text pre-processing, encoding, training, hyperparameter tuning | Uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Generator and predictor modules handle the required text pre-processing.
+| Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb)|
 
 ## Classical Text Explainer
 
@@ -290,7 +298,7 @@ The dashboard visualizes the local feature importances of the document with an i
 <a  name="contrib"></a>
 
 # Contributing
-This project welcomes contributions and suggestions. Most contributions require you to agree to the Github Developer Certificate of Origin, DCO. For details, please visit  [https://probot.github.io/apps/dco/](https://probot.github.io/apps/dco/).
+We welcome contributions and suggestions! Most contributions require you to agree to the Github Developer Certificate of Origin, DCO. For details, please visit  [https://probot.github.io/apps/dco/](https://probot.github.io/apps/dco/).
 
 The Developer Certificate of Origin (DCO) is a lightweight way for contributors to certify that they wrote or otherwise have the right to submit the code they are contributing to the project. Here is the full text of the DCO, reformatted for readability:
 ```
@@ -308,7 +316,7 @@ $ git commit -s -m 'This is my commit message'
 ```
 When you submit a pull request, a DCO bot will automatically determine whether you need to certify. Simply follow the instructions provided by the bot.
 
-<a name=Code></a>
+<a name=code></a>
 # Code of Conduct
 
 This project has adopted the his project has adopted the  [GitHub Community Guidelines](https://help.github.com/en/github/site-policy/github-community-guidelines).
