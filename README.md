@@ -1,5 +1,9 @@
 
 # Interpret-Text - Alpha Release 
+<img alt="PyPI" src="https://img.shields.io/pypi/v/interpret-text"> <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/interpret-text"> <img alt="Azure DevOps builds" src="https://img.shields.io/azure-devops/build/responsibleai/367d9753-0e51-43fd-abea-37441dc9f786/61"> <img alt="Azure DevOps builds" src="https://img.shields.io/azure-devops/build/responsibleai/367d9753-0e51-43fd-abea-37441dc9f786/62"> <img alt="GitHub" src="https://img.shields.io/github/license/interpretml/interpret-text"> [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20unit%20tests%20-%20linux?branchName=master)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=62&branchName=master)
+
+
+
 Interpret-Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
 This repository contains an SDK and example Jupyter notebooks to showcase its use.
