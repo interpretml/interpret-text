@@ -1,5 +1,7 @@
 
 # Interpret-Text - Alpha Release 
+<img alt="GitHub" src="https://img.shields.io/github/license/interpretml/interpret-text"> <img alt="PyPI" src="https://img.shields.io/pypi/v/interpret-text"> <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/interpret-text">
+
 Interpret-Text builds on [Interpret](https://github.com/interpretml/interpret), an open source python package for training interpretable models and helping to explain blackbox machine learning systems. We have added extensions to support text models.
 
 This repository contains an SDK and example Jupyter notebooks to showcase its use.
