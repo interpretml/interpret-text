@@ -1,5 +1,5 @@
 
-# Interpret-Text - Alpha Release 
+# Interpret-Text - Alpha Release package
 <img alt="PyPI" src="https://img.shields.io/pypi/v/interpret-text"> <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/interpret-text"> <img alt="GitHub" src="https://img.shields.io/github/license/interpretml/interpret-text"> [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20unit%20tests%20-%20linux?branchName=master&jobName=cpu_unit_tests_linux)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=62&branchName=master) 
     [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20integration%20tests%20-%20linux?branchName=master&jobName=cpu_integration_tests_linux)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=61&branchName=master)
 
