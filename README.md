@@ -90,7 +90,7 @@ You can install the package from source or from pipy.
 
 <details><summary><strong><em>3.1 From source (developers): </strong></em></summary>
 
-Run the below commands from ```interpret-text/python```
+Run the below commands from ```interpret-text/python``` 
 
 ```
     pip install -e .
