@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 _major = "0"
 _minor = "1"
-_patch = "1"
+_patch = "2"
 
 VERSION = "{}.{}.{}".format(_major, _minor, _patch)
 
