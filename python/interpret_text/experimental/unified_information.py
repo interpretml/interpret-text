@@ -80,7 +80,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         """Explain the model by using MSRA's interpretor
         :param X: The text
         :type X: string
-        :param y: The ground truth label for the sentence
+        :param y: The predicted label for the sentence
         :type y: string
         :param name: a name for saving the explanation, currently ignored
         :type str
@@ -136,7 +136,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
             model_task="classification",
             features=self.parsed_sentence[1:-1],
             classes=self.classes,
-            true_label=y,
+            predicted_label=y,
         )
 
     def _calculate_regularization(self, sampled_x, model, reduced_axes=None):

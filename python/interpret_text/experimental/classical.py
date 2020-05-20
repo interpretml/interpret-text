@@ -133,7 +133,7 @@ class ClassicalTextExplainer:
             in the input text string.
         :param X: String to be explained.
         :type X: str
-        :param y: The ground truth label for the sentence
+        :param y: The predicted label for the sentence
         :type y: string
         :param name: a name for saving the explanation, currently ignored
         :type str
@@ -146,8 +146,13 @@ class ClassicalTextExplainer:
             X, needs_fit=False
         )
         encoded_label = self.model.predict(encoded_text)
+
+        if y is None:
+            y = self.preprocessor.labelEncoder.inverse_transform(encoded_label)
+
         # convert from vector to scalar
         encoded_label = encoded_label[0]
+
         # Obtain the top feature ids for the selected class label
         if hasattr(self.model, "coef_"):
             # when #labels == 2, coef_ returns 1D array
@@ -172,6 +177,6 @@ class ClassicalTextExplainer:
             model_task="classification",
             features=parsed_sentence_list,
             classes=self.preprocessor.labelEncoder.classes_,
-            true_label=y
+            predicted_label=y
         )
         return local_explanantion
