@@ -146,8 +146,13 @@ class ClassicalTextExplainer:
             X, needs_fit=False
         )
         encoded_label = self.model.predict(encoded_text)
+
+        if y is None:
+            y = self.preprocessor.labelEncoder.inverse_transform(encoded_label)
+
         # convert from vector to scalar
         encoded_label = encoded_label[0]
+
         # Obtain the top feature ids for the selected class label
         if hasattr(self.model, "coef_"):
             # when #labels == 2, coef_ returns 1D array
