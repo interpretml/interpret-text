@@ -133,7 +133,7 @@ class ClassicalTextExplainer:
             in the input text string.
         :param X: String to be explained.
         :type X: str
-        :param y: The ground truth label for the sentence
+        :param y: The predicted label for the sentence
         :type y: string
         :param name: a name for saving the explanation, currently ignored
         :type str
@@ -172,6 +172,6 @@ class ClassicalTextExplainer:
             model_task="classification",
             features=parsed_sentence_list,
             classes=self.preprocessor.labelEncoder.classes_,
-            true_label=y
+            predicted_label=y
         )
         return local_explanantion
