@@ -42,9 +42,8 @@ steps:
     versionSpec: '${{parameters.pythonVersion}}' 
     addToPath: true
 
-- template: conda-path-step-template.yml
-  parameters:
-    AgentOS: $(Agent.OS)
+- bash: echo $(Agent.OS)
+  displayName: Show agent OS
 
 - bash: |
       python tools/generate_conda_files.py
