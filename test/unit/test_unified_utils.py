@@ -7,7 +7,7 @@ from utils_test import get_mnli_test_dataset, get_bert_model
 
 
 class TestUnifiedExplainerUtils(object):
-    train_dataset = get_mnli_test_dataset()
+    train_dataset = get_mnli_test_dataset("train")
 
     def test_working(self):
         assert True
