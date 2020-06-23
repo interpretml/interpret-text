@@ -44,7 +44,7 @@ steps:
 
 - bash: |
       python tools/generate_conda_files.py --name ${{parameters.conda_env}} --python-version ${{parameters.pythonVersion}}
-      conda env create -n ${{parameters.conda_env}} --yes --file=${{parameters.conda_env}}.yaml
+      conda env create -n ${{parameters.conda_env}} --file=${{parameters.conda_env}}.yaml
   displayName: 'Creating Conda Environment with dependencies'
 
 - bash: |
