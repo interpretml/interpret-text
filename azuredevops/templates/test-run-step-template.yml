@@ -35,6 +35,10 @@ parameters:
 steps:
 - template: conda-path-step-template.yml
 
+- bash: brew install libopenmp
+  displayName: Install OpenMP with Homebrew
+  condition:  eq(variables['Agent.OS'], 'Darwin')
+
 - bash: |
       python tools/generate_conda_files.py --name ${{parameters.conda_env}} --python-version ${{parameters.pythonVersion}}
       conda env create -n ${{parameters.conda_env}} --file=${{parameters.conda_env}}.yaml
@@ -65,10 +69,6 @@ steps:
   # Can't just run the test/unit directory.... some tests break
   - bash: |
         source activate ${{parameters.conda_env}}
-        conda env list
-        echo "--------------------------------------------------------"
-        conda list
-        echo "--------------------------------------------------------"
         python -m pytest test/unit/test_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
     displayName: Classical explainer unit tests
 
