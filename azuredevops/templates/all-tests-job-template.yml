@@ -12,14 +12,14 @@ parameters:
   # Following used if installationType is WheelArtifact
   wheelArtifactName:
 
-  jobs:
-    - ${{ each plat in parameters.platforms }}:
-      - ${{ each testRunType in parameters.testRunTypes }}:
-        - ${{ each pyVer in parameters.pyVersions }}:
-          - job:
-            displayName: ${{ format('{0} {1} {2}', plat.Key , testRunType, pyVer) }}
-            pool:
-              vmImage: ${{ plat.value }}
+jobs:
+  - ${{ each plat in parameters.platforms }}:
+    - ${{ each testRunType in parameters.testRunTypes }}:
+      - ${{ each pyVer in parameters.pyVersions }}:
+        - job:
+          displayName: ${{ format('{0} {1} {2}', plat.Key , testRunType, pyVer) }}
+          pool:
+            vmImage: ${{ plat.value }}
 
             variables:
               ${{ if eq(parameters.targetType, 'Test') }}:
