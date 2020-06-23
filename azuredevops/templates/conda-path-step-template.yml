@@ -1,33 +1,29 @@
 # See:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/anaconda?view=azure-devops&tabs=macos#add-conda-to-your-system-path
 
+# --------------------------------
+# Windows
 
-parameters:
-- name: AgentOS
-  type: string
-  values:
-  - Windows_NT
-  - Darwin
-  - Linux
+- powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+  displayName: Add conda to PATH for Windows
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
 
-steps:
-- bash: echo ${{parameters.AgentOS}}
-  displayName: Show OS for conda path
-  
+# --------------------------------
+# MacOS
 
-- ${{ if eq(parameters.AgentOS, 'Windows_NT')}}:
-  - bash: echo "##vso[task.prependpath]$CONDA/bin"
-    displayName: Add conda to PATH
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: Add conda to PATH for MacOS
+  condition:  eq(variables['Agent.OS'], 'Darwin')
 
-- ${{ if eq(parameters.AgentOS, 'Darwin')}}:
-  - bash: echo "##vso[task.prependpath]$CONDA/bin"
-    displayName: Add conda to PATH
+# On Hosted macOS, the agent user doesn't have ownership of Miniconda's installation directory/
+# We need to take ownership if we want to update conda or install packages globally
+- bash: sudo chown -R $USER $CONDA
+  displayName: Take ownership of conda installation for MacOS
+  condition:  eq(variables['Agent.OS'], 'Darwin')
 
-  # On Hosted macOS, the agent user doesn't have ownership of Miniconda's installation directory/
-  # We need to take ownership if we want to update conda or install packages globally
-  - bash: sudo chown -R $USER $CONDA
-    displayName: Take ownership of conda installation
+# --------------------------------
+# Linux
 
-- ${{ if eq(parameters.AgentOS, 'Linux')}}:
-  - bash: echo "##vso[task.prependpath]$CONDA/bin"
-    displayName: Add conda to PATH
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: Add conda to PATH
+  condition:  eq(variables['Agent.OS'], 'Linux')

@@ -44,7 +44,7 @@ steps:
 
 - template: conda-path-step-template.yml
   parameters:
-    AgentOS: ${{Agent.OS}}
+    AgentOS: $(Agent.OS)
 
 - bash: |
       python tools/generate_conda_files.py
