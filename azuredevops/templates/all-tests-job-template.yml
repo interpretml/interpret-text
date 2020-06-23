@@ -36,7 +36,6 @@ jobs:
               testRunType: ${{testRunType}}
               installationType: ${{parameters.installationType}}
               pythonVersion: ${{pyVer}}
-              pinRequirements: ${{parameters.pinRequirements}}
               freezeArtifact: $(FreezeArtifact)
               freezeFile: $(FreezeFile)
               # Following are used if the installationType is PyPI
