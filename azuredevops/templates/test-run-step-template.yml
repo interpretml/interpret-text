@@ -28,9 +28,7 @@ parameters:
   type: string
 - name: conda_env
   type: string
-  values:
-  - interpret_cpu
-  default: interpret_cpu
+  default: interpret_conda_env
 - name: conda_path
   type: string
   default: /usr/share/miniconda/bin
@@ -43,18 +41,18 @@ steps:
     addToPath: true
 
 - template: conda-path-step-template.yml
-  parameters:
-    AgentOS: $(Agent.OS)
 
 - bash: |
-      python tools/generate_conda_files.py
-      conda env create -n ${{parameters.conda_env}} --file=interpret_cpu.yaml
+      python tools/generate_conda_files.py --name ${{parameters.conda_env}} --python-version ${{parameters.pythonVersion}}
+      conda env create -n ${{parameters.conda_env}} --yes --file=${{parameters.conda_env}}.yaml
   displayName: 'Creating Conda Environment with dependencies'
 
 - bash: |
-      cd ${{parameters.conda_path}}
       source activate ${{parameters.conda_env}}
-      cd $(Build.SourcesDirectory)
+      python --version
+
+- bash: |
+      source activate ${{parameters.conda_env}}
       python -m pip install flake8
       flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
   displayName: 'Run flake8'

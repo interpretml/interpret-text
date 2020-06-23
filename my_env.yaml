@@ -1,0 +1,44 @@
+# 
+# To create the conda environment:
+# $ conda env create -f my_env.yaml
+# To update the conda environment:
+# $ conda env update -f my_env.yaml
+# To register the conda environment in Jupyter:
+# $ conda activate my_env
+# $ python -m ipykernel install --user --name my_env --display-name "Python (my_env)"
+# 
+name: my_env
+channels:
+- defaults
+- conda-forge
+- pytorch
+dependencies:
+- python==3.7
+- pip>=19.1.1
+- ipykernel>=4.6.1
+- jupyter>=1.0.0
+- matplotlib>=2.2.2
+- numpy>=1.13.3
+- pandas>=0.24.2
+- pytest>=3.6.4
+- pytorch-cpu>=1.0.0
+- scipy>=1.0.0
+- tensorflow==1.12.0
+- h5py>=2.8.0
+- tensorflow-hub==0.5.0
+- py-xgboost<=0.80
+- dask[dataframe]==1.2.2
+- pip:
+  - azureml-sdk[automl,notebooks,contrib,explain]==1.0.57
+  - cached-property==1.5.1
+  - papermill>=1.0.1
+  - nteract-scrapbook>=0.2.1
+  - pytorch-pretrained-bert>=0.6
+  - tqdm==4.31.1
+  - scikit-learn>=0.19.0,<=0.20.3
+  - nltk>=3.4
+  - interpret-community>=0.1.0.2
+  - pre-commit>=1.20.0
+  - spacy>=2.2.3
+  - transformers==2.4.1
+  - pydantic==1.4

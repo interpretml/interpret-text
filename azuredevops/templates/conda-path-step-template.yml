@@ -26,5 +26,5 @@ steps:
 # Linux
 
 - bash: echo "##vso[task.prependpath]$CONDA/bin"
-  displayName: Add conda to PATH
+  displayName: Add conda to PATH for Linux
   condition:  eq(variables['Agent.OS'], 'Linux')
