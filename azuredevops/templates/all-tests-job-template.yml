@@ -21,27 +21,27 @@ jobs:
           pool:
             vmImage: ${{ plat.value }}
 
-            variables:
-              ${{ if eq(parameters.targetType, 'Test') }}:
-                pypiUrl: https://test.pypi.org/simple/
-              ${{ if eq(parameters.targetType, 'Production') }}:
-                pypiUrl: https://pypi.org/simple/
-              FreezeArtifact: '${{parameters.freezeArtifactStem}}-${{plat.Key}}-${{testRunType}}-${{pyVer}}'
-              FreezeFile: '${{parameters.freezeFileStem}}-${{plat.Key}}-${{testRunType}}-${{pyVer}}.txt'
+          variables:
+            ${{ if eq(parameters.targetType, 'Test') }}:
+              pypiUrl: https://test.pypi.org/simple/
+            ${{ if eq(parameters.targetType, 'Production') }}:
+              pypiUrl: https://pypi.org/simple/
+            FreezeArtifact: '${{parameters.freezeArtifactStem}}-${{plat.Key}}-${{testRunType}}-${{pyVer}}'
+            FreezeFile: '${{parameters.freezeFileStem}}-${{plat.Key}}-${{testRunType}}-${{pyVer}}.txt'
 
-            
-            steps:
-            - template: test-run-step-template.yml
-              parameters:
-                testRunType: ${{testRunType}}
-                installationType: ${{parameters.installationType}}
-                pythonVersion: ${{pyVer}}
-                pinRequirements: ${{parameters.pinRequirements}}
-                freezeArtifact: $(FreezeArtifact)
-                freezeFile: $(FreezeFile)
-                # Following are used if the installationType is PyPI
-                pypiUrl: $(pypiUrl)
-                versionArtifactName: ${{parameters.versionArtifactName}}
-                versionArtifactFile: ${{parameters.versionArtifactFile}}
-                # Following used if installationType is WheelArtifact
-                wheelArtifactName: ${{parameters.wheelArtifactName}}
+          
+          steps:
+          - template: test-run-step-template.yml
+            parameters:
+              testRunType: ${{testRunType}}
+              installationType: ${{parameters.installationType}}
+              pythonVersion: ${{pyVer}}
+              pinRequirements: ${{parameters.pinRequirements}}
+              freezeArtifact: $(FreezeArtifact)
+              freezeFile: $(FreezeFile)
+              # Following are used if the installationType is PyPI
+              pypiUrl: $(pypiUrl)
+              versionArtifactName: ${{parameters.versionArtifactName}}
+              versionArtifactFile: ${{parameters.versionArtifactFile}}
+              # Following used if installationType is WheelArtifact
+              wheelArtifactName: ${{parameters.wheelArtifactName}}
