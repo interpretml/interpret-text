@@ -19,7 +19,7 @@ steps:
     workingDirectory: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
 
   - task: PublishPipelineArtifact@1
-    displayName: "Publish pip freeze file to artifact ${{parameters.freezeArtifact}}"
+    displayName: "Publish environment info to artifact ${{parameters.envInfoArtifact}}"
     inputs:
       path: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
-      artifact: ${{parameters.freezeArtifact}}
+      artifact: ${{parameters.envInfoArtifact}}
