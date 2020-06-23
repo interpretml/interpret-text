@@ -1,11 +1,20 @@
+# Nightly build pipeline
+
 variables:
   EnvArtifactStem: 'environment'
   EnvFileStem: 'environment'
 
-pr:
-- master
-
 trigger: none # No CI build
+
+pr: none # Not for pull requests
+
+schedules:
+- cron: "0 7 * * *" # Time is UTC
+  displayName: Nightly Build
+  branches:
+    include:
+      - master
+  always: true
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -15,7 +24,6 @@ jobs:
 - template: templates/all-tests-job-template.yml
   parameters:
     platforms:  { Linux: ubuntu-latest }
-    testRunTypes: ['Unit']
     pyVersions: [3.6.8]
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)
@@ -23,7 +31,6 @@ jobs:
 - template: templates/all-tests-job-template.yml
   parameters:
     platforms:  { Windows: vs2017-win2016 }
-    testRunTypes: ['Unit']
     pyVersions: [3.6.8]
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)
@@ -31,7 +38,6 @@ jobs:
 - template: templates/all-tests-job-template.yml
   parameters:
     platforms:  { MacOS: macos-latest}
-    testRunTypes: ['Unit']
     pyVersions: [3.6.8]
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem) 
