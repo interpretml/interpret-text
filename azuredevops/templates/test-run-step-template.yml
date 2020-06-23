@@ -11,9 +11,9 @@ parameters:
 - name: pinRequirements
   type: boolean
   default: False
-- name: freezeArtifact
+- name: envInfoArtifact
   type: string
-- name: freezeFile
+- name: envInfoFileBase
   type: string
 # Following are used if the installationType is PyPI
 - name: pypiUrl
@@ -56,7 +56,10 @@ steps:
       pip install -r requirements.txt
   displayName: 'Install requirements'
 
-# Should do the pip freeze thing
+- template: environment-info-step-template.yml
+  parameters:
+    envInfoArtifact: ${{parameters.envInfoArtifact}}
+    envInfoFileBase: ${{parameters.envInfoFileBase}}
 
 - ${{ if eq(parameters.testRunType, 'Unit')}}:
   # Can't just run the test/unit directory.... some tests break

@@ -1,6 +1,6 @@
 variables:
-  FreezeArtifactStem: 'freeze'
-  FreezeFileStem: 'requirements-freeze'
+  EnvArtifactStem: 'environment'
+  EnvFileStem: 'environment'
 
 pr:
 - master
@@ -17,21 +17,21 @@ jobs:
     platforms:  { Linux: ubuntu-latest }
     installationType: 'PipLocal'
     pyVersions: [3.6.8]
-    freezeArtifactStem: $(FreezeArtifactStem)
-    freezeFileStem: $(FreezeFileStem)
+    envArtifactStem: $(EnvArtifactStem)
+    envFileStem: $(EnvFileStem)
 
 - template: templates/all-tests-job-template.yml
   parameters:
     platforms:  { Windows: vs2017-win2016 }
     installationType: 'PipLocal'
     pyVersions: [3.6.8]
-    freezeArtifactStem: $(FreezeArtifactStem)
-    freezeFileStem: $(FreezeFileStem)
+    envArtifactStem: $(EnvArtifactStem)
+    envFileStem: $(EnvFileStem)
 
 - template: templates/all-tests-job-template.yml
   parameters:
     platforms:  { MacOS: macos-latest}
     installationType: 'PipLocal'
     pyVersions: [3.6.8]
-    freezeArtifactStem: $(FreezeArtifactStem)
-    freezeFileStem: $(FreezeFileStem)    
+    envArtifactStem: $(EnvArtifactStem)
+    envFileStem: $(EnvFileStem) 

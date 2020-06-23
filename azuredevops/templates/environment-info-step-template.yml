@@ -1,0 +1,25 @@
+# template to save a list of installed packages to an artifact
+# in order to reuse it at a later point.
+
+parameters:
+  envInfoDirectory: environmentInfo
+  envInfoArtifact:
+  envInfoFileBase:
+
+  
+steps:
+  - bash: mkdir ${{parameters.envInfoDirectory}}
+    displayName: Create
+
+  - bash: |
+        source activate ${{parameters.conda_env}}
+        pip freeze --all > ${{parameters.envInfoFileBase}}-pip.txt
+        conda list > ${{parameters.envInfoFileBase}}-conda.txt
+    displayName: "Gather environment information"
+    workingDirectory: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
+
+  - task: PublishPipelineArtifact@1
+    displayName: "Publish pip freeze file to artifact ${{parameters.freezeArtifact}}"
+    inputs:
+      path: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
+      artifact: ${{parameters.freezeArtifact}}
