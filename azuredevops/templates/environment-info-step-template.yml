@@ -9,7 +9,7 @@ parameters:
   
 steps:
   - bash: mkdir ${{parameters.envInfoDirectory}}
-    displayName: Create
+    displayName: Create directory for environment info
 
   - bash: |
         source activate ${{parameters.conda_env}}
