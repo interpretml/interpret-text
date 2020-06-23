@@ -35,7 +35,7 @@ parameters:
 steps:
 - template: conda-path-step-template.yml
 
-- bash: brew install libopenmp
+- bash: brew install libomp
   displayName: Install OpenMP with Homebrew
   condition:  eq(variables['Agent.OS'], 'Darwin')
 
