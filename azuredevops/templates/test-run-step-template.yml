@@ -62,6 +62,10 @@ steps:
   # Can't just run the test/unit directory.... some tests break
   - bash: |
         source activate ${{parameters.conda_env}}
+        conda env list
+        echo "--------------------------------------------------------"
+        conda list
+        echo "--------------------------------------------------------"
         python -m pytest test/unit/test_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
     displayName: Classical explainer unit tests
 
@@ -76,6 +80,7 @@ steps:
     displayName: Introspective rationale explainer unit tests
 
 - ${{ if eq(parameters.testRunType, 'Integration')}}:
+  # Also split up the integration tests :-(
   - bash: |
         source activate ${{parameters.conda_env}}
         python -m pytest test/integration/test_notebook_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
@@ -91,16 +96,15 @@ steps:
         python -m pytest test/integration/test_notebook_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
     displayName: Introspective rationale explainer integration tests
 
-- bash: |
-      source activate ${{parameters.conda_env}}
-      python -m pip install flake8
-      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
-  displayName: 'Run flake8'
-
-
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: '**/*.xml'
     failTaskOnFailedTests: true
   condition: succeededOrFailed()
   displayName: 'Publish Test Results'
+
+- bash: |
+      source activate ${{parameters.conda_env}}
+      python -m pip install flake8
+      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
+  displayName: 'Run flake8'
