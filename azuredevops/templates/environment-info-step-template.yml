@@ -2,6 +2,7 @@
 # in order to reuse it at a later point.
 
 parameters:
+  conda_env:
   envInfoDirectory: environmentInfo
   envInfoArtifact:
   envInfoFileBase:

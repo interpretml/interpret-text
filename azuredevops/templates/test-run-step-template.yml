@@ -62,6 +62,7 @@ steps:
 
 - template: environment-info-step-template.yml
   parameters:
+    conda_env: ${{parameters.conda_env}}
     envInfoArtifact: ${{parameters.envInfoArtifact}}
     envInfoFileBase: ${{parameters.envInfoFileBase}}
 
