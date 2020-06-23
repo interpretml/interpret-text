@@ -4,6 +4,7 @@
 # --------------------------------
 # Windows
 
+steps:
 - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
   displayName: Add conda to PATH for Windows
   condition: eq(variables['Agent.OS'], 'Windows_NT')
