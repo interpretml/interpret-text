@@ -67,25 +67,10 @@ steps:
     envInfoFileBase: ${{parameters.envInfoFileBase}}
 
 - ${{ if eq(parameters.testRunType, 'Unit')}}:
-  # Can't just run the test/unit directory.... some tests break
   - bash: |
         source activate ${{parameters.conda_env}}
-        python -m pytest test/unit/test_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
-    displayName: Classical explainer unit tests
-
-  - bash: |
-        source activate ${{parameters.conda_env}}
-        python -m pytest test/unit/test_unified_information_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
-    displayName: Unified information explainer unit tests
-    
-  - bash: |
-        source activate ${{parameters.conda_env}}
-        python -m pytest test/unit/test_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
-    displayName: Introspective rationale explainer unit tests
-
-  - bash: |
-        source activate ${{parameters.conda_env}}
-        python -m pytest test/unit
+        python -m pytest test/unit --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
+    displayName: Run Unit tests
 
 - ${{ if eq(parameters.testRunType, 'Integration')}}:
   # Also split up the integration tests :-(
@@ -103,6 +88,10 @@ steps:
         source activate ${{parameters.conda_env}}
         python -m pytest test/integration/test_notebook_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
     displayName: Introspective rationale explainer integration tests
+
+  - bash: |
+        source activate ${{parameters.conda_env}}
+        python -m pytest test/integration/
 
 - task: PublishTestResults@2
   inputs:
