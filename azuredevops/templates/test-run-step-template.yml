@@ -47,12 +47,12 @@ steps:
       conda env list
       ls
       pwd
-    displayName: Add Conda to PATH
+  displayName: Add Conda to PATH
 
 - bash: |
       python tools/generate_conda_files.py
       conda env create -n ${{parameters.conda_env}} --file=interpret_cpu.yaml
-    displayName: 'Creating Conda Environment with dependencies'
+  displayName: 'Creating Conda Environment with dependencies'
 
 - bash: |
       cd ${{parameters.conda_path}}
@@ -60,4 +60,4 @@ steps:
       cd ${{Agent.BuildDirectory}}
       python -m pip install flake8
       flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
-    displayName: 'Run flake8'
+  displayName: 'Run flake8'
