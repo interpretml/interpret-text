@@ -73,25 +73,9 @@ steps:
     displayName: Run Unit tests
 
 - ${{ if eq(parameters.testRunType, 'Integration')}}:
-  # Also split up the integration tests :-(
   - bash: |
         source activate ${{parameters.conda_env}}
-        python -m pytest test/integration/test_notebook_classical_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
-    displayName: Classical explainer integration tests
-    
-  - bash: |
-        source activate ${{parameters.conda_env}}
-        python -m pytest test/integration/test_notebook_unified_information_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
-    displayName: Unified information explainer integration tests
-
-  - bash: |
-        source activate ${{parameters.conda_env}}
-        python -m pytest test/integration/test_notebook_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
-    displayName: Introspective rationale explainer integration tests
-
-  - bash: |
-        source activate ${{parameters.conda_env}}
-        python -m pytest test/integration/
+        python -m pytest test/integration/ --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
 
 - task: PublishTestResults@2
   inputs:
