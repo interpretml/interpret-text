@@ -22,6 +22,6 @@ class TestUnifiedExplainerUtils(object):
     def test_make_bert_embeddings(self):
         model = get_bert_model()
         device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
-        train_dataset = get_mnli_test_dataset()
+        train_dataset = get_mnli_test_dataset("train")
         training_embeddings = make_bert_embeddings(train_dataset, model, device)
         assert training_embeddings is not None
