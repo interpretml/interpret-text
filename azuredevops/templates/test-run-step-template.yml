@@ -1,0 +1,46 @@
+parameters:
+- name: testRunType
+  type: string
+  values:
+  - Unit
+  - Integration
+- name: installationType
+  type: string
+- name: pythonVersion
+  type: number
+  default: 3.7
+- name: pinRequirements
+  type: boolean
+  default: False
+- name: freezeArtifact
+  type: string
+- name: freezeFile
+  type: string
+# Following are used if the installationType is PyPI
+- name: pypiUrl
+  type: string
+- name: versionArtifactName
+  type: string
+- name: versionArtifactFile
+  type: string
+# Following used if the installationType is WheelArtifact
+- name: wheelArtifactName
+  type: string
+
+variables:
+  conda_env: interpret_cpu
+
+steps:
+- task: UsePythonVersion@0
+  displayName: 'Use Python ${{parameters.pythonVersion}}'
+  inputs:
+    versionSpec: '${{parameters.pythonVersion}}' 
+    addToPath: true
+
+- bash: |
+      cd /usr/share/miniconda/bin
+      source activate $(conda_env)
+      cd /home/vsts/work/1/s
+      python -m pip install flake8
+      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
+    displayName: 'Run flake8'

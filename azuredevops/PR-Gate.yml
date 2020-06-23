@@ -1,0 +1,29 @@
+variables:
+  FreezeArtifactStem: 'freeze'
+  FreezeFileStem: 'requirements-freeze'
+
+pr:
+- master
+
+trigger: none # No CI build
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+  
+jobs:
+- template: templates/all-tests-job-template.yml
+  parameters:
+    platforms:  { Linux: ubuntu-latest }
+    installationType: 'PipLocal'
+    pyVersions: [3.6]
+    freezeArtifactStem: $(FreezeArtifactStem)
+    freezeFileStem: $(FreezeFileStem)
+
+- template: templates/all-tests-job-template.yml
+  parameters:
+    platforms:  { Windows: vs2017-win2016 }
+    installationType: 'PipLocal'
+    pyVersions: [3.6]
+    freezeArtifactStem: $(FreezeArtifactStem)
+    freezeFileStem: $(FreezeFileStem)
