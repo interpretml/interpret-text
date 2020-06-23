@@ -34,12 +34,6 @@ parameters:
   default: /usr/share/miniconda/bin
 
 steps:
-- task: UsePythonVersion@0
-  displayName: 'Use Python ${{parameters.pythonVersion}}'
-  inputs:
-    versionSpec: '${{parameters.pythonVersion}}' 
-    addToPath: true
-
 - template: conda-path-step-template.yml
 
 - bash: |
@@ -50,6 +44,7 @@ steps:
 - bash: |
       source activate ${{parameters.conda_env}}
       python --version
+  displayName: 'Verify Python version'
 
 - bash: |
       source activate ${{parameters.conda_env}}
