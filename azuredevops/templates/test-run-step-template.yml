@@ -45,16 +45,16 @@ steps:
       python --version
   displayName: 'Verify Python version'
 
-- bash: |
-      source activate ${{parameters.conda_env}}
-      pip install -r requirements.txt
-  displayName: 'Install requirements'
-
 # Need to have alternatives to this install
 - bash: |
       source activate ${{parameters.conda_env}}
       pip install -e python/
-  displayName: 'Install package'
+  displayName: 'Install locally with pip'
+  
+- bash: |
+      source activate ${{parameters.conda_env}}
+      pip install -r requirements.txt
+  displayName: 'Install requirements'
 
 # Should do the pip freeze thing
 
@@ -62,11 +62,13 @@ steps:
   - bash: |
         source activate ${{parameters.conda_env}}
         python -m pytest test/unit --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
+    displayName: Run Unit Tests
 
 - ${{ if eq(parameters.testRunType, 'Integration')}}:
   - bash: |
         source activate ${{parameters.conda_env}}
         python -m pytest test/integration --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
+    displayName: Run Integration Tests
 
 - bash: |
       source activate ${{parameters.conda_env}}
