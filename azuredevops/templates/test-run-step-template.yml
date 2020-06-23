@@ -57,7 +57,7 @@ steps:
 - bash: |
       cd ${{parameters.conda_path}}
       source activate ${{parameters.conda_env}}
-      cd ${{Agent.BuildDirectory}}
+      cd $(Agent.BuildDirectory)
       python -m pip install flake8
       flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
   displayName: 'Run flake8'
