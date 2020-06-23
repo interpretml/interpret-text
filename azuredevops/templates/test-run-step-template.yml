@@ -28,9 +28,6 @@ parameters:
 - name: conda_env
   type: string
   default: interpret_conda_env
-- name: conda_path
-  type: string
-  default: /usr/share/miniconda/bin
 
 steps:
 - template: conda-path-step-template.yml
