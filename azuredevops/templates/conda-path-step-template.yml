@@ -6,16 +6,20 @@ parameters:
 - name: AgentOS
   type: string
   values:
-  - Windows_NT
-  - Darwin
-  - Linux
+ # - Windows_NT
+ # - Darwin
+ # - Linux
 
 steps:
-- ${{ if eq(parameters.AgentOS, Windows_NT)}}:
+- bash: echo ${{parameters.AgentOS}}
+  displayName: Show OS for conda path
+  
+
+- ${{ if eq(parameters.AgentOS, 'Windows_NT')}}:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
 
-- ${{ if eq(parameters.AgentOS, Darwin)}}:
+- ${{ if eq(parameters.AgentOS, 'Darwin')}}:
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Add conda to PATH
 
@@ -24,6 +28,6 @@ steps:
   - bash: sudo chown -R $USER $CONDA
     displayName: Take ownership of conda installation
 
-- ${{ if eq(parameters.AgentOS, Linux)}}:
+- ${{ if eq(parameters.AgentOS, 'Linux')}}:
   - powershell: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
     displayName: Add conda to PATH
