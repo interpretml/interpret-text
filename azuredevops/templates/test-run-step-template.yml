@@ -82,6 +82,10 @@ steps:
         python -m pytest test/unit/test_introspective_rationale_explainer.py --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
     displayName: Introspective rationale explainer unit tests
 
+  - bash: |
+        source activate ${{parameters.conda_env}}
+        python -m pytest test/unit
+
 - ${{ if eq(parameters.testRunType, 'Integration')}}:
   # Also split up the integration tests :-(
   - bash: |
