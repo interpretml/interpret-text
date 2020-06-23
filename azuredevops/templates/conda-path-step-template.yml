@@ -5,7 +5,7 @@
 parameters:
 - name: AgentOS
   type: string
-  values:
+ # values:
  # - Windows_NT
  # - Darwin
  # - Linux
