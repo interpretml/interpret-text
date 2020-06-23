@@ -26,10 +26,14 @@ parameters:
 # Following used if the installationType is WheelArtifact
 - name: wheelArtifactName
   type: string
-
-variables:
-  conda_env: interpret_cpu
-  conda_path: /usr/share/miniconda/bin
+- name: conda_env
+  type: string
+  values:
+  - interpret_cpu
+  default: interpret_cpu
+- name: conda_path
+  type: string
+  default: /usr/share/miniconda/bin
 
 steps:
 - task: UsePythonVersion@0
@@ -47,12 +51,12 @@ steps:
 
 - bash: |
       python tools/generate_conda_files.py
-      conda env create -n $(conda_env) --file=interpret_cpu.yaml
+      conda env create -n ${{parameters.conda_env}} --file=interpret_cpu.yaml
     displayName: 'Creating Conda Environment with dependencies'
 
 - bash: |
-      cd $(conda_path)
-      source activate $(conda_env)
+      cd ${{parameters.conda_path}}
+      source activate ${{parameters.conda_env}}
       cd ${{Agent.BuildDirectory}}
       python -m pip install flake8
       flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
