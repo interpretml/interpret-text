@@ -29,6 +29,7 @@ parameters:
 
 variables:
   conda_env: interpret_cpu
+  conda_path: /usr/share/miniconda/bin
 
 steps:
 - task: UsePythonVersion@0
@@ -38,9 +39,21 @@ steps:
     addToPath: true
 
 - bash: |
-      cd /usr/share/miniconda/bin
+      echo "##vso[task.prependpath]/data/anaconda/bin"
+      conda env list
+      ls
+      pwd
+    displayName: Add Conda to PATH
+
+- bash: |
+      python tools/generate_conda_files.py
+      conda env create -n $(conda_env) --file=interpret_cpu.yaml
+    displayName: 'Creating Conda Environment with dependencies'
+
+- bash: |
+      cd $(conda_path)
       source activate $(conda_env)
-      cd /home/vsts/work/1/s
+      cd ${{Agent.BuildDirectory}}
       python -m pip install flake8
       flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
     displayName: 'Run flake8'
