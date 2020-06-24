@@ -23,21 +23,7 @@ pool:
 jobs:
 - template: templates/all-tests-job-template.yml
   parameters:
-    platforms:  { Linux: ubuntu-latest }
+    platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
     pyVersions: [3.6.8]
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)
-
-- template: templates/all-tests-job-template.yml
-  parameters:
-    platforms:  { Windows: vs2017-win2016 }
-    pyVersions: [3.6.8]
-    envArtifactStem: $(EnvArtifactStem)
-    envFileStem: $(EnvFileStem)
-
-- template: templates/all-tests-job-template.yml
-  parameters:
-    platforms:  { MacOS: macos-latest}
-    pyVersions: [3.6.8]
-    envArtifactStem: $(EnvArtifactStem)
-    envFileStem: $(EnvFileStem) 
