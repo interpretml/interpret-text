@@ -21,7 +21,7 @@ jobs:
   parameters:
     platforms:  { Linux: ubuntu-latest }
     pyVersions: [3.6.8]
-    testRunType: CodeCoverage
+    testRunTypes: [ 'CodeCoverage' ]
     installationType: PipLocal
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)
