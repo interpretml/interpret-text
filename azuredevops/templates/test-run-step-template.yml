@@ -4,6 +4,7 @@ parameters:
   values:
   - Unit
   - Integration
+  - CodeCoverage
 - name: installationType
   type: string
 - name: pythonVersion
@@ -79,6 +80,21 @@ steps:
         source activate ${{parameters.condaEnv}}
         python -m pytest test/integration/ --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
     displayName: Run Integration tests
+
+- ${{ if eq(parameters.testRunType, 'CodeCoverage')}}:
+  - bash: |
+        source activate ${{parameters.condaEnv}}
+        python -m pytest test/unit --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Coverage"  --cov=interpet-text --cov-report=xml --cov-report=html
+    displayName: Run Code Coverage tests
+
+  - task: PublishCodeCoverageResults@1
+    inputs:
+      codeCoverageTool: 'cobertura'
+      summaryFileLocation: $(System.DefaultWorkingDirectory)/coverage.xml
+      pathToSources: $(System.DefaultWorkingDirectory)
+      additionalCodeCoverageFiles: $(System.DefaultWorkingDirectory)/htmlcov/**
+      failIfCoverageEmpty: false
+      displayName: "Publish Code Coverage"
 
 - task: PublishTestResults@2
   inputs:
