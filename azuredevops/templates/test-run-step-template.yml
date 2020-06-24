@@ -78,6 +78,7 @@ steps:
   - bash: |
         source activate ${{parameters.condaEnv}}
         python -m pytest test/integration/ --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
+    displayName: Run Integration tests
 
 - task: PublishTestResults@2
   inputs:

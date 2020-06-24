@@ -18,7 +18,7 @@ jobs:
       - ${{ each pyVer in parameters.pyVersions }}:
         - job:
           displayName: ${{ format('{0} {1} {2}', plat.Key , testRunType, pyVer) }}
-          timeoutInMinutes: 120
+          timeoutInMinutes: 240
           pool:
             vmImage: ${{ plat.value }}
 
