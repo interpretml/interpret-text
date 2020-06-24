@@ -1,4 +1,13 @@
-parameters:
+# Template to run a single set of tests
+# - Specifies Python version
+# - Installs requirements
+# - Saves pip and conda environments to Artifact
+# - Installs interpret-text via specified means
+# - Runs specified test suite
+# - Runs flake8
+# - Saves test results
+
+arameters:
 - name: testRunType
   type: string
   values:

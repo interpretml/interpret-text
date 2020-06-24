@@ -1,3 +1,9 @@
+# Install interpret-text in some way
+# Beyond 'None', the options are:
+# PipLocal -> pip install .
+# WheelArtifact -> Get a .whl file from a Pipeline Artifact
+# PyPI -> Get a version from a Pipeline Artifact and install from PyPI
+
 parameters:
 - name: installationType
   type: string

@@ -1,3 +1,18 @@
+# Template for running tests on multiple Python versions and platforms
+#
+# This is a driver for test-run-step-template.yml
+#
+# platforms is a dictionary to specify the VM images to use
+# for the runs. The keys are human-readable titles, the values
+# are vmImage names
+#
+# testRunTypes specifies the different test suites to run
+#
+# pyVersions lists the Python versions to use
+#
+# The set of jobs submitted is the Cartesian product of these
+# three parameters
+
 parameters:
   platforms: { Linux: ubuntu-latest, Windows: vs2017-win2016 }
   testRunTypes: ['Unit', 'Integration']
