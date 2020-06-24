@@ -2,5 +2,4 @@ flake8
 nteract-scrapbook>=0.2.1
 pytest
 papermill
-# xgboost
 lightgbm
