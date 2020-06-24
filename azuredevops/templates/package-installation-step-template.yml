@@ -30,7 +30,7 @@ steps:
     displayName: "Local install of interpret-text with pip"
 
 # ===============================================================
-# Install from a wheel package
+# Install from a wheel package or from PyPI
 - ${{ if in(parameters.installationType, 'PyPI', 'WheelArtifact') }}:
   # Clear out the checked out code
   - task: DeleteFiles@1
