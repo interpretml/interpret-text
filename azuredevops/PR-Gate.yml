@@ -17,5 +17,6 @@ jobs:
     platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
     testRunTypes: ['Unit']
     pyVersions: [3.6.8]
+    installationType: PipLocal
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)

@@ -2,7 +2,7 @@
 # in order to reuse it at a later point.
 
 parameters:
-  conda_env:
+  condaEnv:
   envInfoDirectory: environmentInfo
   envInfoArtifact:
   envInfoFileBase:
@@ -13,7 +13,7 @@ steps:
     displayName: Create directory for environment info
 
   - bash: |
-        source activate ${{parameters.conda_env}}
+        source activate ${{parameters.condaEnv}}
         pip freeze --all > ${{parameters.envInfoFileBase}}-pip.txt
         conda list > ${{parameters.envInfoFileBase}}-conda.txt
     displayName: "Gather environment information"

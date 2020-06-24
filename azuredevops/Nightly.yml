@@ -25,5 +25,6 @@ jobs:
   parameters:
     platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
     pyVersions: [3.6.8]
+    installationType: PipLocal
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)

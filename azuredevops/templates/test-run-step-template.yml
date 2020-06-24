@@ -25,7 +25,7 @@ parameters:
 # Following used if the installationType is WheelArtifact
 - name: wheelArtifactName
   type: string
-- name: conda_env
+- name: condaEnv
   type: string
   default: interpret_conda_env
 
@@ -37,41 +37,46 @@ steps:
   condition:  eq(variables['Agent.OS'], 'Darwin')
 
 - bash: |
-      python tools/generate_conda_files.py --name ${{parameters.conda_env}} --python-version ${{parameters.pythonVersion}}
-      conda env create -n ${{parameters.conda_env}} --file=${{parameters.conda_env}}.yaml
+      python tools/generate_conda_files.py --name ${{parameters.condaEnv}} --python-version ${{parameters.pythonVersion}}
+      conda env create -n ${{parameters.condaEnv}} --file=${{parameters.condaEnv}}.yaml
   displayName: 'Creating Conda Environment with dependencies'
 
 - bash: |
-      source activate ${{parameters.conda_env}}
+      source activate ${{parameters.condaEnv}}
       python --version
   displayName: 'Verify Python version'
 
 # Need to have alternatives to this install
-- bash: |
-      source activate ${{parameters.conda_env}}
-      pip install -e python/
-  displayName: 'Install locally with pip'
+- template: package-installation-step-template.yml
+  parameters:
+    installationType: ${{parameters.installationType}}
+    pypiUrl: ${{parameters.pypiUrl}}
+    versionArtifactName: ${{parameters.versionArtifactName}}
+    versionArtifactFile: ${{parameters.versionArtifactFile}}
+    pipVersionVariable: variableForPipVersion
+    wheelArtifactName: ${{parameters.wheelArtifactName}}
+    condaEnv: ${{parameters.condaEnv}}
   
 - bash: |
-      source activate ${{parameters.conda_env}}
+      source activate ${{parameters.condaEnv}}
       pip install -r requirements.txt
   displayName: 'Install requirements'
 
 - template: environment-info-step-template.yml
   parameters:
-    conda_env: ${{parameters.conda_env}}
+    condaEnv: ${{parameters.condaEnv}}
     envInfoArtifact: ${{parameters.envInfoArtifact}}
     envInfoFileBase: ${{parameters.envInfoFileBase}}
 
 - ${{ if eq(parameters.testRunType, 'Unit')}}:
   - bash: |
-        source activate ${{parameters.conda_env}}
+        source activate ${{parameters.condaEnv}}
         python -m pytest test/unit --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Unit"
     displayName: Run Unit tests
 
 - ${{ if eq(parameters.testRunType, 'Integration')}}:
   - bash: |
-        source activate ${{parameters.conda_env}}
+        source activate ${{parameters.condaEnv}}
         python -m pytest test/integration/ --junitxml=./TEST--TEST.xml -o junit_suite_name="$(Agent.JobName)-Integration"
 
 - task: PublishTestResults@2
@@ -82,7 +87,7 @@ steps:
   displayName: 'Publish Test Results'
 
 - bash: |
-      source activate ${{parameters.conda_env}}
+      source activate ${{parameters.condaEnv}}
       python -m pip install flake8
       flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
   displayName: 'Run flake8'
