@@ -7,7 +7,7 @@
 # - Runs flake8
 # - Saves test results
 
-arameters:
+parameters:
 - name: testRunType
   type: string
   values:
