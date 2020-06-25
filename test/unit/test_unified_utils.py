@@ -7,9 +7,8 @@ from utils_test import get_mnli_test_dataset, get_bert_model
 
 TEXT_COL = "sentence1"
 
-
 class TestUnifiedExplainerUtils(object):
-
+    
     def test_working(self):
         assert True
 
@@ -22,10 +21,8 @@ class TestUnifiedExplainerUtils(object):
 
     def test_make_bert_embeddings(self):
         model = get_bert_model()
-        device = torch.device(
-            "cpu" if not torch.cuda.is_available() else "cuda")
+        device = torch.device("cpu" if not torch.cuda.is_available() else "cuda")
         train_dataset = get_mnli_test_dataset("train")
         train_dataset = list(train_dataset[TEXT_COL])
-        training_embeddings = make_bert_embeddings(
-            train_dataset, model, device)
+        training_embeddings = make_bert_embeddings(train_dataset, model, device)
         assert training_embeddings is not None
