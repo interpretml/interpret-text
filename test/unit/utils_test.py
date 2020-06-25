@@ -53,4 +53,7 @@ def setup_mock_rnn_introspective_rationale_explainer(model_config, data):
     explainer.build_model_config(model_config)
     return explainer
 
+def setup_mock_classical_explainer(model_config, data):
+    pass
+
 
