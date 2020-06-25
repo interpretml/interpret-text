@@ -1,6 +1,6 @@
 flake8
 nteract-scrapbook>=0.2.1
 pytest
+pytest-cov
 papermill
-xgboost
 lightgbm

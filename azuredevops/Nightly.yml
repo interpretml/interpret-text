@@ -1,0 +1,30 @@
+# Nightly build pipeline
+
+variables:
+  EnvArtifactStem: 'environment'
+  EnvFileStem: 'environment'
+
+trigger: none # No CI build
+
+pr: none # Not for pull requests
+
+schedules:
+- cron: "0 7 * * *" # Time is UTC
+  displayName: Nightly Build
+  branches:
+    include:
+      - master
+  always: true
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+  
+jobs:
+- template: templates/all-tests-job-template.yml
+  parameters:
+    platforms:  { Linux: ubuntu-latest, MacOS: macos-latest, Windows: windows-latest }
+    pyVersions: [3.6.8]
+    installationType: PipLocal
+    envArtifactStem: $(EnvArtifactStem)
+    envFileStem: $(EnvFileStem)

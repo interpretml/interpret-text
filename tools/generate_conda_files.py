@@ -100,12 +100,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--gpu", action="store_true", help="include packages for GPU support"
     )
+    parser.add_argument(
+        "--python-version", help="Specify Python version", required=True
+    )
     args = parser.parse_args()
 
     # set name for environment and output yaml file
     conda_env = "interpret_cpu"
     if args.gpu:
         conda_env = "interpret_gpu"
+
+    # Set the Python version
+    CONDA_BASE["python"] = "python=={0}".format(args.python_version)
 
     # overwrite environment name with user input
     if args.name is not None:
