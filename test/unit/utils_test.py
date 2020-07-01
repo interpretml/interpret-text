@@ -1,10 +1,11 @@
 from interpret_text.experimental.common.preprocessor.bert_preprocessor import BertPreprocessor
 from interpret_text.experimental.common.preprocessor.glove_preprocessor import GlovePreprocessor
+from interpret_text.experimental.common.utils_bert import BERTSequenceClassifier
 from interpret_text.experimental.introspective_rationale import IntrospectiveRationaleExplainer
 
 from notebooks.test_utils.utils_mnli import load_mnli_pandas_df
 from notebooks.test_utils.utils_sst2 import load_sst2_pandas_df
-from interpret_text.experimental.common.utils_bert import BERTSequenceClassifier
+from sklearn.model_selection import train_test_split
 
 CLASSIFIER_TYPE_BERT = "BERT"
 CLASSIFIER_TYPE_BERT_RNN = "BERT_RNN"
@@ -54,3 +55,9 @@ def setup_mock_rnn_introspective_rationale_explainer(model_config, data):
     return explainer
 
 
+def setup_mnli_test_train_split():
+    train_df = get_mnli_test_dataset('train')
+    X_str = train_df['sentence1']
+    ylabels = train_df['genre']
+    X_train, X_test, y_train, y_test = train_test_split(X_str, ylabels, train_size=0.8, test_size=0.2)
+    return X_train, X_test, y_train, y_test

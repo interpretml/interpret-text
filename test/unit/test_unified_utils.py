@@ -7,8 +7,9 @@ from utils_test import get_mnli_test_dataset, get_bert_model
 
 TEXT_COL = "sentence1"
 
+
 class TestUnifiedExplainerUtils(object):
-    
+   
     def test_working(self):
         assert True
 
