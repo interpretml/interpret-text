@@ -7,7 +7,7 @@ _major = "0"
 _minor = "1"
 _patch = "2"
 
-__name__ = "intepret-text"
+__name__ = "interpret-text"
 __version__ = "{}.{}.{}".format(_major, _minor, _patch)
 
 # Only log to disk if environment variable specified
