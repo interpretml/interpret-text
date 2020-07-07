@@ -25,7 +25,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     with _LogWrapper("installation of interpret-text"):
-        subprocess.check_call(["pip", "install", "./python"])
+        subprocess.check_call(["pip", "install", "-e", "./python"])
 
     with _LogWrapper("Check pip"):
         subprocess.check_call(["pip", "freeze"])
@@ -36,7 +36,8 @@ def main(argv):
             version_file.write(interpret_text.__version__)
 
     with _LogWrapper("creation of packages"):
-        subprocess.check_call(["python", "./setup.py", "sdist", "bdist_wheel"], cwd="./python/")
+        subprocess.check_call(
+            ["python", "./setup.py", "sdist", "bdist_wheel"], cwd="./python/")
 
 
 if __name__ == "__main__":
