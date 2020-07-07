@@ -47,6 +47,12 @@ steps:
     envInfoArtifact: ${{parameters.envInfoArtifact}}
     envInfoFileBase: ${{parameters.envInfoFileBase}}
     condaEnv: ${{parameters.condaEnv}}
+  
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      python -m pip install flake8
+      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
+  displayName: 'Run flake8'
 
 # Need to have alternatives to this install
 - template: package-installation-step-template.yml
@@ -92,9 +98,3 @@ steps:
     failTaskOnFailedTests: true
   condition: succeededOrFailed()
   displayName: 'Publish Test Results'
-
-- bash: |
-      source activate ${{parameters.condaEnv}}
-      python -m pip install flake8
-      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
-  displayName: 'Run flake8'
