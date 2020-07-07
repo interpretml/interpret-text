@@ -83,7 +83,7 @@ steps:
 
     - bash: |
         source activate ${{parameters.condaEnv}}
-        pip install interpret-text*.whl
+        pip install interpret_text*.whl
       displayName: "Install interpret-text with pip from local file"
 
       
