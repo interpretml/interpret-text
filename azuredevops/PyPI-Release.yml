@@ -104,3 +104,25 @@ stages:
       inputs:
         path: '$(System.DefaultWorkingDirectory)/$(versionFilename)'
         artifact: $(versionArtifactName)
+
+# ==================================================================================================
+
+- stage: TestWheel
+  displayName: Test Wheel from Artifact
+  dependsOn: CreateWheel
+  pool:
+    vmImage: $(poolImage)
+
+  variables:
+    freezeArtifactStem: TestWheelFreeze
+    freezeFileStem: requirements-wheel-test
+
+  jobs:
+    - template: templates/all-tests-job-template.yml
+      parameters:
+        platforms: { Linux: ubuntu-latest, MacOS: macos-latest }
+        installationType: 'WheelArtifact'
+        pyVersions: [3.6.8]
+        freezeArtifactStem: $(freezeArtifactStem)
+        freezeFileStem: $(freezeFileStem)
+        wheelArtifactName: $(packageArtifactName)
