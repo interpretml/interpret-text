@@ -85,10 +85,12 @@ stages:
 
     - bash: |
         source activate ${{parameters.condaEnv}}
-        pip install setuptools wheel 
-      displayName: 'Install setuptools'
+        pip install --upgrade wheel 
+      displayName: 'Install wheel'
 
-    - script: python ./scripts/build_wheels.py --version-filename $(versionFilename) 
+    - bash: |
+        source activate ${{parameters.condaEnv}}
+        python ./scripts/build_wheels.py --version-filename $(versionFilename) 
       displayName: 'Build wheels'
 
     - task: PublishPipelineArtifact@1
