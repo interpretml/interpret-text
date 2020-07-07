@@ -60,7 +60,7 @@ stages:
   variables:
     wheelEnvName: WheelEnvironment
     freezeArtifactName: CreateWheelFreeze
-    freezeFile: createwheel-freeze.txt
+    freezeFile: createwheel-freeze
 
   jobs:
   - job: CreateWheel
