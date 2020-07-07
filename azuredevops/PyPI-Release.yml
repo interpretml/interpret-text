@@ -114,8 +114,8 @@ stages:
     vmImage: $(poolImage)
 
   variables:
-    freezeArtifactStem: TestWheelFreeze
-    freezeFileStem: requirements-wheel-test
+    envInfoArtifact: TestWheelFreeze
+    envInfoFileBase: requirements-wheel-test
 
   jobs:
     - template: templates/all-tests-job-template.yml
@@ -123,6 +123,6 @@ stages:
         platforms: { Linux: ubuntu-latest, MacOS: macos-latest }
         installationType: 'WheelArtifact'
         pyVersions: [3.6.8]
-        freezeArtifactStem: $(freezeArtifactStem)
-        freezeFileStem: $(freezeFileStem)
+        envInfoArtifact: $(envInfoArtifact)
+        envInfoFileBase: $(envInfoFileBase)
         wheelArtifactName: $(packageArtifactName)
