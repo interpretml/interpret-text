@@ -27,6 +27,9 @@ def main(argv):
     with _LogWrapper("installation of interpret-text"):
         subprocess.check_call(["pip", "install", "-e", "./python"])
 
+    with _LogWrapper("Check pip"):
+        subprocess.check_call(["pip", "freeze"])
+
     with _LogWrapper("storing interpret-text version in {}".format(args.version_filename)):
         import interpret_text
         with open(args.version_filename, 'w') as version_file:
