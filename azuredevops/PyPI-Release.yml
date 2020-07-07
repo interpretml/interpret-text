@@ -84,12 +84,12 @@ stages:
         condaEnv: $(wheelEnvName)
 
     - bash: |
-        source activate ${{parameters.condaEnv}}
+        source activate $(wheelEnvName)
         pip install --upgrade wheel 
       displayName: 'Install wheel'
 
     - bash: |
-        source activate ${{parameters.condaEnv}}
+        source activate $(wheelEnvName)
         python ./scripts/build_wheels.py --version-filename $(versionFilename) 
       displayName: 'Build wheels'
 
