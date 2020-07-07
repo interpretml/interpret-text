@@ -77,7 +77,7 @@ stages:
 
     - template: templates/python-infra-upgrade-step-template.yml
 
-    - template: conda-setup-step-template.yml
+    - template: templates/conda-setup-step-template.yml
       parameters:
         pythonVersion: 3.6.8
         pinRequirements: False
