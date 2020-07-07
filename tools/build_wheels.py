@@ -33,7 +33,7 @@ def main(argv):
             version_file.write(interpret_text.__version__)
 
     with _LogWrapper("creation of packages"):
-        subprocess.check_call(["python", "setup.py", "sdist", "bdist_wheel"])
+        subprocess.check_call(["python", "./setup.py", "sdist", "bdist_wheel"], cwd="./python/")
 
 
 if __name__ == "__main__":

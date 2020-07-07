@@ -2,6 +2,14 @@
 import logging
 import os
 import atexit
+
+_major = "0"
+_minor = "1"
+_patch = "2"
+
+__name__ = "intepret-text"
+__version__ = "{}.{}.{}".format(_major, _minor, _patch)
+
 # Only log to disk if environment variable specified
 interpret_text_logs = os.environ.get('INTERPRET_TEXT_LOGS')
 if interpret_text_logs is not None:

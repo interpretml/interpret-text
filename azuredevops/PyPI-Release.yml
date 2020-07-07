@@ -96,7 +96,7 @@ stages:
     - task: PublishPipelineArtifact@1
       displayName: "Publish wheels"
       inputs:
-        path: $(System.DefaultWorkingDirectory)/dist
+        path: $(System.DefaultWorkingDirectory)/python/dist
         artifact: $(packageArtifactName)
 
     - task: PublishPipelineArtifact@1

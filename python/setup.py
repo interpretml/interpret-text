@@ -5,11 +5,7 @@
 """Setup file for interpret-text package."""
 from setuptools import setup, find_packages
 
-_major = "0"
-_minor = "1"
-_patch = "2"
-
-VERSION = "{}.{}.{}".format(_major, _minor, _patch)
+import interpret_text
 
 CLASSIFIERS = [
     "Development Status :: 5 - Production/Stable",
@@ -44,8 +40,8 @@ DEPENDENCIES = [
 ]
 
 setup(
-    name="interpret-text",
-    version=VERSION,
+    name=interpret_text.__name__,
+    version=interpret_text.__version__,
     description="Microsoft Interpret Text SDK for Python",
     long_description="",
     long_description_content_type="text/markdown",
