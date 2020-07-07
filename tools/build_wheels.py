@@ -25,7 +25,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     with _LogWrapper("installation of interpret-text"):
-        subprocess.check_call(["pip", "install", "-e", "./python"])
+        subprocess.check_call(["pip", "install", "./python"])
 
     with _LogWrapper("Check pip"):
         subprocess.check_call(["pip", "freeze"])
