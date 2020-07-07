@@ -31,6 +31,12 @@ steps:
   
 - bash: |
       source activate ${{parameters.condaEnv}}
+      python -m pip install --upgrade pip
+      pip install --upgrade setuptools
+  displayName: Upgrade Python infrastructure
+
+- bash: |
+      source activate ${{parameters.condaEnv}}
       pip install -r requirements.txt
   displayName: 'Install pip requirements'
 
