@@ -139,11 +139,9 @@ stages:
     ${{ if eq(parameters.releaseType, 'Test')}}:
       twineConnection: PyPI-Test
       twineEndpoint: PyPITest
-      pypiUrl: https://test.pypi.org/legacy/
     ${{ if eq(parameters.releaseType, 'Production')}}:
-      kvUsername: 'usernameprod'
-      kvPassword: 'passwordprod'
-      pypiUrl: https://upload.pypi.org/legacy/
+      twineConnection: PyPI-Prod
+      twineEndpoint: PyPIProd
 
   jobs:
   - deployment: 'PyPI_${{parameters.releaseType}}_Upload'
