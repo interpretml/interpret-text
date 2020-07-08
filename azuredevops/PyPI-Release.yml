@@ -169,7 +169,7 @@ stages:
 
           - task: TwineAuthenticate@0
             inputs:
-              externalFeeds: $(twineConnection)
+              externalFeeds: ${{twineConnection}}
 
           - script: 'twine upload --verbose -r $(twineConnection) --config-file $(PYPIRC_PATH) $(Pipeline.Workspace)/$(packageArtifactName)/*'
             displayName: Upload to ${{parameters.releaseType}} PyPI
