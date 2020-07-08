@@ -185,3 +185,27 @@ stages:
       displayName: "Pause to allow PyPI updates to complete"
       inputs:
         delayForMinutes: "5"
+
+# # ==================================================================================================
+
+- stage: TestFromPyPI
+  displayName: Test package from ${{parameters.releaseType}} PyPI
+  dependsOn: UploadWheel
+  pool:
+    vmImage: $(poolImage)
+  
+  variables:
+    envInfoArtifact: TestPyPIFreeze
+    envInfoFileBase: requirements-pypi-test
+
+  jobs:
+  - template: templates/all-tests-job-template.yml
+    parameters:
+      platforms:  { Linux: ubuntu-latest, acOS: macos-latest }
+      pyVersions: [3.6.8]
+      freezeArtifactStem: $(freezeArtifactStem)
+      freezeFileStem: $(freezeFileStem)
+      installationType: 'PyPI'
+      targetType: ${{parameters.releaseType}}
+      versionArtifactName: $(versionArtifactName)
+      versionArtifactFile: $(versionFileName)
