@@ -201,7 +201,7 @@ stages:
   jobs:
   - template: templates/all-tests-job-template.yml
     parameters:
-      platforms:  { Linux: ubuntu-latest, acOS: macos-latest }
+      platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
       pyVersions: [3.6.8]
       freezeArtifactStem: $(freezeArtifactStem)
       freezeFileStem: $(freezeFileStem)
