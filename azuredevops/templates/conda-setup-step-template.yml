@@ -4,6 +4,9 @@ parameters:
 - name: pinRequirements
   type: boolean
   default: False
+- name: envInfoDirectory
+  type: string
+  default: environmentInfo
 - name: envInfoArtifact
   type: string
 - name: envInfoFileBase
@@ -40,8 +43,18 @@ steps:
       pip install -r requirements.txt
   displayName: 'Install pip requirements'
 
-- template: environment-info-step-template.yml
-  parameters:
-    condaEnv: ${{parameters.condaEnv}}
-    envInfoArtifact: ${{parameters.envInfoArtifact}}
-    envInfoFileBase: ${{parameters.envInfoFileBase}}
+- bash: mkdir ${{parameters.envInfoDirectory}}
+  displayName: Create directory for environment info
+
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      pip freeze --all > ${{parameters.envInfoFileBase}}-pip.txt
+      conda list > ${{parameters.envInfoFileBase}}-conda.txt
+  displayName: "Gather environment information"
+  workingDirectory: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
+
+- task: PublishPipelineArtifact@1
+  displayName: "Publish environment info to artifact ${{parameters.envInfoArtifact}}"
+  inputs:
+    path: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
+    artifact: ${{parameters.envInfoArtifact}}
