@@ -76,7 +76,7 @@ stages:
         pythonVersion: 3.6.8
         pinRequirements: False
         envInfoArtifact: $(freezeArtifactName)
-        envFileStem: $(freezeFile)
+        envInfoFileBase: $(freezeFile)
         condaEnv: $(wheelEnvName)
 
     - bash: |
