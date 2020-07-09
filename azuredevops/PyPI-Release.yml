@@ -36,18 +36,14 @@ stages:
   pool:
     vmImage: $(poolImage)
 
-  variables:
-    envInfoArtifact: PredeployFreeze
-    envInfoFileBase: predeploy-requirements
-
   jobs:
   - template: templates/all-tests-job-template.yml
     parameters:
       platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
       installationType: 'PipLocal'
       pyVersions: [3.6.8]
-      envArtifactStem: $(envInfoArtifact)
-      envFileStem: $(envInfoFileBase)
+      envArtifactStem: PredeployFreeze
+      envFileStem: predeploy-requirements
 
 # ==================================================================================================
 
@@ -80,7 +76,7 @@ stages:
         pythonVersion: 3.6.8
         pinRequirements: False
         envInfoArtifact: $(freezeArtifactName)
-        envInfoFileBase: $(freezeFile)
+        envFileStem: $(freezeFile)
         condaEnv: $(wheelEnvName)
 
     - bash: |
@@ -113,18 +109,14 @@ stages:
   pool:
     vmImage: $(poolImage)
 
-  variables:
-    envInfoArtifact: TestWheelFreeze
-    envInfoFileBase: requirements-wheel-test
-
   jobs:
     - template: templates/all-tests-job-template.yml
       parameters:
         platforms: { Linux: ubuntu-latest, MacOS: macos-latest }
         installationType: 'WheelArtifact'
         pyVersions: [3.6.8]
-        envInfoArtifact: $(envInfoArtifact)
-        envInfoFileBase: $(envInfoFileBase)
+        envArtifactStem: TestWheelFreeze
+        envFileStem: requirements-wheel-test
         wheelArtifactName: $(packageArtifactName)
 
 # ==================================================================================================
@@ -203,8 +195,8 @@ stages:
     parameters:
       platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
       pyVersions: [3.6.8]
-      freezeArtifactStem: $(freezeArtifactStem)
-      freezeFileStem: $(freezeFileStem)
+      envArtifactStem: TestPyPIFreeze
+      envFileStem: requirements-pypi-test
       installationType: 'PyPI'
       targetType: ${{parameters.releaseType}}
       versionArtifactName: $(versionArtifactName)
