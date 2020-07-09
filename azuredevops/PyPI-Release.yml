@@ -47,7 +47,7 @@ stages:
       installationType: 'PipLocal'
       pyVersions: [3.6.8]
       envArtifactStem: $(envInfoArtifact)
-      envInfoFileBase: $(envInfoFileBase)
+      envFileStem: $(envInfoFileBase)
 
 # ==================================================================================================
 
