@@ -40,21 +40,19 @@ parameters:
   default: interpret_conda_env
 
 steps:
-- template: conda-path-step-template.yml
-
-- bash: brew install libomp
-  displayName: Install OpenMP with Homebrew
-  condition:  eq(variables['Agent.OS'], 'Darwin')
-
-- bash: |
-      python tools/generate_conda_files.py --name ${{parameters.condaEnv}} --python-version ${{parameters.pythonVersion}}
-      conda env create -n ${{parameters.condaEnv}} --file=${{parameters.condaEnv}}.yaml
-  displayName: 'Creating Conda Environment with dependencies'
-
+- template: conda-setup-step-template.yml
+  parameters:
+    pythonVersion: ${{parameters.pythonVersion}}
+    pinRequirements: ${{parameters.pinRequirements}}
+    envInfoArtifact: ${{parameters.envInfoArtifact}}
+    envInfoFileBase: ${{parameters.envInfoFileBase}}
+    condaEnv: ${{parameters.condaEnv}}
+  
 - bash: |
       source activate ${{parameters.condaEnv}}
-      python --version
-  displayName: 'Verify Python version'
+      python -m pip install flake8
+      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
+  displayName: 'Run flake8'
 
 # Need to have alternatives to this install
 - template: package-installation-step-template.yml
@@ -66,17 +64,6 @@ steps:
     pipVersionVariable: variableForPipVersion
     wheelArtifactName: ${{parameters.wheelArtifactName}}
     condaEnv: ${{parameters.condaEnv}}
-  
-- bash: |
-      source activate ${{parameters.condaEnv}}
-      pip install -r requirements.txt
-  displayName: 'Install requirements'
-
-- template: environment-info-step-template.yml
-  parameters:
-    condaEnv: ${{parameters.condaEnv}}
-    envInfoArtifact: ${{parameters.envInfoArtifact}}
-    envInfoFileBase: ${{parameters.envInfoFileBase}}
 
 - ${{ if eq(parameters.testRunType, 'Unit')}}:
   - bash: |
@@ -111,9 +98,3 @@ steps:
     failTaskOnFailedTests: true
   condition: succeededOrFailed()
   displayName: 'Publish Test Results'
-
-- bash: |
-      source activate ${{parameters.condaEnv}}
-      python -m pip install flake8
-      flake8 --ignore=E501,E266,W503,F403,F405,E731,F821,E203 ./python/
-  displayName: 'Run flake8'

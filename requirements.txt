@@ -4,3 +4,4 @@ pytest
 pytest-cov
 papermill
 lightgbm
+shap>=0.20.0,<=0.29.3

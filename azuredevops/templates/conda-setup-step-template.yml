@@ -1,0 +1,60 @@
+parameters:
+- name: pythonVersion
+  type: string
+- name: pinRequirements
+  type: boolean
+  default: False
+- name: envInfoDirectory
+  type: string
+  default: environmentInfo
+- name: envInfoArtifact
+  type: string
+- name: envInfoFileBase
+  type: string
+- name: condaEnv
+  type: string
+  default: interpret_conda_env
+
+steps:
+- template: conda-path-step-template.yml
+
+- bash: brew install libomp
+  displayName: Install OpenMP with Homebrew
+  condition:  eq(variables['Agent.OS'], 'Darwin')
+
+- bash: |
+      python tools/generate_conda_files.py --name ${{parameters.condaEnv}} --python-version ${{parameters.pythonVersion}}
+      conda env create -n ${{parameters.condaEnv}} --file=${{parameters.condaEnv}}.yaml
+  displayName: 'Creating Conda Environment with dependencies'
+
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      python --version
+  displayName: 'Verify Python version'
+  
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      python -m pip install --upgrade pip
+      pip install --upgrade setuptools
+  displayName: Upgrade Python infrastructure
+
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      pip install -r requirements.txt
+  displayName: 'Install pip requirements'
+
+- bash: mkdir ${{parameters.envInfoDirectory}}
+  displayName: Create directory for environment info
+
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      pip freeze --all > ${{parameters.envInfoFileBase}}-pip.txt
+      conda list > ${{parameters.envInfoFileBase}}-conda.txt
+  displayName: "Gather environment information"
+  workingDirectory: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
+
+- task: PublishPipelineArtifact@1
+  displayName: "Publish environment info to artifact ${{parameters.envInfoArtifact}}"
+  inputs:
+    path: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
+    artifact: ${{parameters.envInfoArtifact}}
