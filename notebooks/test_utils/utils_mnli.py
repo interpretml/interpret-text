@@ -8,13 +8,13 @@
 """
     Utility functions for downloading, extracting, and reading the
     Multi-Genre NLI (MultiNLI) Corpus.
-    https://www.nyu.edu/projects/bowman/multinli/
+    https://cims.nyu.edu/~sbowman/multinli/
 """
 import os
 import pandas as pd
 from notebooks.test_utils.utils_data_shared import maybe_download, extract_zip
 
-URL = "http://www.nyu.edu/projects/bowman/multinli/multinli_1.0.zip"
+URL = "https://cims.nyu.edu/~sbowman/multinli/multinli_1.0.zip"
 DATA_FILES = {
     "train": "multinli_1.0/multinli_1.0_train.jsonl",
     "dev_matched": "multinli_1.0/multinli_1.0_dev_matched.jsonl",
