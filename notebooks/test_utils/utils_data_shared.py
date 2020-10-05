@@ -55,7 +55,7 @@ def maybe_download(url, filename=None, work_directory=".", expected_bytes=None):
             ):
                 file.write(data)
     else:
-        log.debug("File {} already downloaded".format(filepath)) 
+        log.debug("File {} already downloaded".format(filepath))
     if expected_bytes is not None:
         statinfo = os.stat(filepath)
         if statinfo.st_size != expected_bytes:
