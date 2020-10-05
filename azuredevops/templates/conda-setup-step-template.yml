@@ -58,3 +58,4 @@ steps:
   inputs:
     path: '$(System.DefaultWorkingDirectory)/${{parameters.envInfoDirectory}}'
     artifact: '${{parameters.envInfoArtifact}}-Attempt-$(System.JobAttempt)'
+  condition: False # Since ADO is playing up right now  NOT FOR CHECKIN
