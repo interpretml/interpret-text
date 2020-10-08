@@ -6,6 +6,8 @@
 from interpret_text.experimental.classical import ClassicalTextExplainer
 from sklearn.preprocessing import LabelEncoder
 from utils_test import setup_mnli_test_train_split
+import pickle
+import os
 
 DOCUMENT = "rare bird has more than enough charm to make it memorable."
 
@@ -44,4 +46,24 @@ class TestClassicalExplainer(object):
         y = classifier.predict(DOCUMENT)
         predicted_label = label_encoder.inverse_transform(y)
         local_explanation = explainer.explain_local(DOCUMENT, predicted_label)
+        assert len(local_explanation.local_importance_values) == len(local_explanation.features)
+
+    def test_pickle(self):
+        """
+        Test for pickling of classical explainer
+        :return:
+        """
+        X_train, X_test, y_train, y_test = setup_mnli_test_train_split()
+        label_encoder = LabelEncoder()
+        y_train = label_encoder.fit_transform(y_train)
+        explainer = ClassicalTextExplainer()
+        classifier, best_params = explainer.fit(X_train, y_train)
+        explainer_file_name = 'explainer.p'
+        with open(explainer_file_name, 'wb') as explainer_save_file:
+            pickle.dump(explainer, explainer_save_file)
+        with open(explainer_file_name, 'rb') as explainer_load_file:
+            explainer = pickle.load(explainer_load_file)
+        os.remove(explainer_file_name)
+        explainer.preprocessor.labelEncoder = label_encoder
+        local_explanation = explainer.explain_local(DOCUMENT)
         assert len(local_explanation.local_importance_values) == len(local_explanation.features)

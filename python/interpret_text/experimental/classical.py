@@ -14,6 +14,23 @@ from interpret_text.experimental.explanation import _create_local_explanation
 # Uses logistic regression and 1-gram model by default
 
 
+class Encoder:
+    """Encoder object recast into an API that is compatible with
+    Pipeline().
+    """
+    def __init__(self, explainer):
+        self._explainer = explainer
+
+    def transform(self, X_test):
+        X_vec, _ = self._explainer.preprocessor.encode_features(
+            X_test, needs_fit=False
+        )
+        return X_vec
+
+    def fit(self, *args):
+        return self
+
+
 class ClassicalTextExplainer:
     """The ClassicalTextExplainer for returning explanations for n-gram
     bag-of-words models using sklearn's classifier API.
@@ -106,22 +123,6 @@ class ClassicalTextExplainer:
             best_params = classifier_CV.best_params_
         else:
             best_params = self.model.get_params()
-
-        class Encoder:
-            """Encoder object recast into an API that is compatible with
-            Pipeline().
-            """
-            def __init__(self, explainer):
-                self._explainer = explainer
-
-            def transform(self, X_test):
-                X_vec, _ = self._explainer.preprocessor.encode_features(
-                    X_test, needs_fit=False
-                )
-                return X_vec
-
-            def fit(self, *args):
-                return self
 
         text_model = Pipeline(
             steps=[("preprocessor", Encoder(self)), ("classifier", self.model)]
