@@ -48,7 +48,7 @@ class TestClassicalExplainer(object):
         local_explanation = explainer.explain_local(DOCUMENT, predicted_label)
         assert len(local_explanation.local_importance_values) == len(local_explanation.features)
 
-    def test_pickle(self):
+    def test_pickle(self, tmpdir):
         """
         Test for pickling of classical explainer
         :return:
@@ -58,12 +58,13 @@ class TestClassicalExplainer(object):
         y_train = label_encoder.fit_transform(y_train)
         explainer = ClassicalTextExplainer()
         classifier, best_params = explainer.fit(X_train, y_train)
-        explainer_file_name = 'explainer.p'
-        with open(explainer_file_name, 'wb') as explainer_save_file:
+        explainer_file_name = 'explainer.pkl'
+        explainer_file_path = tmpdir.mkdir('explainers').join(explainer_file_name)
+        with open(explainer_file_path, 'wb') as explainer_save_file:
             pickle.dump(explainer, explainer_save_file)
-        with open(explainer_file_name, 'rb') as explainer_load_file:
+        with open(explainer_file_path, 'rb') as explainer_load_file:
             explainer = pickle.load(explainer_load_file)
-        os.remove(explainer_file_name)
+        os.remove(explainer_file_path)
         explainer.preprocessor.labelEncoder = label_encoder
         local_explanation = explainer.explain_local(DOCUMENT)
         assert len(local_explanation.local_importance_values) == len(local_explanation.features)
