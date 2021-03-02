@@ -37,11 +37,9 @@ CONDA_BASE = {
     "pytest": "pytest>=3.6.4",
     "pytorch": "pytorch-cpu>=1.0.0",
     "scipy": "scipy>=1.0.0",
-    "tensorflow": "tensorflow==1.12.0",
+    "tensorflow": "tensorflow<2.0.0",
     "h5py": "h5py>=2.8.0",
-    "tensorflow-hub": "tensorflow-hub==0.5.0",
-    "py-xgboost": "py-xgboost<=0.80",
-    "dask": "dask[dataframe]==1.2.2",
+    "py-xgboost": "py-xgboost<=0.80"
 }
 CONDA_GPU = {
     "numba": "numba>=0.38.1",
@@ -51,7 +49,7 @@ CONDA_GPU = {
 }
 
 PIP_BASE = {
-    "azureml-sdk": "azureml-sdk[automl,notebooks,contrib,explain]==1.0.57",
+    "interpret-community": "interpret-community>=0.16.0",
     "cached-property": "cached-property==1.5.1",
     "papermill": "papermill>=1.0.1",
     "nteract-scrapbook": "nteract-scrapbook>=0.2.1",
@@ -59,7 +57,6 @@ PIP_BASE = {
     "tqdm": "tqdm==4.31.1",
     "scikit-learn": "scikit-learn>=0.19.0,<=0.20.3",
     "nltk": "nltk>=3.4",
-    "interpret-community": "interpret-community>=0.1.0.2",
     "pre-commit": "pre-commit>=1.20.0",
     "spacy": "spacy>=2.2.3",
     "transformers": "transformers==2.4.1",
