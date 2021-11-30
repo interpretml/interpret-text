@@ -38,6 +38,7 @@ CONDA_BASE = {
     "pytorch": "pytorch-cpu>=1.0.0",
     "scipy": "scipy>=1.0.0",
     "tensorflow": "tensorflow<2.0.0",
+    "tensorflow-estimator": "tensorflow-estimator<2.0.0",
     "h5py": "h5py>=2.8.0",
     "py-xgboost": "py-xgboost<=0.80"
 }

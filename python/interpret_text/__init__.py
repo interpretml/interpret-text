@@ -5,7 +5,7 @@ import atexit
 
 _major = "0"
 _minor = "1"
-_patch = "2"
+_patch = "3"
 
 __name__ = "interpret-text"
 __version__ = "{}.{}.{}.dev10".format(_major, _minor, _patch)
