@@ -33,8 +33,7 @@ jobs:
       - ${{ each pyVer in parameters.pyVersions }}:
         - job:
           displayName: ${{ format('{0} {1} {2}', plat.Key , testRunType, pyVer) }}
-          ${{ if eq(plat.Key, 'Windows')}}:
-            timeoutInMinutes: 240
+          timeoutInMinutes: 360
           pool:
             vmImage: ${{ plat.value }}
 

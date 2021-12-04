@@ -39,7 +39,8 @@ class ClassicalTextExplainer:
     """
 
     def __init__(self, preprocessor=None, model=None,
-                 hyperparam_range=None, is_trained=False):
+                 hyperparam_range=None, is_trained=False,
+                 n_jobs=None, tol=0.0001):
         """Initialize the ClassicalTextExplainer
         :param model: Linear models with linear coefs mapped to features or
             tree based models with inbuilt feature_importances that are sklearn
@@ -52,7 +53,13 @@ class ClassicalTextExplainer:
         :param hyperparam_range: Custom hyper parameter range to search over
             when training input model. passed to sklearn's GridsearchCV's
             as param_grid argument.
-        :type hyperparam_range: dict     """
+        :type hyperparam_range: dict
+        :param n_jobs: The number of jobs to run in parallel.
+            Passed to GridSearchCV. -1 means using all processors.
+        :type n_jobs: int
+        :param tol: Tolerance for stopping criteria. Default is 1e-4.
+        :type tol: float
+        """
         self.parsed_sentence = None
         self.word_importances = None
         self.model = model
@@ -69,6 +76,8 @@ class ClassicalTextExplainer:
                     "Custom model needs to be supplied with custom hyperparameter range to search over."
                 )
         self.preprocessor = BOWEncoder() if preprocessor is None else preprocessor
+        self.n_jobs = n_jobs
+        self.tol = tol
 
     def _encode(self, X_str):
         """Encode text strings in X_str as vectors.
@@ -114,8 +123,9 @@ class ClassicalTextExplainer:
                 self.model = LogisticRegression()
                 # Hyperparameters were chosen through hyperparamter optimization on MNLI
                 self.hyperparam_range = [ExplainerParams.HYPERPARAM_RANGE]
+                self.hyperparam_range[0]['tol'] = [self.tol]
             classifier_CV = GridSearchCV(
-                self.model, self.hyperparam_range, cv=3, scoring="accuracy"
+                self.model, self.hyperparam_range, cv=3, scoring="accuracy", n_jobs=self.n_jobs
             )
             classifier_CV.fit(X_train, y_train)
             # set model as the best estimator from grid search results
