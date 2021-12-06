@@ -8,7 +8,7 @@ _minor = "1"
 _patch = "3"
 
 __name__ = "interpret-text"
-__version__ = "{}.{}.{}.dev10".format(_major, _minor, _patch)
+__version__ = "{}.{}.{}".format(_major, _minor, _patch)
 
 # Only log to disk if environment variable specified
 interpret_text_logs = os.environ.get('INTERPRET_TEXT_LOGS')
