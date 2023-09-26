@@ -43,6 +43,11 @@ steps:
       pip install -r requirements.txt
   displayName: 'Install pip requirements'
 
+- bash: |
+      source activate ${{parameters.condaEnv}}
+      python -m spacy download en_core_web_sm
+  displayName: 'Setup spacy'
+
 - bash: mkdir ${{parameters.envInfoDirectory}}
   displayName: Create directory for environment info
 

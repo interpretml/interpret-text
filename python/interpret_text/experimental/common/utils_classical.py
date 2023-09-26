@@ -3,10 +3,12 @@ import html
 import string
 import numpy as np
 import matplotlib.pyplot as plt
-from spacy.lang.en import English
 from sklearn.preprocessing import LabelEncoder
 from IPython.core.display import display, HTML
 from sklearn.feature_extraction.text import CountVectorizer
+
+
+nlp = spacy.load("en_core_web_sm")
 
 
 # Tokenizer is class instead of function to avoid multiple reloads of parser, stopwords and punctuation
@@ -93,11 +95,11 @@ class BOWEncoder:
             labelEncoder and vectorizer using predefined objects.
         """
         self.tokenizer = BOWTokenizer(
-            English()
+            nlp
         )  # the tokenizer must have a tokenize() and parse() function.
         self.labelEncoder = LabelEncoder()
         self.vectorizer = CountVectorizer(
-            tokenizer=self.tokenizer.tokenize, ngram_range=(1, 1)
+            tokenizer=self.tokenizer.tokenize, ngram_range=(1, 1), min_df=1
         )
         self.decode_params = {}
 

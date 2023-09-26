@@ -32,7 +32,9 @@ BERT_MODEL_CONFIG = {
     "model_prefix": 'sst2rnpmodeltest',
     "embedding_path": '../../../data/sst2\\',
     "labels": [0, 1],
-    "num_labels": 2
+    "num_labels": 2,
+    "save_path": '',
+    "model_folder_path": ''
 }
 
 BERT_RNN_MODEL_CONFIG = {
@@ -67,7 +69,9 @@ BERT_RNN_MODEL_CONFIG = {
     "model_prefix": 'sst2rnpmodeltest',
     "embedding_path": '../../../data/sst2\\',
     "labels": [0, 1],
-    "num_labels": 2
+    "num_labels": 2,
+    "save_path": '',
+    "model_folder_path": ''
 }
 
 RNN_MODEL_CONFIG = {
@@ -102,5 +106,7 @@ RNN_MODEL_CONFIG = {
     "model_prefix": 'sst2rnpmodeltest',
     "embedding_path": '../../../data/sst2\\',
     "labels": [0, 1],
-    "num_labels": 2
+    "num_labels": 2,
+    "save_path": '',
+    "model_folder_path": ''
 }

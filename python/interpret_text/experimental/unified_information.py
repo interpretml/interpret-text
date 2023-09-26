@@ -66,7 +66,7 @@ class UnifiedInformationExplainer(PureStructuredModelMixin, nn.Module):
         assert self.model is not None, "You have to pass in a trained model."
         assert self.scale >= 0, "The value for scale cannot be less than zero"
         assert 1 >= self.rate >= 0, "The value for rate has to be between 0 and 1"
-        assert type(self.target_layer) == int and (
+        assert isinstance(self.target_layer, int) and (
             1 <= self.target_layer <= 14
         ), (
             """the\
