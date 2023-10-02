@@ -1,7 +1,7 @@
 
 # Interpret-Text - Alpha Release 
-<img alt="PyPI" src="https://img.shields.io/pypi/v/interpret-text"> <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/interpret-text"> <img alt="GitHub" src="https://img.shields.io/github/license/interpretml/interpret-text"> [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20unit%20tests%20-%20linux?branchName=master&jobName=cpu_unit_tests_linux)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=62&branchName=master) 
-    [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20integration%20tests%20-%20linux?branchName=master&jobName=cpu_integration_tests_linux)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=61&branchName=master)
+<img alt="PyPI" src="https://img.shields.io/pypi/v/interpret-text"> <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/interpret-text"> <img alt="GitHub" src="https://img.shields.io/github/license/interpretml/interpret-text"> [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20unit%20tests%20-%20linux?branchName=main&jobName=cpu_unit_tests_linux)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=62&branchName=main) 
+    [![Build Status](https://dev.azure.com/responsibleai/interpret-text/_apis/build/status/CPU%20integration%20tests%20-%20linux?branchName=main&jobName=cpu_integration_tests_linux)](https://dev.azure.com/responsibleai/interpret-text/_build/latest?definitionId=61&branchName=main)
 
 
 
@@ -140,7 +140,7 @@ The following is a list of the explainers available in this repository:
 | Explain BERT | No | Yes  | Yes  |
 | Explain RNN  | No | No | Yes |
 | NLP pipeline support | Handles text pre-processing, encoding, training, hyperparameter tuning | Uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Generator and predictor modules handle the required text pre-processing.
-| Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/master/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb)|
+| Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb)|
 
 ## Classical Text Explainer
 
