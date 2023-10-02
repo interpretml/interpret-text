@@ -16,7 +16,7 @@ Tests are automatically run as part of a DevOps pipeline. The pipelines are defi
 <details>
 <summary><strong><em>Unit tests (click to expand)</em></strong></summary>
 
-Unit tests ensure that each class or function behaves as it should. Every time a developer makes a pull request to staging or master branch, a battery of unit tests is executed.
+Unit tests ensure that each class or function behaves as it should. Every time a developer makes a pull request to main branch, a battery of unit tests is executed.
 
 **Note that the next instructions execute the tests from the root folder.**
 
@@ -43,6 +43,6 @@ In the notebooks of these repo we use [Papermill](https://github.com/nteract/pap
 
 In the unit tests we just make sure the notebook runs. In the integration tests, we use a bigger dataset for more epochs and we test that the metrics are what we expect.
 
-For a deep overview on how to integrate papermill on unit and integration test, please refer to [this guide from Microsoft Recommenders repo](https://github.com/microsoft/recommenders/blob/master/tests/README.md#how-to-create-tests-on-notebooks-with-papermill).
+For a deep overview on how to integrate papermill on unit and integration test, please refer to [this guide from Recommenders repo](https://github.com/recommenders-team/recommenders/tree/main/tests#how-to-create-tests-for-the-notebooks).
 
 More details on how to integrate Papermill with notebooks can be found in their [repo](https://github.com/nteract/papermill).

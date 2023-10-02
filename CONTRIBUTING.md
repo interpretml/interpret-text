@@ -9,7 +9,7 @@ Contributions are welcomed! Here's a few things to know:
 
 ## Steps to Contributing
 
-*Prs are made against Master and releases are made from Master.
+*Prs are made against main and releases are made from main.
 
 ## Coding Guidelines
 

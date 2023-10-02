@@ -12,7 +12,7 @@ The visualization dashboard is a modular component that will take in an Explanat
 ### Setting up your environment
 The dashboard uses Typescript and React as it's main language and framework. NPM is the package management system that will be used throughout this document, but other package management systems can be used.
 ### Feature Development
-The dashboard currently uses [Office UI Fabric](https://developer.microsoft.com/en-us/fabric#/get-started) and [mlchartlib](https://github.com/interpretml/interpret-community/tree/master/visualization/mlchartlib) for development.
+The dashboard currently uses [Office UI Fabric](https://developer.microsoft.com/en-us/fabric#/get-started) and [mlchartlib](https://github.com/microsoft/responsible-ai-toolbox/tree/main/libs/mlchartlib) for development.
 
 The source code is broken into localization and MLIDashboard. Localization is used as to display the static strings in the dashboard to different languages, while MLIDashboard houses the Typescript code for functionality.
 
