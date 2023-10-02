@@ -4,7 +4,7 @@ from typing import Dict
 
 
 def get_bert_default_config() -> Dict:
-    return{
+    return {
         "cuda": False,
         "pretrain_cls": False,
         "batch_size": 32,
@@ -36,7 +36,7 @@ def get_bert_default_config() -> Dict:
 
 
 def get_rnn_default_config() -> Dict:
-    return{
+    return {
         "cuda": False,
         "pretrain_cls": False,
         "batch_size": 32,
@@ -68,7 +68,7 @@ def get_rnn_default_config() -> Dict:
 
 
 def get_bert_rnn_default_config() -> Dict:
-    return{
+    return {
         "hidden_dim": 100,
         "embedding_dimension": 768
     }

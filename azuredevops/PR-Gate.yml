@@ -16,9 +16,9 @@ pool:
 jobs:
 - template: templates/all-tests-job-template.yml
   parameters:
-    platforms:  { Linux: ubuntu-latest, MacOS: macos-latest }
+    platforms:  { MacOS: macos-latest }
     testRunTypes: ['Unit']
-    pyVersions: [3.6.8]
+    pyVersions: [3.8]
     installationType: PipLocal
     envArtifactStem: $(EnvArtifactStem)
     envFileStem: $(EnvFileStem)

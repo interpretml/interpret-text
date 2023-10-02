@@ -7,7 +7,7 @@ pool:
 strategy:
   matrix:
     Python36:
-      python.version: '3.6'
+      python.version: '3.8'
 
 variables:
   interpFeed: "responsibleai"

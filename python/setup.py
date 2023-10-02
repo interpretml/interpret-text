@@ -13,9 +13,8 @@ CLASSIFIERS = [
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: MacOS",
@@ -28,7 +27,7 @@ DEPENDENCIES = [
     "pydantic",
     "spacy",
     "ipywidgets",
-    "transformers==2.4.1",
+    "transformers>=4.17.0",
     "scipy",
     "scikit-learn",
     "tqdm",
@@ -36,7 +35,7 @@ DEPENDENCIES = [
     "pytorch_pretrained_bert",
     "cached_property",
     "interpret-community",
-    "shap>=0.20.0, <=0.29.3",
+    "shap>=0.20.0, <=0.42.1",
 ]
 
 setup(

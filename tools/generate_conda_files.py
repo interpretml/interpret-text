@@ -24,10 +24,10 @@ $ python -m ipykernel install --user --name {conda_env} \
 --display-name "Python ({conda_env})"
 """
 
-CHANNELS = ["defaults", "conda-forge", "pytorch"]
+CHANNELS = ["conda-forge", "pytorch"]
 
 CONDA_BASE = {
-    "python": "python==3.6.8",
+    "python": "python=3.8",
     "pip": "pip>=19.1.1",
     "ipykernel": "ipykernel>=4.6.1",
     "jupyter": "jupyter>=1.0.0",
@@ -35,12 +35,12 @@ CONDA_BASE = {
     "numpy": "numpy>=1.13.3",
     "pandas": "pandas>=0.24.2",
     "pytest": "pytest>=3.6.4",
-    "pytorch": "pytorch-cpu>=1.0.0",
+    "pytorch": "pytorch>=1.0.0",
     "scipy": "scipy>=1.0.0",
-    "tensorflow": "tensorflow<2.0.0",
-    "tensorflow-estimator": "tensorflow-estimator<2.0.0",
+    "tensorflow": "tensorflow",
+    "tensorflow-estimator": "tensorflow-estimator",
     "h5py": "h5py>=2.8.0",
-    "py-xgboost": "py-xgboost<=0.80"
+    "xgboost": "xgboost"
 }
 CONDA_GPU = {
     "numba": "numba>=0.38.1",
@@ -49,19 +49,22 @@ CONDA_GPU = {
     "cudatoolkit": "cudatoolkit==9.2",
 }
 
+CONDA_CPU = {
+    "cpuonly": "cpuonly"
+}
+
 PIP_BASE = {
     "interpret-community": "interpret-community>=0.16.0",
-    "cached-property": "cached-property==1.5.1",
+    "cached-property": "cached-property==1.5.2",
     "papermill": "papermill>=2.3.3",
     "nteract-scrapbook": "nteract-scrapbook>=0.2.1",
     "pytorch-pretrained-bert": "pytorch-pretrained-bert>=0.6",
     "tqdm": "tqdm>=4.62.3",
-    "scikit-learn": "scikit-learn>=0.19.0,<=1.0.1",
+    "scikit-learn": "scikit-learn>=0.19.0,<=1.3.1",
     "nltk": "nltk>=3.4",
     "pre-commit": "pre-commit>=1.20.0",
     "spacy": "spacy>=2.2.3",
-    "transformers": "transformers==2.4.1",
-    "pydantic": "pydantic==1.4"
+    "transformers": "transformers>=4.17.0"
 }
 PIP_GPU = {}
 
@@ -109,7 +112,7 @@ if __name__ == "__main__":
         conda_env = "interpret_gpu"
 
     # Set the Python version
-    CONDA_BASE["python"] = "python=={0}".format(args.python_version)
+    CONDA_BASE["python"] = "python={0}".format(args.python_version)
 
     # overwrite environment name with user input
     if args.name is not None:
@@ -123,6 +126,8 @@ if __name__ == "__main__":
     if args.gpu:
         conda_packages.update(CONDA_GPU)
         pip_packages.update(PIP_GPU)
+    else:
+        conda_packages.update(CONDA_CPU)
 
     # update conda and pip packages based on os platform support
     if platform == "darwin":
