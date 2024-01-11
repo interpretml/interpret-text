@@ -7,20 +7,7 @@ import torch
 import numpy as np
 from scipy.special import logsumexp, log_softmax
 
-openai.api_type = "azure"
-openai.api_base = "https://oai-mert.openai.azure.com/"
-openai.api_version = "2023-03-15-preview"
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-
 DEFAULT_SYSTEM_PROMPT = "You are an AI assistant that helps people find information."
-
-engine = "mert-DaVinci002"
-
-MODEL_TO_ENCODING = {
-    "GPT35": "cl100k_base",  
-    "Davinci003": "p50k_base",
-    "mert-DaVinci002": "p50k_base",
-}
 
 class ChatOpenAI:
     def __init__(self, engine="GPT35", system_prompt=DEFAULT_SYSTEM_PROMPT):
@@ -45,9 +32,14 @@ class ChatOpenAI:
 
 
 class CompletionsOpenAI:
-    def __init__(self, engine="mert-DaVinci002", format_fn=None):
+    def __init__(self, engine="mert-DaVinci002", format_fn=None, encoding="p50k_base", api_settings=None):
+        if api_settings is not None:
+            openai.api_type = api_settings.get("api_type")
+            openai.api_base = api_settings.get("api_base")
+            openai.api_version = api_settings.get("api_version")
+            openai.api_key = api_settings.get("api_key")
         self.engine = engine
-        self.tokenizer = tiktoken.get_encoding(MODEL_TO_ENCODING[engine])
+        self.tokenizer = tiktoken.get_encoding(encoding)
         self.format_fn = format_fn if format_fn is not None else (lambda x: x)
 
     def _sample_api_single(self, prompt, temperature=0, max_tokens=50,
