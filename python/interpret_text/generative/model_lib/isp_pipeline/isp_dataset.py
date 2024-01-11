@@ -1,4 +1,5 @@
-## The below code is taken from https://github.com/naimenz/inverse-scaling-eval-pipeline and modified.
+# The below code is taken from
+# https://github.com/naimenz/inverse-scaling-eval-pipeline and modified.
 
 from __future__ import annotations
 from abc import ABC
@@ -76,7 +77,8 @@ class Dataset:
             # important to convert the string 'classes' back into a list
             classes_list = ast.literal_eval(str(row["classes"]))
             if any(cls[0] != ' ' for cls in classes_list):
-                print(f"WARNING: some class label from {classes_list} does not have a leading space")
+                print(
+                    f"WARNING: some class label from {classes_list} does not have a leading space")
             example = ClassificationExample(
                 prompt=row["prompt"],
                 classes=classes_list,
@@ -89,7 +91,8 @@ class Dataset:
     def numeric_from_df(cls, df: pd.DataFrame) -> Dataset:
         examples = []
         for _, row in df.iterrows():
-            example = NumericExample(row["prompt"], row["true_answer"], row["anchor"])
+            example = NumericExample(
+                row["prompt"], row["true_answer"], row["anchor"])
             examples.append(example)
         return Dataset(examples)
 
@@ -108,7 +111,8 @@ class Dataset:
             # important to convert the string 'classes' back into a list
             classes_list = ast.literal_eval(str(row["classes"]))
             if any(cls[0] != ' ' for cls in classes_list):
-                print(f"WARNING: some class label from {classes_list} does not have a leading space")
+                print(
+                    f"WARNING: some class label from {classes_list} does not have a leading space")
             example = LogoddsExample(
                 prompt=row["prompt"],
                 other_prompt=row["other_prompt"],

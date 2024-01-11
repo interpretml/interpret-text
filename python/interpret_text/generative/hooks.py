@@ -1,5 +1,5 @@
 """
-The below file is taken from https://github.com/kmeng01/rome/blob/main/util/nethook.py 
+The below file is taken from https://github.com/kmeng01/rome/blob/main/util/nethook.py
 It belongs to the above repository's authors under the MIT License.
 
 Utilities for instrumenting a torch model.
@@ -91,7 +91,8 @@ class Trace(contextlib.AbstractContextManager):
                 # copy operation.  That allows in-place operations
                 # to follow without error.
                 if retain_grad:
-                    output = recursive_copy(retainer.output, clone=True, detach=False)
+                    output = recursive_copy(
+                        retainer.output, clone=True, detach=False)
             if stop:
                 raise StopForward()
             return output
@@ -220,7 +221,8 @@ def recursive_copy(x, clone=None, detach=None, retain_grad=None):
     # Only dicts, lists, and tuples (and subclasses) can be copied.
     if isinstance(x, dict):
         # We changed this part of the code where we also pass retain_grad.
-        return type(x)({k: recursive_copy(v, retain_grad=retain_grad) for k, v in x.items()})
+        return type(x)({k: recursive_copy(v, retain_grad=retain_grad)
+                        for k, v in x.items()})
     elif isinstance(x, (list, tuple)):
         return type(x)([recursive_copy(v, retain_grad=retain_grad) for v in x])
     else:
@@ -281,9 +283,10 @@ def hierarchical_subsequence(
     assert (first is None) or (after is None)
     if first is last is after is upto is None:
         return sequential if share_weights else copy.deepcopy(sequential)
-    assert isinstance(sequential, torch.nn.Sequential), (
-        ".".join((first or last or after or upto)[:depth] or "arg") + " not Sequential"
-    )
+    assert isinstance(
+        sequential, torch.nn.Sequential), (".".join(
+            (first or last or after or upto)[
+                :depth] or "arg") + " not Sequential")
     including_children = (first is None) and (after is None)
     included_children = OrderedDict()
     # A = current level short name of A.
@@ -306,9 +309,7 @@ def hierarchical_subsequence(
             including_children = False
         if including_children:
             # AR = full name for recursive descent if name matches.
-            FR, LR, AR, UR = [
-                n if n is None or n[depth] == name else None for n in [FN, LN, AN, UN]
-            ]
+            FR, LR, AR, UR = [n if n is None or n[depth] == name else None for n in [FN, LN, AN, UN]]
             chosen = hierarchical_subsequence(
                 layer,
                 first=FR,
@@ -442,7 +443,8 @@ def invoke_with_optional_args(fn, *args, **kwargs):
                 unpassed = ", ".join(
                     argspec.args[u] for u in unmatched_pos if u < defaulted_pos
                 )
-                raise TypeError(f"{fn.__name__}() cannot be passed {unpassed}.")
+                raise TypeError(
+                    f"{fn.__name__}() cannot be passed {unpassed}.")
     # Pass remaining kw args if they can be accepted.
     pass_kw = {
         k: v

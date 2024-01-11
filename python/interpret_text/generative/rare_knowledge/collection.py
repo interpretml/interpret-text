@@ -9,7 +9,7 @@ from nltk.corpus import words
 def sample_songs():
     endpoint_url = "https://query.wikidata.org/sparql"
 
-    query = f"""
+    query = """
     SELECT DISTINCT ?song ?songLabel ?artist ?artistLabel (SAMPLE(?popularity) AS ?popularity_count)
     WHERE {{
       ?song wdt:P31 wd:Q7366; # Instance of song
@@ -22,21 +22,27 @@ def sample_songs():
     """
 
     headers = {"Accept": "application/json"}
-    response = requests.get(endpoint_url, params={"query": query}, headers=headers)
+    response = requests.get(
+        endpoint_url, params={
+            "query": query}, headers=headers)
 
     if response.status_code != 200:
         raise Exception(f"Error: {response.status_code} - {response.reason}")
 
     results = response.json().get("results", {}).get("bindings", [])
-    songs_info = [{"song_name": result["songLabel"]["value"], "artist_name": result["artistLabel"]["value"], "popularity": int(result["popularity_count"]["value"])} for result in results]
+    songs_info = [{"song_name": result["songLabel"]["value"],
+                   "artist_name": result["artistLabel"]["value"],
+                   "popularity": int(result["popularity_count"]["value"])} for result in results]
 
     return songs_info
+
 
 def sample_universities():
     endpoint_url = "https://query.wikidata.org/sparql"
 
-    query = f"""
-    SELECT DISTINCT ?university ?universityLabel (SAMPLE(?f_year) AS ?founding_year) (SAMPLE(?cityLabel) AS ?city) (SAMPLE(?popularity) AS ?popularity_count)
+    query = """
+    SELECT DISTINCT ?university ?universityLabel (SAMPLE(?f_year) AS ?founding_year)(SAMPLE(?cityLabel)
+    AS ?city) (SAMPLE(?popularity) AS ?popularity_count)
     WHERE {{
       ?university wdt:P31 wd:Q3918. # Instance of university
       OPTIONAL {{ ?university wdt:P571 ?founding_date. BIND(YEAR(?founding_date) AS ?f_year) }}
@@ -49,7 +55,9 @@ def sample_universities():
     """
 
     headers = {"Accept": "application/json"}
-    response = requests.get(endpoint_url, params={"query": query}, headers=headers)
+    response = requests.get(
+        endpoint_url, params={
+            "query": query}, headers=headers)
 
     if response.status_code != 200:
         raise Exception(f"Error: {response.status_code} - {response.reason}")
@@ -59,11 +67,28 @@ def sample_universities():
 
     for result in results:
         university_info = {
-            "university_name": result.get("universityLabel", {}).get("value", ""),
-            "founding_year": int(result.get("founding_year", {}).get("value", "0")) if result.get("founding_year") else None,
-            "city": result.get("city", {}).get("value", "") if result.get("city") else None,
-            "popularity": int(result.get("popularity_count", {}).get("value", "0")) if result.get("popularity_count") else None
-        }
+            "university_name": result.get(
+                "universityLabel",
+                {}).get(
+                "value",
+                ""),
+            "founding_year": int(
+                result.get(
+                    "founding_year",
+                    {}).get(
+                        "value",
+                        "0")) if result.get("founding_year") else None,
+            "city": result.get(
+                            "city",
+                            {}).get(
+                                "value",
+                                "") if result.get("city") else None,
+            "popularity": int(
+                                    result.get(
+                                        "popularity_count",
+                                        {}).get(
+                                            "value",
+                                        "0")) if result.get("popularity_count") else None}
         universities_info.append(university_info)
 
     return universities_info
@@ -88,7 +113,9 @@ def sample_basketball_players():
     """
 
     headers = {"Accept": "application/json"}
-    response = requests.get(endpoint_url, params={"query": query}, headers=headers)
+    response = requests.get(
+        endpoint_url, params={
+            "query": query}, headers=headers)
 
     if response.status_code != 200:
         raise Exception(f"Error: {response.status_code} - {response.reason}")
@@ -98,7 +125,8 @@ def sample_basketball_players():
         {
             "player_name": result.get("playerLabel", {}).get("value", ""),
             "birth_year": int(result.get("birth_year", {}).get("value", "0")) if result.get("birth_year") else None,
-            "birthplace": result.get("birthplaceLabel", {}).get("value", "") if result.get("birthplaceLabel") else None,
+            "birthplace": (result.get("birthplaceLabel", {}).get("value", "")
+                           if result.get("birthplaceLabel") else None),
             "popularity": int(result.get("popularity", {}).get("value", "0")) if result.get("popularity") else None
         }
         for result in results
@@ -109,9 +137,9 @@ def sample_basketball_players():
 
 def sample_football_teams():
     endpoint_url = "https://query.wikidata.org/sparql"
-    
-    query = f"""
-    SELECT DISTINCT ?team ?teamLabel (SAMPLE(?f_year) AS ?founding_year) (SAMPLE(?stadiumLabel) AS ?stadium_name) (SAMPLE(?cityLabel) AS ?city) (SAMPLE(?popularity) AS ?popularity_count)
+
+    query = """SELECT DISTINCT ?team ?teamLabel (SAMPLE(?f_year) AS ?founding_year)
+    (SAMPLE(?stadiumLabel) AS ?stadium_name) (SAMPLE(?cityLabel) AS ?city) (SAMPLE(?popularity) AS ?popularity_count)
     WHERE {{
       ?team wdt:P31 wd:Q476028. # Instance of football club
       OPTIONAL {{ ?team wdt:P571 ?founding_date. BIND(YEAR(?founding_date) AS ?f_year) }}
@@ -125,7 +153,9 @@ def sample_football_teams():
     """
 
     headers = {"Accept": "application/json"}
-    response = requests.get(endpoint_url, params={"query": query}, headers=headers)
+    response = requests.get(
+        endpoint_url, params={
+            "query": query}, headers=headers)
 
     if response.status_code != 200:
         raise Exception(f"Error: {response.status_code} - {response.reason}")
@@ -135,12 +165,33 @@ def sample_football_teams():
 
     for result in results:
         team_info = {
-            "team_name": result.get("teamLabel", {}).get("value", ""),
-            "founding_year": int(result.get("founding_year", {}).get("value", "0")) if result.get("founding_year") else None,
-            "stadium_name": result.get("stadium_name", {}).get("value", "") if result.get("stadium_name") else None,
-            "city": result.get("city", {}).get("value", "") if result.get("city") else None,
-            "popularity": int(result.get("popularity_count", {}).get("value", "0")) if result.get("popularity_count") else None
-        }
+            "team_name": result.get(
+                "teamLabel",
+                {}).get(
+                "value",
+                ""),
+            "founding_year": int(
+                result.get(
+                    "founding_year",
+                    {}).get(
+                        "value",
+                        "0")) if result.get("founding_year") else None,
+            "stadium_name": result.get(
+                            "stadium_name",
+                            {}).get(
+                                "value",
+                                "") if result.get("stadium_name") else None,
+            "city": result.get(
+                                    "city",
+                                    {}).get(
+                                        "value",
+                                        "") if result.get("city") else None,
+            "popularity": int(
+                                            result.get(
+                                                "popularity_count",
+                                                {}).get(
+                                                    "value",
+                                                "0")) if result.get("popularity_count") else None}
         teams_info.append(team_info)
 
     return teams_info
@@ -151,12 +202,14 @@ def load_basketball_players():
         items = sample_basketball_players()
         with open("./rare_knowledge/data/basketball_players.pkl", "wb") as f:
             pickle.dump(items, f)
-    
+
     with open("./rare_knowledge/data/basketball_players.pkl", "rb") as f:
         items = pickle.load(f)
 
     prompt_template = "Tell me the year the basketball player {} was born in."
-    prompt_fn = lambda prompt: f"User: {prompt}\nAssistant: The player was born in"
+
+    def prompt_fn(prompt):
+        return f"User: {prompt}\nAssistant: The player was born in"
     for item in items:
         item["name"] = item["player_name"]
         item["prompt"] = prompt_fn(prompt_template.format(item["name"]))
@@ -175,7 +228,9 @@ def load_football_teams():
         items = pickle.load(f)
 
     prompt_template = "Tell me the year the football team {} was founded in."
-    prompt_fn = lambda prompt: f"User: {prompt}\nAssistant: The team was founded in"
+
+    def prompt_fn(prompt):
+        return f"User: {prompt}\nAssistant: The team was founded in"
     for item in items:
         item["name"] = item["team_name"]
         item["prompt"] = prompt_fn(prompt_template.format(item["name"]))
@@ -188,25 +243,31 @@ def load_fake_football_teams():
     with open("./rare_knowledge/data/fake_football_teams.pkl", "rb") as f:
         items = pickle.load(f)
     prompt_template = "Tell me the year the football team {} was founded in."
-    prompt_fn = lambda prompt: f"User: {prompt}\nAssistant: The team was founded in"
+
+    def prompt_fn(prompt):
+        return f"User: {prompt}\nAssistant: The team was founded in"
+
     for item in items:
         item["name"] = item["team_name"]
         item["prompt"] = prompt_fn(prompt_template.format(item["name"]))
         item["label"] = item["founding_year"]
         item["popularity"] = item["popularity"]
-    return items, prompt_fn, prompt_template    
+    return items, prompt_fn, prompt_template
+
 
 def load_songs():
     if not os.path.exists("./rare_knowledge/data/songs.pkl"):
         items = sample_songs()
         with open("./rare_knowledge/data/songs.pkl", "wb") as f:
             pickle.dump(items, f)
-        
+
     with open("./rare_knowledge/data/songs.pkl", "rb") as f:
         items = pickle.load(f)
 
     prompt_template = "Tell me the the performer of the song {}"
-    prompt_fn = lambda prompt: f"User: {prompt}\nAssistant: The performer is"
+
+    def prompt_fn(prompt):
+        return f"User: {prompt}\nAssistant: The performer is"
     for item in items:
         item["name"] = item["song_name"]
         item["prompt"] = prompt_fn(prompt_template.format(item["name"]))
@@ -220,12 +281,14 @@ def load_schools():
         items = sample_universities()
         with open("./rare_knowledge/data/schools.pkl", "wb") as f:
             pickle.dump(items, f)
-        
+
     with open("./rare_knowledge/data/schools.pkl", "rb") as f:
         items = pickle.load(f)
 
     prompt_template = "Tell me the year {} was founded in."
-    prompt_fn = lambda prompt: f"User: {prompt}\nAssistant: It was founded in"
+
+    def prompt_fn(prompt):
+        return f"User: {prompt}\nAssistant: It was founded in"
     for item in items:
         item["name"] = item["university_name"]
         item["prompt"] = prompt_fn(prompt_template.format(item["name"]))
@@ -239,13 +302,15 @@ def load_counterfact():
     counterfact = json.load(open("./rare_knowledge/data/counterfact.json"))
     all_items = []
     for item in counterfact:
-        prompt = item["requested_rewrite"]["prompt"].format(item["requested_rewrite"]["subject"])
-        all_items.append({"prompt": prompt, 
-                          "label": item["requested_rewrite"]["target_true"]["str"], 
+        prompt = item["requested_rewrite"]["prompt"].format(
+            item["requested_rewrite"]["subject"])
+        all_items.append({"prompt": prompt,
+                          "label": item["requested_rewrite"]["target_true"]["str"],
                           "name": item["requested_rewrite"]["subject"],
                           "popularity": -1})
 
     return all_items, None, None
+
 
 def conditions_to_prompt(conditions):
     prompt = "Is there a word where:\n"
@@ -269,26 +334,30 @@ def generate_conditions(num_conditions=3, maxpos=10):
     poses = []
     random_word = random.choice(words.words())
     for _ in range(num_conditions):
-        #letter = random.choice(string.ascii_lowercase)
-        
+        # letter = random.choice(string.ascii_lowercase)
+
         position = random.randint(1, min(maxpos, len(random_word)))
         while position in poses:
             position = random.randint(1, min(maxpos, len(random_word)))
         poses.append(position)
-        letter = random_word[position-1].lower()
+        letter = random_word[position - 1].lower()
         conditions.append((position, letter))
     return conditions
+
 
 def satisfies_conditions(word, conditions):
     for pos, letter in conditions:
         try:
-            if word[pos-1] != letter: return False
+            if word[pos - 1] != letter:
+                return False
         except IndexError:
             return False
     return True
 
+
 def count_satisfying_words(conditions):
     return sum(satisfies_conditions(w, conditions) for w in words.words())
+
 
 def sample_words(N=10000, num_conds=2):
     items = []
@@ -297,9 +366,12 @@ def sample_words(N=10000, num_conds=2):
         prompt, constraints = conditions_to_prompt(conditions)
         popularity = count_satisfying_words(conditions)
         full_prompt = f"User: {prompt}\nAssistant: Yes, the word is"
-        items.append({"prompt": full_prompt, "conditions": conditions, "constraints": constraints,
-                     "popularity": popularity})    
+        items.append({"prompt": full_prompt,
+                      "conditions": conditions,
+                      "constraints": constraints,
+                      "popularity": popularity})
     return items
+
 
 def load_word_dataset():
     filename = "./rare_knowledge/data/words_10k.pkl"
@@ -324,7 +396,7 @@ def load_trivia_qa_dataset():
 def sample_movies():
     endpoint_url = "https://query.wikidata.org/sparql"
 
-    query = f"""
+    query = """
     SELECT ?movie ?movieLabel ?directorLabel ?popularity WHERE {{
       ?movie wdt:P31 wd:Q11424;                 # <- instance of film
             wdt:P57 ?director;                  # <- director
@@ -337,7 +409,9 @@ def sample_movies():
     """
 
     headers = {"Accept": "application/json"}
-    response = requests.get(endpoint_url, params={"query": query}, headers=headers)
+    response = requests.get(
+        endpoint_url, params={
+            "query": query}, headers=headers)
 
     if response.status_code != 200:
         raise Exception(f"Error: {response.status_code} - {response.reason}")
@@ -345,12 +419,14 @@ def sample_movies():
     results = response.json().get("results", {}).get("bindings", [])
     movies_info = [
         {
-            "movie_name": result.get("movieLabel", {}).get("value", ""),
-            "director_name": result.get("directorLabel", {}).get("value", ""),
-            "popularity": int(result.get("popularity", {}).get("value", "0")) if result.get("popularity") else None
-        }
-        for result in results
-    ]
+            "movie_name": result.get(
+                "movieLabel", {}).get(
+                "value", ""), "director_name": result.get(
+                    "directorLabel", {}).get(
+                        "value", ""), "popularity": int(
+                            result.get(
+                                "popularity", {}).get(
+                                    "value", "0")) if result.get("popularity") else None} for result in results]
 
     return movies_info
 
@@ -364,32 +440,39 @@ def load_movies():
     with open(filename, "rb") as f:
         items = pickle.load(f)
     prompt_template = "Tell me the the director of the movie {}."
-    prompt_fn = lambda prompt: f"User: {prompt}\nAssistant: The director is"
+
+    def prompt_fn(prompt):
+        return f"User: {prompt}\nAssistant: The director is"
     for item in items:
         item["name"] = item["movie_name"]
         item["prompt"] = prompt_fn(prompt_template.format(item["name"]))
         item["label"] = item["director_name"]
     return items, prompt_fn, prompt_template
 
+
 def load_nobel_city():
     filename = "/home/t-merty/mounts/sandbox-mert/data/nobel_data.pkl"
     items = pickle.load(open(filename, "rb"))
     return items, None, None
+
 
 def load_senator_multiconstraint():
     filename = "/home/t-merty/mounts/sandbox-mert/data/senator_multiconstraint_data.pkl"
     items = pickle.load(open(filename, "rb"))
     return items, None, None
 
+
 def load_senator_multiconstraint_v2():
     filename = "/home/t-merty/mounts/sandbox-mert/data/senator_multiconstraint_v2_data.pkl"
     items = pickle.load(open(filename, "rb"))
     return items, None, None
 
+
 def load_word_startend():
     filename = "/home/t-merty/mounts/sandbox-mert/data/word_startend_multiconstraint_data.pkl"
     items = pickle.load(open(filename, "rb"))
     return items, None, None
+
 
 def load_books():
     filename = "/home/t-merty/mounts/sandbox-mert/data/books_multiconstraints.pkl"
@@ -409,12 +492,7 @@ def load_senator_assistant():
     return items, None, None
 
 
-def load_counterfact():
-    filename = "/home/t-merty/mounts/sandbox-mert/data/counterfact.pkl"
-    items = pickle.load(open(filename, "rb"))
-    return items, None, None   
-
 def load_counterfact_subset(subset):
     filename = f"/home/t-merty/mounts/sandbox-mert/data/{subset}.pkl"
     items = pickle.load(open(filename, "rb"))
-    return items, None, None   
+    return items, None, None

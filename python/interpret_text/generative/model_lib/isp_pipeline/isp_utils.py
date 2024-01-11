@@ -1,8 +1,8 @@
-## The below code is taken from https://github.com/naimenz/inverse-scaling-eval-pipeline
+# The below code is taken from
+# https://github.com/naimenz/inverse-scaling-eval-pipeline
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from dataclasses import asdict, dataclass
 import logging
@@ -63,6 +63,7 @@ class APIParameters:
     stop: Optional[list[str]] = None
     echo: bool = False
 
+
 def call_api(
     prompt: Union[str, list[str]],
     model_name: OpenAIModel,
@@ -74,7 +75,8 @@ def call_api(
     while True:
         count += 1
         if count >= max_retries:
-            raise ValueError(f"Retried too many times ({max_retries}), got error: {response_json['error']}")
+            raise ValueError(
+                f"Retried too many times ({max_retries}), got error: {response_json['error']}")
         response = _call_api(prompt, model_name, api_params)
         response_json = response.json()
         if response.status_code != 200:
@@ -113,6 +115,7 @@ def _call_api(
     response = requests.post(url, json=data, headers=headers)
     return response
 
+
 template = """
 Q: Convert "2 million" to a number.
 A: 2000000
@@ -148,8 +151,12 @@ class BasicParser(NumericParser):
 
 
 def prep_string(s: str) -> str:
-    # clearing out leading/trailing spaces, commas, parentheses, and trailing full stops
-    return s.strip().replace(",", "").replace(")", "").replace("(", "").rstrip(".")
+    # clearing out leading/trailing spaces, commas, parentheses, and trailing
+    # full stops
+    return s.strip().replace(
+        ",", "").replace(
+        ")", "").replace(
+            "(", "").rstrip(".")
 
 
 class GPT3Parser(NumericParser):
@@ -160,12 +167,19 @@ class GPT3Parser(NumericParser):
         filled_templates = [
             template.format(number_string=ns.strip()) for ns in number_strings
         ]
-        response = call_api(filled_templates, self.model_name, parser_api_params)
+        response = call_api(
+            filled_templates,
+            self.model_name,
+            parser_api_params)
         texts = [
             choice["text"].strip().replace(",", "")
             for choice in response.json()["choices"]
         ]
         print(f"strings returned from parser: {texts}")
-        # check the response is non-empty and the model reports it found a valid number
-        floats = [float(text) if text and text != "N/A" else None for text in texts]
+        # check the response is non-empty and the model reports it found a
+        # valid number
+        floats = [
+            float(text) if text and text != "N/A" else None
+            for text in texts
+        ]
         return floats
