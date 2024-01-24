@@ -10,17 +10,23 @@ DEFAULT_SYSTEM_PROMPT = "You are an AI assistant that helps people find informat
 
 
 class ChatOpenAI:
-    def __init__(self, engine="GPT35", system_prompt=DEFAULT_SYSTEM_PROMPT):
+    def __init__(self, engine="GPT35", encoding="cl100k_base", api_settings=None, system_prompt=DEFAULT_SYSTEM_PROMPT):
+        if api_settings is not None:
+            openai.api_type = api_settings.get("api_type")
+            openai.api_base = api_settings.get("api_base")
+            openai.api_version = api_settings.get("api_version")
+            openai.api_key = api_settings.get("api_key")
         self.system_prompt = system_prompt
         self.engine = engine
-        pass
+        self.encoding = encoding
+        self.tokenizer = tiktoken.get_encoding(encoding)
 
-    def _sample_api_single(self, prompt, temperature=0, max_tokens=8000,
+    def _sample_api_single(self, text, temperature=0, max_tokens=8000,
                            top_p=0.99):
         response = openai.ChatCompletion.create(
             engine=self.engine,
             messages=[{"role": "system", "content": self.system_prompt},
-                      {"role": "user", "content": prompt}],
+                      {"role": "user", "content": text}],
             temperature=temperature,
             max_tokens=max_tokens,
             top_p=top_p,
@@ -28,6 +34,23 @@ class ChatOpenAI:
             presence_penalty=0,
             stop=None)
         return response["choices"][0]["message"]["content"]
+    
+    def sample(self, texts, temperature=0, max_new_tokens=8000,
+                           top_p=0.99):
+        completions = []
+        for p in texts:
+            response = openai.ChatCompletion.create(
+                engine=self.engine,
+                messages=[{"role": "system", "content": self.system_prompt},
+                            {"role": "user", "content": p}],
+                temperature=temperature,
+                max_tokens=max_new_tokens,
+                top_p=top_p,
+                frequency_penalty=0,
+                presence_penalty=0,
+            stop=None)
+            completions.append(response["choices"][0]["message"]["content"])
+        return completions
 
 
 class CompletionsOpenAI:
