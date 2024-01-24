@@ -34,21 +34,22 @@ class ChatOpenAI:
             presence_penalty=0,
             stop=None)
         return response["choices"][0]["message"]["content"]
-    
+
     def sample(self, texts, temperature=0, max_new_tokens=8000,
-                           top_p=0.99):
+               top_p=0.99
+               ):
         completions = []
         for p in texts:
-            response = openai.ChatCompletion.create(
-                engine=self.engine,
-                messages=[{"role": "system", "content": self.system_prompt},
-                            {"role": "user", "content": p}],
-                temperature=temperature,
-                max_tokens=max_new_tokens,
-                top_p=top_p,
-                frequency_penalty=0,
-                presence_penalty=0,
-            stop=None)
+            response = openai.ChatCompletion.create(engine=self.engine,
+                                                    messages=[{"role": "system", "content": self.system_prompt},
+                                                              {"role": "user", "content": p}],
+                                                    temperature=temperature,
+                                                    max_tokens=max_new_tokens,
+                                                    top_p=top_p,
+                                                    frequency_penalty=0,
+                                                    presence_penalty=0,
+                                                    stop=None
+                                                    )
             completions.append(response["choices"][0]["message"]["content"])
         return completions
 
