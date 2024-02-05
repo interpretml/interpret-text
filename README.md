@@ -122,7 +122,7 @@ Install and run Jupyter Notebook
 
 # Supported NLP Scenarios
 
-Currently this repository only provides support for the text classification scenario.
+This repository provides support for text classification and generative text scenarios.
 # <a name="explainers"></a>
 
 # Supported Explainers
@@ -133,14 +133,20 @@ The following is a list of the explainers available in this repository:
 
 * [Introspective Rationale Explainer](http://people.csail.mit.edu/tommi/papers/YCZJ_EMNLP2019.pdf)
 
+* Likelihood Explainer
+
+* Sentence Embedder Explainer 
+
+* Hierarchical Explainer 
+
 ## Explanation Method Comparison Chart
-|  | Classical Text Explainer | Unified Information Explainer | Introspective Rationale Explainer |
-|---------------|---------|:-------------------:|:----------------------------:|
-| Input model support | Scikit-learn linear models and tree-based models | PyTorch | PyTorch |
-| Explain BERT | No | Yes  | Yes  |
-| Explain RNN  | No | No | Yes |
-| NLP pipeline support | Handles text pre-processing, encoding, training, hyperparameter tuning | Uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Generator and predictor modules handle the required text pre-processing.
-| Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb)|
+|  | Classical Text Explainer | Unified Information Explainer | Introspective Rationale Explainer | Likelihood Explainer | Sentence Embedder Explainer | Hierarchical Explainer |
+|---------------|---------|:-------------------:|:----------------------------:|:----------------------------:|:----------------------------:|:----------------------------:|
+| Input model support | Scikit-learn linear models and tree-based models | PyTorch | PyTorch | PyTorch, HuggingFace, OpenAI | PyTorch, HuggingFace, OpenAI | PyTorch, HuggingFace, OpenAI | 
+| Explain BERT | No | Yes  | Yes  | Yes | Yes | Yes |
+| Explain RNN  | No | No | Yes | Yes | Yes | Yes |
+| NLP pipeline support | Handles text pre-processing, encoding, training, hyperparameter tuning | Uses BERT tokenizer however user needs to supply trained/fine-tuned BERT model, and samples of trained data | Generator and predictor modules handle the required text pre-processing | User needs to supply generative text model that provides log probs and samples of training data | User needs to supply generative text model and samples of training data | User needs to supply generative text model and samples of training data |
+| Sample notebook | [Classical Text Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_classical_text_explainer.ipynb) | [Unified Information Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_unified_information_explainer.ipynb) | [Introspective Rationale Explainer Sample Notebook](https://nbviewer.jupyter.org/github/interpretml/interpret-text/blob/main/notebooks/text_classification/text_classification_introspective_rationale_explainer.ipynb) | [Likelihood Explainer Sample Notebook](notebooks/generative_text/explanation_likelihood/generative_text_huggingface_gpt.ipynb) | [Sentence Embedder Explainer Sample Notebook](notebooks/generative_text/explanation_sentence_embedder/generative_text_openai_gpt4_or_gpt3.5.ipynb) | [Hierarchical Explainer Sample Notebook](notebooks/generative_text/explanation_hierarchical/generative_text_huggingface_gpt.ipynb) | 
 
 ## Classical Text Explainer
 
@@ -193,6 +199,7 @@ The UnifiedInformationExplainer handles the required text pre-processing. Each s
 ### Supported Models:
 The UnifiedInformationExplainer only supports BERT at this time. A user will need to supply a trained or fine-tuned BERT model, the training dataset (or a subset if it is too large) and the sentence or text to be explained.  Future work can extend this implementation to support RNNs and LSTMs. 
 
+
 ## Introspective Rationale Explainer
 The IntrospectiveRationaleExplainer uses a generator-predictor framework to produce a comprehensive subset of text input features or rationales that are relevant for the classification task. This introspective model predicts the labels and incorporates the outcome into the rationale selection process. The outcome is a hard or soft selection of rationales (words that have useful information for the classification task) and anti-rationales (words that do not appear to have useful information). 
 
@@ -208,6 +215,53 @@ The IntrospectiveRationaleExplainer is designed to be modular and extensible. Th
 * Explain an RNN model with BERT as the generator (RNNs are used in the predictor module and BERT is used in the generator module)
 The user can also explain a custom model. In this case, the user will have to provide the pre-processor, predictor and generator modulules to the API.  
 
+## Likelihood Explainer
+The Likelihood Explainer leverages conditional log likelihood measures to provide detailed local explanations for the outputs of generative text models. This explainer is model-agnostic (as long as model provides log probs) and is particularly effective in dissecting and understanding the contributions of different parts of the text to the model's final output. The approach is grounded in creating perturbed versions of the input text and evaluating the model's response to these perturbations, thereby attributing significance to various text segments based on their impact on the model's likelihood estimations.
+
+The following notebooks provides example of getting local importances with this explainer:
+
+* [HuggingFace GPT-Neo example notebook](notebooks/generative_text/explanation_likelihood/generative_text_huggingface_gpt.ipynb)
+* [OpenAI API GPT-3 example notebook](notebooks/generative_text/explanation_likelihood/generative_text_openai_gpt3.ipynb)
+* [HuggingFace RoBERTa example notebook](notebooks/generative_text/explanation_likelihood/generative_text_huggingface_roberta.ipynb)
+
+### Preprocessing:
+The Likelihood explainer handles the required text pre-processing. Each sentence is tokenized via the underlying generative text model's tokenizer.
+
+### Supported Models:
+The Likelihood Explainer is designed to work with any generative text model, provided they can produce log probabilities.
+
+## Sentence Embedder Explainer
+The Sentence Embedder explainer leverages sentence embedding techniques to provide insightful explanations for the output of generative text models. This explainer is even more flexible than the Likelihood Explainer since it doesn't require log probs. This characteristic makes it particularly advantageous for use with models like OpenAI's GPT-4, accessed through the OpenAI API, where direct access to log likelihood calculations may not be available. It operates on the principle of generating perturbed versions of the input text, evaluating these against the original text's embedding, and attributing significance based on the proximity to the original output.
+
+The following notebook provides an example of getting local importances with this explainer:
+
+* [OpenAI API GPT-4 example notebook](notebooks/generative_text/explanation_sentence_embedder/generative_text_openai_gpt4_or_gpt3.5.ipynb)
+
+### Preprocessing:
+The Sentence Embedder explainer handles the required text pre-processing. Each sentence is tokenized via the underlying generative text model's tokenizer.
+
+### Supported Models:
+The Sentence Explainer Text Explainer is designed to work with any generative text model.
+
+## Hierarchical Explainer
+The Hierarchical Text Explainer is a tool designed for providing deep, layered insights into the workings of generative text models. This explainer can be used to combines multiple levels of text analysis, starting from broader sentence structures down to finer n-gram partitions, to uncover the influence of text components at varying levels of detail. It systematically applies a sequence of perturbations across these different scales, assessing the model's output changes to pinpoint the significance of specific text segments. 
+
+Note: The 'LocalExplanationHierarchical' can be used with either 'LocalExplanationLikelihood' or 'localExplanationSentenceEmbedder'
+
+
+The following notebook provides an example of getting local importances with this explainer:
+
+* [HuggingFace GPT-Neo example notebook](notebooks/generative_text/explanation_hierarchical/generative_text_huggingface_gpt.ipynb)
+
+The following Streamlit app showcases the Hierarchical Explainer's capabilities through a fully interactive user interface:
+
+* [Hierarchical Explainer App](python/interpret_text/generative/app_hierarchical.py)
+
+### Preprocessing:
+The Hierarchical Explainer explainer handles the required text pre-processing. Each sentence is tokenized via the underlying generative text model's tokenizer.
+
+### Supported Models:
+The Hierarchical Explainer Text Explainer is designed to work with any generative text model.
 
 <a  name="use"></a>
 # Use Interpret-Text
